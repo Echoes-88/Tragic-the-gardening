@@ -1,52 +1,87 @@
+BEGIN;
+
+-- On supprime les tables de la BDD si elles existent déjà
+DROP TABLE IF EXISTS 
+"user",
+"monster",
+"booster",
+"deck",
+"deck_has_monster",
+"deck_has_booster";
+
+-- -----------------------------------------------------
+-- Ajout de données USER
+-- -----------------------------------------------------
+
 CREATE TABLE IF NOT EXISTS "user" (
   "id" SERIAL PRIMARY KEY,
   "firstname" text NOT NULL,
   "lastname" text NOT NULL,
-  "nickname" text NOT NULL,
+  "pseudo" text NOT NULL,
   "email" text NOT NULL,
   "hit_point" INT NULL,
   "victory" INT NULL,
   "defeat" INT NULL,
-  "psw" text NOT NULL
+  "psw" text NOT NULL,
+  "role" text DEFAULT 'user'
 );
 
-
-CREATE TABLE IF NOT EXISTS "card" (
+-- -----------------------------------------------------
+-- Ajout de données MONSTER
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS "monster" (
   "id" SERIAL PRIMARY KEY,
-  "name" text NOT NULL,
-  "text" TEXT NULL,
+  "title" text NOT NULL,
+  "text" text NULL,
   "attack" INT NULL,
   "defense" INT NULL,
   "hit_point" INT NULL,
-  "special" INT NULL
+  "special_effect_value" INT NULL,
+  "special_effect_text" text NULL,
+  "position" INT NULL
 );
 
-
+-- -----------------------------------------------------
+-- Ajout de données BOOSTER
+-- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS "booster" (
   "id" SERIAL PRIMARY KEY,
-  "name" TEXT NOT NULL,
-  "text" TEXT NULL,
-  "type" TEXT NULL,
-  "effect_1" INT NULL,
-  "effect_2" INT NULL
+  "title" text NOT NULL,
+  "text" text NULL,
+  "special_effect_value" INT NULL,
+  "special_effect_text" text NULL,
+  "special_effect_value_2" INT NULL,
+  "special_effect_text_2" text NULL,
+  "position" INT NULL
 );
 
+-- -----------------------------------------------------
+-- DECK
+-- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS "deck" (
   "id" SERIAL PRIMARY KEY,
-  "name" TEXT NULL,
+  "title" TEXT NOT NULL,
   "user_id" integer NOT NULL REFERENCES "user" ("id")
 );
-
-CREATE TABLE IF NOT EXISTS "deck_has_card" (
-  "deck_id" integer REFERENCES "deck"("id"),
-  "card_id" integer REFERENCES "card" ("id"),
-  PRIMARY KEY ("deck_id", "card_id")
+-- -----------------------------------------------------
+-- DECK HAS MONSTER
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS "deck_has_monster" (
+  "deck_id" INT REFERENCES "deck"("id"),
+  "monster_id" INT REFERENCES "monster"("id"),
+  PRIMARY KEY ("deck_id", "monster_id"),
+  "quantity" INT NULL
 );
 
+-- -----------------------------------------------------
+-- DECK HAS BOOSTER
+-- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS "deck_has_booster" (
-  "deck_id" integer REFERENCES "deck"("id"),
-  "booster_id" integer REFERENCES "booster" ("id"),
-  PRIMARY KEY ("deck_id", "booster_id")
+  "deck_id" INT REFERENCES "deck"("id"),
+  "booster_id" INT REFERENCES "booster"("id"),
+  PRIMARY KEY ("deck_id", "booster_id"),
+  "quantity" INT NULL
 );
 
 
+COMMIT;

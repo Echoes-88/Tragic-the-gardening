@@ -1,13 +1,21 @@
- Chaque joueur pose en dÃ©but de match 3 cartes de type character sur le plateau
+ UNE PARTIE SE JOUE EN 3 MANCHES
 
-Le plateau comporte une quatrieme zone pour les boosters.
-Au deuxiÃ¨me tour de jeu, le joueur peut assigner un booster de son deck Ã  une carte.
-Il pourra ensuite reposer un booster tous les 3 tours (tours 1, 4, 7, 10, 13, 16, 19, 22, 25, 28...)
+ A CHAQUE MANCHE LE JOUEUR POSE 4 CARTES MONSTRE SUR LE PLATEAU ET 1 BOOSTER
 
-Lorsque que chaque joueur Ã  poser ses 4 cartes sur le plateau, le combat commence.
+ A CHAQUE TOUR LE JOUEUR SELECTIONNE UNE DE SES CARTES ET CIBLE UNE CARTE DE L'ADVERSAIRE.
 
-Chaque tour le joueur sÃ©lectionne la carte qu'il souhaite jouer et cible la carte de l'adversaire
+ TOUS LES 3 TOURS DE JEU LE JOUEUR PEUT UTILISER UN BOOSTER SUR UNE CARTE
 
+ AU 4eme TOUR DE JEU CHAQUE JOUEUR PEUT AJOUTER 1 CARTE MONSTRE ET 1 CARTE BOOSTER SUR LE PLATEAU
+ 
+
+
+
+Il est possible de créer des decks qui comportent 16 cartes MONSTRE et 6 CARTES BOOSTER
+
+LES CARTES MONSTRE DU DECK UTILISEES LORS D'UNE MANCHE NE SONT PLUS DISPO APRES UNE MANCHE
+
+LES CARTES BOOSTER DU DECK SONT TOUTES DISPONIBLE A CHAQUE MANCHE
 
 
 
