@@ -1,11 +1,11 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../database');
 
-class Deck extends Sequelize.model {};
+class Deck extends Sequelize.Model {};
 
 Deck.init({
 
-        name: Sequelize.STRING,
+        title: Sequelize.STRING,
 
     }, {
         sequelize,

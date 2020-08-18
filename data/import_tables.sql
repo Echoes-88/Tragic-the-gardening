@@ -23,7 +23,9 @@ CREATE TABLE IF NOT EXISTS "user" (
   "victory" INT NULL,
   "defeat" INT NULL,
   "psw" text NOT NULL,
-  "role" text DEFAULT 'user'
+  "role" text DEFAULT 'user',
+  "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+  "updatedAt" TIMESTAMP
 );
 
 -- -----------------------------------------------------
@@ -38,7 +40,9 @@ CREATE TABLE IF NOT EXISTS "monster" (
   "hit_point" INT NULL,
   "special_effect_value" INT NULL,
   "special_effect_text" text NULL,
-  "position" INT NULL
+  "position" INT NULL,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+  "updatedAt" TIMESTAMP
 );
 
 -- -----------------------------------------------------
@@ -52,7 +56,9 @@ CREATE TABLE IF NOT EXISTS "booster" (
   "special_effect_text" text NULL,
   "special_effect_value_2" INT NULL,
   "special_effect_text_2" text NULL,
-  "position" INT NULL
+  "position" INT NULL,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+  "updatedAt" TIMESTAMP
 );
 
 -- -----------------------------------------------------
@@ -61,7 +67,9 @@ CREATE TABLE IF NOT EXISTS "booster" (
 CREATE TABLE IF NOT EXISTS "deck" (
   "id" SERIAL PRIMARY KEY,
   "title" TEXT NOT NULL,
-  "user_id" integer NOT NULL REFERENCES "user" ("id")
+  "user_id" integer NOT NULL REFERENCES "user" ("id"),
+  "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+  "updatedAt" TIMESTAMP
 );
 -- -----------------------------------------------------
 -- DECK HAS MONSTER
@@ -70,7 +78,9 @@ CREATE TABLE IF NOT EXISTS "deck_has_monster" (
   "deck_id" INT REFERENCES "deck"("id"),
   "monster_id" INT REFERENCES "monster"("id"),
   PRIMARY KEY ("deck_id", "monster_id"),
-  "quantity" INT NULL
+  "quantity" INT NULL,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+  "updatedAt" TIMESTAMP
 );
 
 -- -----------------------------------------------------
@@ -80,7 +90,9 @@ CREATE TABLE IF NOT EXISTS "deck_has_booster" (
   "deck_id" INT REFERENCES "deck"("id"),
   "booster_id" INT REFERENCES "booster"("id"),
   PRIMARY KEY ("deck_id", "booster_id"),
-  "quantity" INT NULL
+  "quantity" INT NULL,
+  "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+  "updatedAt" TIMESTAMP
 );
 
 

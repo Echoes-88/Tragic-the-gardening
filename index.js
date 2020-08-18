@@ -5,15 +5,11 @@ const PORT = process.env.PORT || 5050;
 
 // Express
 const express = require('express');
-
 const app = express();
 
-// views
-app.set('views', 'app/views');
-app.set('view engine', 'ejs');
-
-// dossier statiques
-app.use(express.static('asset'));
+// autorisation de requêtes externes
+var cors = require('cors');
+app.use(cors());
 
 // gestionnaire POST
 app.use(express.urlencoded({extended: true}));
@@ -27,7 +23,7 @@ app.use(session({
 }));
 
 // middleware user
-const userMiddleware = require('./app/middlewares/user');
+const userMiddleware = require('./app/middlewares/userMiddleware');
 app.use(userMiddleware);
 
 // router

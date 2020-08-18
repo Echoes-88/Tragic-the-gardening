@@ -1,22 +1,23 @@
 const Sequelize = require('sequelize');
 const sequelize = require('../database');
 
-class Booster extends Sequelize.Model {};
+class Monster extends Sequelize.Model {};
 
-Booster.init({
+Monster.init({
 
         title: Sequelize.STRING,
         text: Sequelize.STRING,
+        attack: Sequelize.INTEGER,
+        defense: Sequelize.INTEGER,
+        hit_point: Sequelize.INTEGER,
         special_effect_value: Sequelize.INTEGER,
-        special_effect_text: Sequelize.STRING,
-        special_effect_value_2: Sequelize.INTEGER,
-        special_effect_text_2: Sequelize.STRING,
+        special_effect_value: Sequelize.INTEGER,
         position: Sequelize.INTEGER,
     }, {
         sequelize,
-        tableName: "booster"
+        tableName: "monster"
     });
 
-module.exports = Booster;
+module.exports = Monster;
 
 

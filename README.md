@@ -74,12 +74,7 @@ const rats = new cards("rats", 2, 4, 3);
 const geckoFeu = new cards("geckos de Feu", 5, 5, 4);
 
 
-LIST OF BOOSTER
 
-stimpack = hit_point, 2
-
-
-CODE 
 
 Tuto drag and drop
 https://developer.mozilla.org/fr/docs/Web/API/API_HTML_Drag_and_Drop/Op%C3%A9rations_de_glissement

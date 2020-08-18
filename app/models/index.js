@@ -1,42 +1,50 @@
 const Booster = require('./booster');
-const Card = require('./card');
+const Monster = require('./monster');
 const Deck = require('./deck');
 const User = require('./user');
 
 // Un deck est possédé par un utilisateur
 Deck.belongsTo(User, {
     foreignKey: "user_id",
-    as: "userDeck"
+    as: "deckParent"
+})
+
+// Un utilisateur possede plusieurs deck
+User.hasMany(Deck, {
+    foreignKey: "user_id",
+    as: "userHasDecks"
 })
 
 
-// "Un Deck possède plusieurs cartes"
-Deck.belongsToMany(Card, {
-    as: "cards",
-    through: 'deck_has_card',
+// "Un Deck possède plusieurs monstres"
+Deck.belongsToMany(Monster, {
+    as: "deckHasMonster",
+    through: 'deck_has_monster',
     foreignKey: 'deck_id',
-    otherKey: 'card_id',
+    otherKey: 'monster_id',
 });
 // ... et la réciproque !
-Card.belongsToMany(Deck, {
-    as: "decksCard",
-    through: 'deck_has_card',
-    otherKey: 'deck_id',
-    foreignKey: 'card_id'
+Monster.belongsToMany(Deck, {
+    as: "monsterHasDeck",
+    through: 'deck_has_monster',
+    foreignKey: 'monster_id',
+    otherKey: 'deck_id'
 });
 
 
 // "Un Deck possède plusieurs booster"
 Deck.belongsToMany(Booster, {
-    as: "boosters",
+    as: "deckHasBooster",
     through: 'deck_has_booster',
     foreignKey: 'deck_id',
     otherKey: 'booster_id',
 });
 // ... et la réciproque !
-Card.belongsToMany(Deck, {
-    as: "decksBooster",
+Booster.belongsToMany(Deck, {
+    as: "boosterHasDeck",
     through: 'deck_has_booster',
-    otherKey: 'deck_id',
-    foreignKey: 'card_id'
+    foreignKey: 'booster_id',
+    otherKey: 'deck_id'
 });
+
+module.exports = { Booster, Monster, Deck, User };
