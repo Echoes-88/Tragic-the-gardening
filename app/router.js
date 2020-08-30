@@ -1,44 +1,43 @@
 const express = require('express');
-const deckController = require('./controllers/deckController');
-const monsterController = require('./controllers/monsterController');
-const boosterController = require('./controllers/boosterController');
+
+// Middleware to avoid try/catch in controllers
+const capture = require('./middlewares/capture')
+
+const genericController = require('./controllers/genericController')
+
+const renderController = require('./controllers/renderController');
+
 const userController = require('./controllers/userController');
+
+const deckController = require('./controllers/deckController');
+
 
 const router = express.Router();
 
-// ROUTES POUR LES DECK
-router.get('/deck', deckController.getAll);
+// PAGE D'ACCUEIL
+router.get('/', renderController.home);
+
+// LOGIN
+router.get('/login', userController.loginForm);
+router.post('/login', capture(userController.loginSubmit));
+
+// SIGNUP
+router.get('/signup', userController.signupForm);
+router.post('/signup', capture(userController.signupSubmit));
+
+// USER PROFIL
+router.get('/profil', userController.profil);
+
+// ROUTES GENERIQUES CRUD : DECK, MONSTER, BOOSTER, USER
+router.get('/crud/:entity', capture(genericController.getAll));
+router.get('/crud/:entity/:id', capture(genericController.getOne));
+router.post('/crud/:entity', capture(genericController.createOne));
+router.patch('/crud/:entity/:id', capture(genericController.updateOne));
+router.delete('/crud/:entity/:id', capture(genericController.deleteOne));
 
 // Generateur de deck initial
-router.get('/deck/init', deckController.init);
+router.get('/newGame', renderController.newGame);
 
-// router.post('/deck', deckController.createOne);
-// router.get('/deck/:id', deckController.getOne);
-// router.patch('/deck/:id', deckController.updateOne);
-// router.delete('/deck/:id', deckController.deleteOne);
-
-// // ROUTES POUR LES MONSTERS
-// router.get('/monster', monsterController.getAll);
-
-// router.post('/monster', monsterController.createOne);
-// router.get('/monster/:id', monsterController.getOne);
-// router.patch('/monster/:id', monsterController.updateOne);
-// router.delete('/monster/:id', monsterController.deleteOne);
-
-// // ROUTES POUR LES BOOSTERS
-// router.get('/booster', boosterController.getAll);
-
-// router.post('/booster', boosterController.createOne);
-// router.get('/booster/:id', boosterController.getOne);
-// router.patch('/booster/:id', boosterController.updateOne);
-// router.delete('/booster/:id', boosterController.deleteOne);
-
-// // ROUTES POUR LES USERS
-// router.get('/user', userController.getAll);
-
-// router.post('/user', userController.createOne);
-// router.get('/user/:id', userController.getOne);
-// router.patch('/user/:id', userController.updateOne);
-// router.delete('/user/:id', userController.deleteOne);
+// ROUTE POUR CREER UN DECK
 
 module.exports = router;

@@ -11,6 +11,14 @@ const app = express();
 var cors = require('cors');
 app.use(cors());
 
+// Fichiers static
+// app.use(express.static('./public/'));
+app.use(express.static('./asset'));
+
+// Views EJS
+app.set('view engine', 'ejs');
+app.set('views', 'app/views');
+
 // gestionnaire POST
 app.use(express.urlencoded({extended: true}));
 

@@ -23,13 +23,13 @@ Deck.belongsToMany(Monster, {
     foreignKey: 'deck_id',
     otherKey: 'monster_id',
 });
-// ... et la réciproque !
-Monster.belongsToMany(Deck, {
-    as: "monsterHasDeck",
-    through: 'deck_has_monster',
-    foreignKey: 'monster_id',
-    otherKey: 'deck_id'
-});
+// // ... et la réciproque !
+// Monster.belongsToMany(Deck, {
+//     as: "monsterHasDeck",
+//     through: 'deck_has_monster',
+//     foreignKey: 'monster_id',
+//     otherKey: 'deck_id'
+// });
 
 
 // "Un Deck possède plusieurs booster"
@@ -39,12 +39,12 @@ Deck.belongsToMany(Booster, {
     foreignKey: 'deck_id',
     otherKey: 'booster_id',
 });
-// ... et la réciproque !
-Booster.belongsToMany(Deck, {
-    as: "boosterHasDeck",
-    through: 'deck_has_booster',
-    foreignKey: 'booster_id',
-    otherKey: 'deck_id'
-});
+// // ... et la réciproque !
+// Booster.belongsToMany(Deck, {
+//     as: "boosterHasDeck",
+//     through: 'deck_has_booster',
+//     foreignKey: 'booster_id',
+//     otherKey: 'deck_id'
+// });
 
 module.exports = { Booster, Monster, Deck, User };

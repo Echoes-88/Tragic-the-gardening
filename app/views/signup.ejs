@@ -1,0 +1,58 @@
+<%- include('partials/header', {documentTitle:"Login - Tragic the gardening"}); %> 
+
+
+<% if (locals.error !== undefined) { %>
+    <div class="error"><%= error %></div>
+<% }%>
+
+
+<form action="/signup" method="POST" class="form-signin">
+
+    <div class="form-label-group">
+        <input type="lastname" class="form-control" id="lastname" name="lastname"
+            aria-describedby="lastnameHelp" placeholder="Votre nom"
+            value=<%= locals.fields ? locals.fields.lastname : "" %>>
+        <label for="lastname">Votre nom</label>
+    </div>
+
+    <div class="form-label-group">
+        <input type="firstname" class="form-control" id="firstname" name="firstname"
+            aria-describedby="firstnameHelp" placeholder="Votre prénom"
+            value=<%= locals.fields ? locals.fields.firstname : "" %>>
+        <label for="firstname">Votre prénom</label>
+    </div>
+
+    <div class="form-label-group">
+        <input type="pseudo" class="form-control" id="pseudo" name="pseudo"
+            aria-describedby="pseudoHelp" placeholder="Votre pseudo"
+            value=<%= locals.fields ? locals.fields.pseudo : "" %>>
+        <label for="pseudo">Votre pseudo</label>
+    </div>
+
+    <div class="form-label-group">
+        <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp"
+            placeholder="Votre courriel"
+            value=<%= locals.fields ? locals.fields.email : "" %>>
+        <label for="email">Votre courriel</label>
+    </div>
+
+    <div class="form-label-group">
+        <input type="password" class="form-control" id="password" name="password"
+            placeholder="Votre mot de mot de passe">
+        <label for="password">Votre mot de mot de passe</label>
+    </div>
+
+    <div class="form-label-group">
+        <input type="password" class="form-control" id="passwordConfirm" name="passwordConfirm"
+            placeholder="Confirmez votre mot de passe">
+        <label for="passwordConfirm">Confirmez votre mot de passe</label>
+    </div>
+
+    <div class="form-group text-center">
+        <button type="submit" class="btn btn-primary">Envoyer</button>
+    </div>
+
+</form>
+
+
+<%- include('partials/footer'); %>

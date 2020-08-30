@@ -1,3 +1,8 @@
+TO DO :
+
+Créer la page signin.ejs
+
+
 Chaque joueur pose en début de match 3 cartes de type character sur le plateau
 
 Le plateau comporte une quatrieme zone pour les boosters.
