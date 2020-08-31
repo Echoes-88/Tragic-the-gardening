@@ -17,6 +17,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node app/server.js",
+    "build": "watchify front/src/app.js -o public/assets/js/bundle.js",
     "dev": "nodemon app/server.js"
   },
   "author": "",

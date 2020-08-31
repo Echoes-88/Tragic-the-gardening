@@ -1,6 +1,6 @@
 TO DO :
 
-Créer la page signin.ejs
+AMELIORER LE ADD / REMOVE CLASSLIST POUR CACHER ET AFFICHER LES ELEMENTS
 
 
 Chaque joueur pose en début de match 3 cartes de type character sur le plateau

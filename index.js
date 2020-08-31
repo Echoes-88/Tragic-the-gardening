@@ -16,8 +16,9 @@ app.use(cors());
 app.use(express.static('./asset'));
 
 // Views EJS
-app.set('view engine', 'ejs');
-app.set('views', 'app/views');
+app.use(express.static('public'));
+// app.set('view engine', 'ejs');
+// app.set('views', 'app/views');
 
 // gestionnaire POST
 app.use(express.urlencoded({extended: true}));

@@ -3,48 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="./assets/css/style.css" />
     <title>Tragic the gardening</title>
 </head>
 <body>
-    
-    <p id="test">HELLO</p>
 
-    <h2>LOGIN</h2>
-    <form action="/" method="post">
+  <main class="background-home">
+
+    <nav class="menu is-active">
+      <ul>
+        <li><a href="" menu="login">LOGIN</a></li>
+        <li> <a href="/signup" menu="createAccound">CREATE ACCOUNT</a></li>
+        <li><a href="/" menu="rules">RULES</a></li>
+      </ul>
+
+    </nav>
+
+    <!-- LOGIN FORM -->
+    <form action="" method="POST" class="form displayNone" id="login">
+
+      <div class="form-label-group">
   
-        <div class="container">
-          <label for="username"><b>Username</b></label>
-          <input type="text" placeholder="Enter username" name="username" required>
-      
-          <label for="psw"><b>Password</b></label>
-          <input type="password" placeholder="Enter Password" name="psw" required>
-      
-          <button type="submit">Login</button>
+          <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Votre courriel" value=<%= locals.fields ? locals.fields.email : "" %>>
+          
+          <label for="email">Votre courriel</label>
+      </div>
+  
+      <div class="form-label-group">
+          <input type="password" class="form-control" id="password" name="password"
+              placeholder="Votre mot de passe">
+          <label for="password">Votre mot de passe</label>
+      </div>
+  
+      <div class="checkbox mb-3">
           <label>
-            <input type="checkbox" checked="checked" name="remember"> Remember me
+              <input type="checkbox" name="remember" value="remember-me"> Se souvenir de moi
           </label>
-        </div>
-      
-        <div class="container" style="background-color:#f1f1f1">
-          <button type="button" class="cancelbtn">Cancel</button>
-          <span class="psw">Forgot <a href="#">password?</a></span>
-        </div>
-    
-    
-      </form>
-      
-    
+      </div>
+  
+      <button class="btn btn-lg btn-primary btn-block" type="submit">Se connecter</button>
+  
+  </form>
 
 
+  </main>
+    <script src="./assets/js/bundle.js"></script>
 
-    <a href="/newDeck">Make a new deck</a>
-
-<form action="" method="post">
-
-    <input type="text" value="1">
-
-    <button type="submit">VALIDER</button>
-</form>
-    <script src="js/app.js"></script>
 </body>
 </html>

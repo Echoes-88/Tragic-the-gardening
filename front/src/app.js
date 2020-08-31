@@ -1,14 +1,10 @@
-const paragraphe = document.getElementById('test');
+const eventListener = require('./eventListener');
 
-fetch('http://localhost:2000/deck/init').then(function(response) {
-    response.text().then(function(text) {
+var app = {
 
-        var arrayOfObjects = eval(text);
+init: function () {
 
-            console.log(arrayOfObjects);
-
-
-
-        // paragraphe.textContent = text[0].id
-    });
-  });
+    eventListener.main();
+},
+};
+document.addEventListener('DOMContentLoaded', app.init);
