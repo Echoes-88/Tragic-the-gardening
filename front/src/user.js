@@ -2,25 +2,10 @@ const utils = require('./utils');
 
 const user = {
 
-    baseUrl: 'http://localhost:2000',
-
-    showLoginForm: function() {
-
-        event.preventDefault();
-        const loginForm = document.querySelector('form[id="login"]')
-        const menu = document.querySelector('.menu')
-
-        // On desactive l'affichage du menu
-        menu.classList.remove('is-active');
-        menu.classList.add('displayNone');
-
-        // On active l'affichage du formulaire login
-        loginForm.classList.remove('displayNone');
-        loginForm.classList.add('is-active');
-    },
+    baseUrl: 'http://localhost:3000',
 
 
-    handleLoginForm: function(data) {
+    handleLoginForm: async function(data) {
 
         event.preventDefault();
 
@@ -31,13 +16,16 @@ const user = {
             body: dataForm
         };
 
-        return (
-            fetch(`${user.baseUrl}/login`, requestConfig)
+        const response = await fetch(`${user.baseUrl}/login`, requestConfig);
+		const jsonResponse = await response.json();
 
-                .then((response) => {
-                    utils.showMenu();
-                })
-        );
+        if(response.status === 404) {
+            console.log(jsonResponse)
+        } else {
+            console.log(jsonResponse);
+            utils.showPlayGame();
+        }
+
     }
 
 };

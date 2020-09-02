@@ -6,40 +6,40 @@ const userController = {
 
     loginSubmit: async (req, res) => {
 
-        // Checking if user already exist
-        const user = await models.User.findOne({
-            where: {
-                email: req.body.email
-            }
-        });
-
-        if(!user) {
-            console.log(error, 'utilisateur inconnu');
-            res.status(500).json({error});
-        } else {
-            // Checking password with bcrypt
-            const validPwd = bcrypt.compareSync(req.body.password, user.psw);
-
-            if(!validPwd) {
-                console.log(error, 'Erreur de mot de passe');
-                res.status(500).json({error});
-            } else {
-                // if login ok, add user informations to session
-                req.session.user = {
-                    firstname: user.firstname,
-                    lastname: user.lastname,
-                    pseudo: user.pseudo,
-                    email: user.email,
-                    role: user.role,
-                    id: user.id
-                };
-                if(req.body.remember) {
-                    req.session.cookie.expires = new Date(Date.now() + 3600000);
+            // Checking if user already exist
+            const user = await models.User.findOne({
+                where: {
+                    email: req.body.email
                 }
+            });
 
-                return res.json();
+            if(!user) {
+                console.log('utilisateur inconnu');
+                res.status(404).json({error: `User not found`});
+            } else {
+                // Checking password with bcrypt
+                const validPwd = bcrypt.compareSync(req.body.password, user.psw);
+
+                if(!validPwd) {
+                    console.log('Erreur de mot de passe');
+                    res.status(404).json({error: `Password not found`});
+                } else {
+                    // if login ok, add user informations to session
+                    req.session.user = {
+                        firstname: user.firstname,
+                        lastname: user.lastname,
+                        pseudo: user.pseudo,
+                        email: user.email,
+                        role: user.role,
+                        id: user.id
+                    };
+                    if(req.body.remember) {
+                        req.session.cookie.expires = new Date(Date.now() + 3600000);
+                    }
+
+                    res.json(user);
+                }
             }
-        }
 
     },
 

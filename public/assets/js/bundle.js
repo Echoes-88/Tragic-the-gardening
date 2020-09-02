@@ -7,13 +7,12 @@ var app = {
 eventListener: function() {
 
     // LOGIN SHOW FORM
-    const menuLogin = document.querySelector('a[menu="login"]');      
+    const menuLogin = document.querySelector('li[menu="login"]');      
     menuLogin.addEventListener('click', utils.showLoginForm);
 
     // LOGIN SUBMIT
     const loginForm = document.querySelector('form[id="login"]')
     loginForm.addEventListener('submit', user.handleLoginForm);
-
 },
 
 init: function () {
@@ -21,31 +20,17 @@ init: function () {
     app.eventListener();
 },
 };
+
 document.addEventListener('DOMContentLoaded', app.init);
 },{"./user":2,"./utils":3}],2:[function(require,module,exports){
 const utils = require('./utils');
 
 const user = {
 
-    baseUrl: 'http://localhost:2000',
-
-    showLoginForm: function() {
-
-        event.preventDefault();
-        const loginForm = document.querySelector('form[id="login"]')
-        const menu = document.querySelector('.menu')
-
-        // On desactive l'affichage du menu
-        menu.classList.remove('is-active');
-        menu.classList.add('displayNone');
-
-        // On active l'affichage du formulaire login
-        loginForm.classList.remove('displayNone');
-        loginForm.classList.add('is-active');
-    },
+    baseUrl: 'http://localhost:3000',
 
 
-    handleLoginForm: function(data) {
+    handleLoginForm: async function(data) {
 
         event.preventDefault();
 
@@ -56,13 +41,16 @@ const user = {
             body: dataForm
         };
 
-        return (
-            fetch(`${user.baseUrl}/login`, requestConfig)
+        const response = await fetch(`${user.baseUrl}/login`, requestConfig);
+		const jsonResponse = await response.json();
 
-                .then((response) => {
-                    utils.showMenu();
-                })
-        );
+        if(response.status === 404) {
+            console.log(jsonResponse)
+        } else {
+            console.log(jsonResponse);
+            utils.showPlayGame();
+        }
+
     }
 
 };
@@ -72,7 +60,7 @@ module.exports = user;
 
 const utils = {
 
-    showMenu: function() {
+    showPlayGame: function() {
 
         // HIDDE LOGIN FORM
         const loginForm = document.querySelector('form[id="login"]')
@@ -84,6 +72,16 @@ const utils = {
         menu.classList.remove('inactive');
         menu.classList.add('is-active');
 
+        // ADD PLAY BUTTON & REMOVE LOGIN + SUBSCRIBE
+        const playButton = document.querySelector('li[menu="play"]');
+        playButton.classList.remove('inactive');
+        playButton.classList.add('is-active');
+        const loginButton = document.querySelector('li[menu="login"]');
+        loginButton.classList.remove('is-active');
+        loginButton.classList.add('inactive');
+        const subscribeButton = document.querySelector('li[menu="createAccount"]');
+        subscribeButton.classList.remove('is-active');
+        subscribeButton.classList.add('inactive');
     },
 
     showLoginForm: function() {
@@ -100,7 +98,6 @@ const utils = {
         loginForm.classList.remove('inactive');
         loginForm.classList.add('is-active');
     },
-
 };
 
 module.exports = utils;

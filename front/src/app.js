@@ -6,13 +6,12 @@ var app = {
 eventListener: function() {
 
     // LOGIN SHOW FORM
-    const menuLogin = document.querySelector('a[menu="login"]');      
+    const menuLogin = document.querySelector('li[menu="login"]');      
     menuLogin.addEventListener('click', utils.showLoginForm);
 
     // LOGIN SUBMIT
     const loginForm = document.querySelector('form[id="login"]')
     loginForm.addEventListener('submit', user.handleLoginForm);
-
 },
 
 init: function () {
@@ -20,4 +19,5 @@ init: function () {
     app.eventListener();
 },
 };
+
 document.addEventListener('DOMContentLoaded', app.init);
