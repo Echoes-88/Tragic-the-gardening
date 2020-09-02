@@ -4,7 +4,7 @@ var app = {
 
 init: function () {
 
-    eventListener.main();
+    eventListener.login();
 },
 };
 document.addEventListener('DOMContentLoaded', app.init);

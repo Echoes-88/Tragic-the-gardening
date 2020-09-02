@@ -2,7 +2,7 @@ const moduleUtils = require('./utils');
 
 const eventListener = {
 
-    main: function(event) {
+    login: function() {
 
         const menuLogin = document.querySelector('a[menu="login"]');
         

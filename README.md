@@ -1,5 +1,13 @@
 TO DO :
 
+app.js (dans le dossier FRONT) execute la methode login dans eventListener.js (situé dans le meme dossier)
+
+La methode login execute ensuite au clic la methode showLoginForm (DANS LE FICHIER UTILS, meme dossier)
+
+Cette méthode masque le menu principal pour laisser la place au formulaire de login
+Ensuite je souhaite écouter la soumission du formulaire pour interroger la BDD en back
+
+
 AMELIORER LE ADD / REMOVE CLASSLIST POUR CACHER ET AFFICHER LES ELEMENTS
 
 
