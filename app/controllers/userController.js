@@ -3,14 +3,6 @@ const bcrypt = require('bcrypt');
 
 const userController = {
 
-    profil: (req, res) => {
-        res.render('profil');
-    },
-
-    loginForm: (req, res) => {
-
-        res.render('login');
-    },
 
     loginSubmit: async (req, res) => {
 
@@ -22,19 +14,15 @@ const userController = {
         });
 
         if(!user) {
-            res.render('login', {
-                error: 'Utilisateur inconnu',
-                field: req.body // if no, return form with the textcontent
-            });
+            console.log(error, 'utilisateur inconnu');
+            res.status(500).json({error});
         } else {
             // Checking password with bcrypt
             const validPwd = bcrypt.compareSync(req.body.password, user.psw);
 
             if(!validPwd) {
-                res.render('login', {
-                    error: 'Erreur de mot de passe',
-                    field: req.body // if wrong password, return to login with textcontent
-                });
+                console.log(error, 'Erreur de mot de passe');
+                res.status(500).json({error});
             } else {
                 // if login ok, add user informations to session
                 req.session.user = {
@@ -49,7 +37,7 @@ const userController = {
                     req.session.cookie.expires = new Date(Date.now() + 3600000);
                 }
 
-                res.redirect('/');
+                return res.json();
             }
         }
 
@@ -57,11 +45,6 @@ const userController = {
 
     logOut: (req, res) => {
         req.session.user = false;
-        res.redirect('/');
-    },
-
-    signupForm: (req, res) => {
-        res.render('signup', {});
     },
 
     signupSubmit: async (req, res) => {

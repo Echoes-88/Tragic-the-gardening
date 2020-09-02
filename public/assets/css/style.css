@@ -7,6 +7,7 @@ body {
     src: url('../font/AdobeDia.ttf');
 }
 
+
 .background-home {
     background-image: url(../img/background.jpg);
     width: 100%;
@@ -19,11 +20,15 @@ body {
     align-items: center;
 }
 
-.menu {
-
+.menu a {
+    color: greenyellow;
 }
 
-.menu li {
+.menu a:hover {
+    color: #101010;
+}
+
+.menu-list {
 background-color: #101010;
 color:greenyellow;
 list-style: none;
@@ -40,12 +45,16 @@ cursor: pointer;
     color: #101010;
 }
 
-.displayNone {
+li:hover a {
+    color: inherit;
+}
+
+.inactive {
     display: none;
 }
 
 .is-active {
-    display: flex;
+    display: block;
 }
 
 /* FORM */

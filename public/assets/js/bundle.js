@@ -1,37 +1,36 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-const eventListener = require('./eventListener');
+const utils = require('./utils');
+const user = require('./user');
 
 var app = {
 
+eventListener: function() {
+
+    // LOGIN SHOW FORM
+    const menuLogin = document.querySelector('a[menu="login"]');      
+    menuLogin.addEventListener('click', utils.showLoginForm);
+
+    // LOGIN SUBMIT
+    const loginForm = document.querySelector('form[id="login"]')
+    loginForm.addEventListener('submit', user.handleLoginForm);
+
+},
+
 init: function () {
 
-    eventListener.login();
+    app.eventListener();
 },
 };
 document.addEventListener('DOMContentLoaded', app.init);
-},{"./eventListener":2}],2:[function(require,module,exports){
-const moduleUtils = require('./utils');
+},{"./user":2,"./utils":3}],2:[function(require,module,exports){
+const utils = require('./utils');
 
-const eventListener = {
+const user = {
 
-    login: function() {
-
-        const menuLogin = document.querySelector('a[menu="login"]');
-        
-        menuLogin.addEventListener('click', moduleUtils.showLoginForm);
-    }
-
-};
-
-module.exports = eventListener;
-},{"./utils":3}],3:[function(require,module,exports){
-
-const moduleUtils = {
-
-    // VERIFIER SI CE PARAMETRE EST UTILE, COMMENT MODIFIER APRES ?
     baseUrl: 'http://localhost:2000',
 
     showLoginForm: function() {
+
         event.preventDefault();
         const loginForm = document.querySelector('form[id="login"]')
         const menu = document.querySelector('.menu')
@@ -43,48 +42,66 @@ const moduleUtils = {
         // On active l'affichage du formulaire login
         loginForm.classList.remove('displayNone');
         loginForm.classList.add('is-active');
-
-        const loginButton = loginForm.querySelector('button[type="submit"');
-
-
-        console.log(loginButton)
-        // au click de validation du form login je verifie l'existence de l'utilisateur
-        loginForm.addEventListener('submit', function(data){
-            event.preventDefault();
-
-            // L'email
-            console.log(data.target.elements[0].value);
-
-            // Le mdp
-            console.log(data.target.elements[1].value);
-
-            let dataForm = new FormData(data);
-
-            console.log(dataForm);
+    },
 
 
-            // Faire un return des erreur en json du côté de l'api
+    handleLoginForm: function(data) {
 
-            // AJOUTER UNE METHODE SPECIFIQUE POUR RECUPERER LES DONNEES PUIS SOUMETTRE LE FORM ??? Voir ligne 112 https://github.com/Echoes-88/Cheat_sheet/blob/master/ALL-IN-ONE/FRONT-IN-API/front/src/card.js
+        event.preventDefault();
 
-            const requestConfig = {
-                method: 'POST',
-                body: data
-            };
+        let dataForm = new FormData(data.target);
 
-            return (
-                fetch(`${moduleUtils.baseUrl}/login`, requestConfig)
+        const requestConfig = {
+            method: 'POST',
+            body: dataForm
+        };
 
-                    .then((response) => {
+        return (
+            fetch(`${user.baseUrl}/login`, requestConfig)
 
-                        return response.json();
-                    })
-            );
-
-        })
+                .then((response) => {
+                    utils.showMenu();
+                })
+        );
     }
 
 };
 
-module.exports = moduleUtils;
+module.exports = user;
+},{"./utils":3}],3:[function(require,module,exports){
+
+const utils = {
+
+    showMenu: function() {
+
+        // HIDDE LOGIN FORM
+        const loginForm = document.querySelector('form[id="login"]')
+        loginForm.classList.remove('is-active');
+        loginForm.classList.add('inactive');
+
+        // SHOW MENU
+        const menu = document.querySelector('.menu')
+        menu.classList.remove('inactive');
+        menu.classList.add('is-active');
+
+    },
+
+    showLoginForm: function() {
+
+        event.preventDefault();
+
+        // HIDDE MENU
+        const menu = document.querySelector('.menu')
+        menu.classList.remove('is-active');
+        menu.classList.add('inactive');
+
+        // SHOW LOGIN FORM
+        const loginForm = document.querySelector('form[id="login"]')
+        loginForm.classList.remove('inactive');
+        loginForm.classList.add('is-active');
+    },
+
+};
+
+module.exports = utils;
 },{}]},{},[1]);

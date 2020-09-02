@@ -11,6 +11,7 @@ const app = express();
 var cors = require('cors');
 app.use(cors());
 
+
 // Fichiers static
 // app.use(express.static('./public/'));
 app.use(express.static('./asset'));
@@ -22,6 +23,10 @@ app.use(express.static('public'));
 
 // gestionnaire POST
 app.use(express.urlencoded({extended: true}));
+
+// Utilisation de Multer pour gérer les données issues de formData
+const multer = require('multer');
+app.use( multer().none() );
 
 // gestion des sessions
 const session = require('express-session');
