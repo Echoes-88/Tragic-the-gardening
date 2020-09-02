@@ -17,10 +17,8 @@ const moduleUtils = {
         loginForm.classList.remove('displayNone');
         loginForm.classList.add('is-active');
 
-        const loginButton = loginForm.querySelector('button[type="submit"');
+        // const loginButton = loginForm.querySelector('button[type="submit"');
 
-
-        console.log(loginButton)
         // au click de validation du form login je verifie l'existence de l'utilisateur
         loginForm.addEventListener('submit', function(data){
             event.preventDefault();
@@ -35,8 +33,6 @@ const moduleUtils = {
 
             console.log(dataForm);
 
-
-            // Faire un return des erreur en json du côté de l'api
 
             // AJOUTER UNE METHODE SPECIFIQUE POUR RECUPERER LES DONNEES PUIS SOUMETTRE LE FORM ??? Voir ligne 112 https://github.com/Echoes-88/Cheat_sheet/blob/master/ALL-IN-ONE/FRONT-IN-API/front/src/card.js
 
