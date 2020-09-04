@@ -20,12 +20,45 @@ const user = {
 		const jsonResponse = await response.json();
 
         if(response.status === 404) {
-            console.log(jsonResponse)
+            // Debugger
+            // console.log(jsonResponse)
+
         } else {
-            console.log(jsonResponse);
+
+            // Saving json response in local session
+            userDatas = JSON.stringify(jsonResponse);
+            sessionStorage.setItem('userDatas', userDatas);
+
             utils.showPlayGame();
         }
 
+    },
+
+    account: function(event) {
+
+        event.preventDefault();
+
+        //HIDDE MENU
+        const menu = document.querySelector('.menu')
+        menu.classList.remove('is-active');
+        menu.classList.add('inactive');
+
+
+        const userDatas = sessionStorage.getItem('userDatas');
+        const user = JSON.parse(userDatas);
+        console.log('user', user);
+
+        const dom = document.querySelector('main');
+
+        const article = document.createElement('article');
+        dom.appendChild(article);
+
+        for(const data of Object.keys(user)) {
+            const paragraph = document.createElement('p');
+            paragraph.classList.add('account-key');
+            paragraph.textContent = data;
+            article.appendChild(paragraph);
+        }
     }
 
 };

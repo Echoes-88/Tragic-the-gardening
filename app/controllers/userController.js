@@ -33,9 +33,16 @@ const userController = {
                         role: user.role,
                         id: user.id
                     };
+
                     if(req.body.remember) {
                         req.session.cookie.expires = new Date(Date.now() + 3600000);
                     }
+                    
+                    // Sending user datas in json to use it in front without API calls
+                    delete user.dataValues.hit_point;
+                    delete user.dataValues.psw;
+                    delete user.dataValues.createdAt;
+                    delete user.dataValues.updatedAt
 
                     res.json(user);
                 }
@@ -85,6 +92,26 @@ const userController = {
             }
         }
     },
+
+    userHasDecks: async function() {
+
+        const decks = await models.Deck.findAll({
+            include: [{
+                association: "userHasDecks",
+                include: ["deckHasMonster", "deckHasBooster"]
+            }],
+            where: {
+                user_id: req.body.id
+            }
+        })
+
+        if (decks > 0) {
+            res.status(200).json({message: "ok"});
+        } else {
+            res.status(404).json({error: "List not found"});
+        }
+        
+    }
 };
 
 module.exports= userController;
