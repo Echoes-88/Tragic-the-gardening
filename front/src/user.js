@@ -29,7 +29,7 @@ const user = {
             userDatas = JSON.stringify(jsonResponse);
             sessionStorage.setItem('userDatas', userDatas);
 
-            utils.showPlayGame();
+            utils.showLoggedMenu();
         }
 
     },
@@ -38,27 +38,38 @@ const user = {
 
         event.preventDefault();
 
-        //HIDDE MENU
-        const menu = document.querySelector('.menu')
-        menu.classList.remove('is-active');
-        menu.classList.add('inactive');
+        // CLEAR DISPLAY
+        utils.clearEverything();
 
-
+        // GET DATAS FROM SESSION STORAGE
         const userDatas = sessionStorage.getItem('userDatas');
         const user = JSON.parse(userDatas);
-        console.log('user', user);
 
+        // CREATING DOM
         const dom = document.querySelector('main');
 
         const article = document.createElement('article');
+        article.classList.add('is-active');
         dom.appendChild(article);
 
-        for(const data of Object.keys(user)) {
+        // GENERATING USER INFORMATIONS IN DOM
+        for(const elt of Object.entries(user)) {
+
+            console.log(elt)
             const paragraph = document.createElement('p');
             paragraph.classList.add('account-key');
-            paragraph.textContent = data;
+            paragraph.textContent = elt[0] + ' : ' + elt[1];
             article.appendChild(paragraph);
         }
+
+        // ADDING "BACK TO MAIN MENU"
+        const backMenu = document.createElement('button');
+        backMenu.classList.add('nav-button');
+        backMenu.textContent = "GO BACK"
+        article.appendChild(backMenu);
+
+        // EVENTLISTENER "BACK TO MAIN MENU"
+        backMenu.addEventListener('click', utils.showLoggedMenu);
     }
 
 };

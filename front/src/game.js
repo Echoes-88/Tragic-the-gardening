@@ -1,8 +1,12 @@
+    const utils = require('./utils');
 
 const game = {
 
     play: function(event) {
         event.preventDefault();
+
+        // CLEAR DISPLAY
+        utils.clearEverything();
 
         // Checking if user has decks from API
 

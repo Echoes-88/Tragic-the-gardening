@@ -18,13 +18,13 @@ eventListener: function() {
     const menuPlay = document.querySelector('li[set-menu="play"] a');
     menuPlay.addEventListener('click', game.play);
 
-    // SHOW ACCOUNT
+    // ACCOUNT BUTTON
     const menuAccount = document.querySelector('li[set-menu="account"] a');
     menuAccount.addEventListener('click', user.account);
 },
 
 init: function () {
-
+    utils.showMainMenu();
     app.eventListener();
 },
 };

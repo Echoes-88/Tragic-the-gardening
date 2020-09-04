@@ -19,24 +19,28 @@ eventListener: function() {
     const menuPlay = document.querySelector('li[set-menu="play"] a');
     menuPlay.addEventListener('click', game.play);
 
-    // SHOW ACCOUNT
+    // ACCOUNT BUTTON
     const menuAccount = document.querySelector('li[set-menu="account"] a');
     menuAccount.addEventListener('click', user.account);
 },
 
 init: function () {
-
+    utils.showMainMenu();
     app.eventListener();
 },
 };
 
 document.addEventListener('DOMContentLoaded', app.init);
 },{"./game":2,"./user":3,"./utils":4}],2:[function(require,module,exports){
+    const utils = require('./utils');
 
 const game = {
 
     play: function(event) {
         event.preventDefault();
+
+        // CLEAR DISPLAY
+        utils.clearEverything();
 
         // Checking if user has decks from API
 
@@ -101,7 +105,7 @@ const game = {
 }
 
 module.exports = game;
-},{}],3:[function(require,module,exports){
+},{"./utils":4}],3:[function(require,module,exports){
 const utils = require('./utils');
 
 const user = {
@@ -133,7 +137,7 @@ const user = {
             userDatas = JSON.stringify(jsonResponse);
             sessionStorage.setItem('userDatas', userDatas);
 
-            utils.showPlayGame();
+            utils.showLoggedMenu();
         }
 
     },
@@ -142,27 +146,38 @@ const user = {
 
         event.preventDefault();
 
-        //HIDDE MENU
-        const menu = document.querySelector('.menu')
-        menu.classList.remove('is-active');
-        menu.classList.add('inactive');
+        // CLEAR DISPLAY
+        utils.clearEverything();
 
-
+        // GET DATAS FROM SESSION STORAGE
         const userDatas = sessionStorage.getItem('userDatas');
         const user = JSON.parse(userDatas);
-        console.log('user', user);
 
+        // CREATING DOM
         const dom = document.querySelector('main');
 
         const article = document.createElement('article');
+        article.classList.add('is-active');
         dom.appendChild(article);
 
-        for(const data of Object.keys(user)) {
+        // GENERATING USER INFORMATIONS IN DOM
+        for(const elt of Object.entries(user)) {
+
+            console.log(elt)
             const paragraph = document.createElement('p');
             paragraph.classList.add('account-key');
-            paragraph.textContent = data;
+            paragraph.textContent = elt[0] + ' : ' + elt[1];
             article.appendChild(paragraph);
         }
+
+        // ADDING "BACK TO MAIN MENU"
+        const backMenu = document.createElement('button');
+        backMenu.classList.add('nav-button');
+        backMenu.textContent = "GO BACK"
+        article.appendChild(backMenu);
+
+        // EVENTLISTENER "BACK TO MAIN MENU"
+        backMenu.addEventListener('click', utils.showLoggedMenu);
     }
 
 };
@@ -172,45 +187,58 @@ module.exports = user;
 
 const utils = {
 
-    showPlayGame: function() {
+    showMainMenu: function() {
+        
+        // SHOW MENU
+        const menu = document.querySelector('.menu')
+        menu.classList.add('is-active');
 
-        // HIDDE LOGIN FORM
-        const loginForm = document.querySelector('form[id="login"]')
-        loginForm.classList.remove('is-active');
-        loginForm.classList.add('inactive');
+        // SHOW LOGIN, CREATE ACCOUNT, RULES
+        const playButton = document.querySelector('li[set-menu="login"]');
+        playButton.classList.add('is-active');
+
+        const createAccountButton = document.querySelector('li[set-menu="createAccount"]');
+        createAccountButton.classList.add('is-active');
+        
+        const rulesButton = document.querySelector('li[set-menu="rules"]');
+        rulesButton.classList.add('is-active');
+    },
+
+    showLoggedMenu: function() {
+
+        // CLEAR DISPLAY
+        utils.clearEverything();
 
         // SHOW MENU
         const menu = document.querySelector('.menu')
-        menu.classList.remove('inactive');
         menu.classList.add('is-active');
 
-        // ADD PLAY BUTTON & REMOVE LOGIN + SUBSCRIBE + ACCOUNT
         const playButton = document.querySelector('li[set-menu="play"]');
-        playButton.classList.remove('inactive');
         playButton.classList.add('is-active');
-        const loginButton = document.querySelector('li[set-menu="login"]');
-        loginButton.classList.remove('is-active');
-        loginButton.classList.add('inactive');
-        const subscribeButton = document.querySelector('li[set-menu="createAccount"]');
-        subscribeButton.classList.remove('is-active');
-        subscribeButton.classList.add('inactive');
         const accountButton = document.querySelector('li[set-menu="account"]');
-        accountButton.classList.remove('inactive');
         accountButton.classList.add('is-active');
+        const rulesButton = document.querySelector('li[set-menu="rules"]');
+        rulesButton.classList.add('is-active');
+
+    },
+
+    clearEverything: function() {
+        const activeElements = document.querySelectorAll('*');
+
+        for(let activElt of activeElements) {
+            activElt.classList.remove('is-active');
+        }
     },
 
     showLoginForm: function(event) {
 
         event.preventDefault();
 
-        // HIDDE MENU
-        const menu = document.querySelector('.menu')
-        menu.classList.remove('is-active');
-        menu.classList.add('inactive');
+        // CLEAR DISPLAY
+        utils.clearEverything();
 
         // SHOW LOGIN FORM
         const loginForm = document.querySelector('form[id="login"]')
-        loginForm.classList.remove('inactive');
         loginForm.classList.add('is-active');
     },
 };

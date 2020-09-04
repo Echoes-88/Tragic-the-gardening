@@ -2,6 +2,7 @@ body {
  height: 100vh;
 }
 
+
 @font-face {
     font-family: "AdobeDia";
     src: url('../font/AdobeDia.ttf');
@@ -9,7 +10,8 @@ body {
 
 p {
     color: greenyellow;
-    font-size: 1.5em;
+    font-size: 2em;
+    font-family: "AdobeDia";
 }
 
 
@@ -23,6 +25,10 @@ p {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.menu {
+    display: none;
 }
 
 .menu a {
@@ -44,6 +50,7 @@ font-family: 'AdobeDia';
 text-align: center;
 font-size: 1.6em;
 cursor: pointer;
+display: none;
 }
 
 .menu li:hover {
@@ -55,16 +62,28 @@ li:hover a {
     color: inherit;
 }
 
-.inactive {
-    display: none;
-}
 
 .is-active {
     display: block;
 }
 
+/* NAV */
+.nav-button {
+    background-color: #101010;
+    color:greenyellow;
+    font-family: 'AdobeDia';
+    text-align: center;
+    font-size: 1.6em;
+    cursor: pointer;
+}
+
 /* FORM */
 form {
     flex-direction: column;
+    display: none;
 }
 
+/* FORM */
+article {
+    display: none;
+}

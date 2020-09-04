@@ -1,45 +1,58 @@
 
 const utils = {
 
-    showPlayGame: function() {
+    showMainMenu: function() {
+        
+        // SHOW MENU
+        const menu = document.querySelector('.menu')
+        menu.classList.add('is-active');
 
-        // HIDDE LOGIN FORM
-        const loginForm = document.querySelector('form[id="login"]')
-        loginForm.classList.remove('is-active');
-        loginForm.classList.add('inactive');
+        // SHOW LOGIN, CREATE ACCOUNT, RULES
+        const playButton = document.querySelector('li[set-menu="login"]');
+        playButton.classList.add('is-active');
+
+        const createAccountButton = document.querySelector('li[set-menu="createAccount"]');
+        createAccountButton.classList.add('is-active');
+        
+        const rulesButton = document.querySelector('li[set-menu="rules"]');
+        rulesButton.classList.add('is-active');
+    },
+
+    showLoggedMenu: function() {
+
+        // CLEAR DISPLAY
+        utils.clearEverything();
 
         // SHOW MENU
         const menu = document.querySelector('.menu')
-        menu.classList.remove('inactive');
         menu.classList.add('is-active');
 
-        // ADD PLAY BUTTON & REMOVE LOGIN + SUBSCRIBE + ACCOUNT
         const playButton = document.querySelector('li[set-menu="play"]');
-        playButton.classList.remove('inactive');
         playButton.classList.add('is-active');
-        const loginButton = document.querySelector('li[set-menu="login"]');
-        loginButton.classList.remove('is-active');
-        loginButton.classList.add('inactive');
-        const subscribeButton = document.querySelector('li[set-menu="createAccount"]');
-        subscribeButton.classList.remove('is-active');
-        subscribeButton.classList.add('inactive');
         const accountButton = document.querySelector('li[set-menu="account"]');
-        accountButton.classList.remove('inactive');
         accountButton.classList.add('is-active');
+        const rulesButton = document.querySelector('li[set-menu="rules"]');
+        rulesButton.classList.add('is-active');
+
+    },
+
+    clearEverything: function() {
+        const activeElements = document.querySelectorAll('*');
+
+        for(let activElt of activeElements) {
+            activElt.classList.remove('is-active');
+        }
     },
 
     showLoginForm: function(event) {
 
         event.preventDefault();
 
-        // HIDDE MENU
-        const menu = document.querySelector('.menu')
-        menu.classList.remove('is-active');
-        menu.classList.add('inactive');
+        // CLEAR DISPLAY
+        utils.clearEverything();
 
         // SHOW LOGIN FORM
         const loginForm = document.querySelector('form[id="login"]')
-        loginForm.classList.remove('inactive');
         loginForm.classList.add('is-active');
     },
 };

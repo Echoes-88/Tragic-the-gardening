@@ -37,8 +37,8 @@ const userController = {
                     if(req.body.remember) {
                         req.session.cookie.expires = new Date(Date.now() + 3600000);
                     }
-                    
-                    // Sending user datas in json to use it in front without API calls
+
+                    // Sending user datas in json to save it in sessionStorage => front/src/user.js
                     delete user.dataValues.hit_point;
                     delete user.dataValues.psw;
                     delete user.dataValues.createdAt;
