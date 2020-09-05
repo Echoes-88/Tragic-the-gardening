@@ -44,6 +44,7 @@ const utils = {
         }
     },
 
+
     showLoginForm: function(event) {
 
         event.preventDefault();

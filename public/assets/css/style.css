@@ -67,6 +67,10 @@ li:hover a {
     display: block;
 }
 
+.is-hidden {
+    display: none;
+}
+
 /* NAV */
 .nav-button {
     background-color: #101010;
@@ -75,6 +79,7 @@ li:hover a {
     text-align: center;
     font-size: 1.6em;
     cursor: pointer;
+    margin-top:2rem;
 }
 
 /* FORM */
@@ -83,7 +88,26 @@ form {
     display: none;
 }
 
+label {
+    display: block;
+    color: greenyellow;
+    font-size: 2em;
+    font-family: "AdobeDia";
+
+}
+
+input
+{   
+    color:green;
+    background-color: black;
+    height: 28px;
+    padding-left: 10px;
+    text-decoration: none;
+    border: 1px solid green;
+}
+
 /* FORM */
 article {
     display: none;
+    text-align: center;
 }

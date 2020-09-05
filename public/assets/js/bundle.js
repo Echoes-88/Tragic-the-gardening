@@ -88,6 +88,15 @@ const game = {
         // if no, show button create deck, on click addEvent to show deckGenerator method
 
 
+        // ADDING "BACK TO MAIN MENU"
+        const backMenu = document.createElement('button');
+        backMenu.classList.add('nav-button');
+        backMenu.textContent = "GO BACK"
+        dom.appendChild(backMenu);
+
+        // EVENTLISTENER "BACK TO MAIN MENU"
+        backMenu.addEventListener('click', utils.showLoggedMenu);
+
     },
     
 
@@ -229,6 +238,7 @@ const utils = {
             activElt.classList.remove('is-active');
         }
     },
+
 
     showLoginForm: function(event) {
 
