@@ -28,7 +28,7 @@ p {
 }
 
 .menu {
-    display: none;
+
 }
 
 .menu a {
@@ -50,7 +50,6 @@ font-family: 'AdobeDia';
 text-align: center;
 font-size: 1.6em;
 cursor: pointer;
-display: none;
 }
 
 .menu li:hover {
@@ -62,10 +61,6 @@ li:hover a {
     color: inherit;
 }
 
-
-.is-active {
-    display: block;
-}
 
 .is-hidden {
     display: none;
@@ -85,7 +80,6 @@ li:hover a {
 /* FORM */
 form {
     flex-direction: column;
-    display: none;
 }
 
 label {
@@ -108,6 +102,5 @@ input
 
 /* FORM */
 article {
-    display: none;
     text-align: center;
 }

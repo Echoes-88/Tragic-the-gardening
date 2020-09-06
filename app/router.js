@@ -22,6 +22,9 @@ router.post('/crud/:entity', capture(genericController.createOne));
 router.patch('/crud/:entity/:id', capture(genericController.updateOne));
 router.delete('/crud/:entity/:id', capture(genericController.deleteOne));
 
+// ASSOCIATIONS
+router.get('/user-decks/:id', capture(userController.userHasDecks));
+
 // ROUTE POUR CREER UN DECK
 
 module.exports = router;

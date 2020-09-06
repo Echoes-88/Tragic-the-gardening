@@ -93,24 +93,21 @@ const userController = {
         }
     },
 
-    userHasDecks: async function() {
+    userHasDecks: async function(req, res) {
 
-        const decks = await models.Deck.findAll({
+        const decks = await models.User.findAll({
             include: [{
                 association: "userHasDecks",
                 include: ["deckHasMonster", "deckHasBooster"]
             }],
             where: {
-                user_id: req.body.id
+                id: req.params.id
             }
         })
 
-        if (decks > 0) {
-            res.status(200).json({message: "ok"});
-        } else {
-            res.status(404).json({error: "List not found"});
-        }
-        
+        res.json(decks);
+
+
     }
 };
 

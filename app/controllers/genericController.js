@@ -60,29 +60,59 @@ const genericController = {
             // CREATE DECK
             if(entity === 'deck') {
 
+                // Adding deck in database
+                const deck = await models.Deck.create(
+                {
+                    title: req.body.title,
+                    user_id: req.body.id
+                });
 
-                console.log(req.body)
-           
-                const monsters = await TargetModel.findAll({});
-                const boosters = await TargetModel.findAll({});
-    
-                let quantityMonster = 0;
 
-                // CHOPER L'ID DE SESSION A CODER + GET L'USER RELIE A CET ID
-                console.log(req.session.id)
-                let user = req.session.id;
-    
-                for (var i = 0; i < 5; i++) {
-    
+                // Getting all monsters and booster from database
+                const monsters = await models.Monster.findAll({});
+                const boosters = await models.Booster.findAll({});
+
+                let monstersArray = [];
+                let boostersArray = [];
+
+                // Choosing X random monsters and adding in deck
+                for (var i = 0; i < 10; i++) {
+
+                    let monsterQuantity = 1;
+
                     let monster = monsters[Math.floor(Math.random()*monsters.length)];
-    
-                    await models.Deck.create(
-                        {include:['deckHasMonster']}, 
-                        req.body,
-                        /*{ monster_id: monster.id, quantity: monster.text},*/ 
-                        {where:{deck_id: req.body.id}});
-                    
+
+                    await deck.addDeckHasMonster(monster, { through: {quantity: 1}});
+
+
+
+                    // monstersArray.push(monster.id);
+
+                    // if (monstersArray.includes(monster.id)) {
+                    //     monsterQuantity++;
+                    // }
+
+
+
+                    // let monsterQuantified = await models.DeckHasMonster.findAll({where: {deck_id: deck.id, monster_id: monster.id}});
+                
+                    // monsterQuantified.quantity = monsterQuantity;
+                    // await monsterQuantified.save();
+
                 }
+
+                for (var j = 0; j < 3; j++) {
+                    let booster = boosters[Math.floor(Math.random()*boosters.length)];
+                    boostersArray.push(booster);
+                }
+
+                // Checker les valeurs des tableaux. Si doublon récupérer l'id concerné et la quantité
+                // Faire un update deck_has_monster en modifiant la quantité
+
+                // await deck.addDeckHasMonster(monster);
+                // await deck.addDeckHasBooster(booster);
+
+
             } else if(entity === 'monster') {
 
             } else if (entity === 'booster') {
@@ -91,7 +121,7 @@ const genericController = {
 
             }
 
-            res.json(instance);
+            // res.json(instance);
         }
     },
 

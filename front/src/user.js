@@ -41,6 +41,10 @@ const user = {
         // CLEAR DISPLAY
         utils.clearEverything();
 
+        // SHOW MENU
+        const menu = document.querySelector('.menu')
+        menu.classList.remove('is-hidden');
+
         // GET DATAS FROM SESSION STORAGE
         const userDatas = sessionStorage.getItem('userDatas');
         const user = JSON.parse(userDatas);
@@ -49,7 +53,6 @@ const user = {
         const dom = document.querySelector('main');
 
         const article = document.createElement('article');
-        article.classList.add('is-active');
         dom.appendChild(article);
 
         // GENERATING USER INFORMATIONS IN DOM

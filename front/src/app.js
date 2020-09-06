@@ -24,6 +24,7 @@ eventListener: function() {
 },
 
 init: function () {
+    utils.clearEverything();
     utils.showMainMenu();
     app.eventListener();
 },
