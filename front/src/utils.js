@@ -56,6 +56,17 @@ const utils = {
         const loginForm = document.querySelector('form[id="login"]')
         loginForm.classList.remove('is-hidden');
     },
+
+    showCreateAccountForm: function(event) {
+        event.preventDefault();
+
+        // CLEAR DISPLAY
+        utils.clearEverything();
+
+        // SHOW CREATE ACCOUNT FORM
+        const createAccountForm = document.querySelector('form[id="createAccount"]');
+        createAccountForm.classList.remove('is-hidden');
+    }
 };
 
 module.exports = utils;

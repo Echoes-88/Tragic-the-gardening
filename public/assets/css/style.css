@@ -104,3 +104,12 @@ input
 article {
     text-align: center;
 }
+
+button {
+    background-color: #101010;
+    color:greenyellow;
+    font-family: 'AdobeDia';
+    text-align: center;
+    font-size: 1.5em;
+    cursor: pointer;
+}

@@ -72,45 +72,63 @@ const genericController = {
                 const monsters = await models.Monster.findAll({});
                 const boosters = await models.Booster.findAll({});
 
+                // Init monster and booster arrays
                 let monstersArray = [];
                 let boostersArray = [];
 
-                // Choosing X random monsters and adding in deck
-                for (var i = 0; i < 10; i++) {
 
-                    let monsterQuantity = 1;
-
+                // Choosing X random monsters and adding in arrays
+                for (var i = 0; i < 5; i++) {
                     let monster = monsters[Math.floor(Math.random()*monsters.length)];
-
-                    await deck.addDeckHasMonster(monster, { through: {quantity: 1}});
-
-
-
-                    // monstersArray.push(monster.id);
-
-                    // if (monstersArray.includes(monster.id)) {
-                    //     monsterQuantity++;
-                    // }
-
-
-
-                    // let monsterQuantified = await models.DeckHasMonster.findAll({where: {deck_id: deck.id, monster_id: monster.id}});
-                
-                    // monsterQuantified.quantity = monsterQuantity;
-                    // await monsterQuantified.save();
-
+                    monstersArray.push(monster.id)       
                 }
 
-                for (var j = 0; j < 3; j++) {
+                // Choosing X random booster and adding in arrays
+                for (var i = 0; i < 3; i++) {
                     let booster = boosters[Math.floor(Math.random()*boosters.length)];
-                    boostersArray.push(booster);
+                    boostersArray.push(booster.id)       
                 }
 
-                // Checker les valeurs des tableaux. Si doublon récupérer l'id concerné et la quantité
-                // Faire un update deck_has_monster en modifiant la quantité
+                // GET OCCURENCIES OF EACH MONSTER VALUES AND ADDING IN DATABASE
+                monstersArray.sort();
 
-                // await deck.addDeckHasMonster(monster);
-                // await deck.addDeckHasBooster(booster);
+                var current = null;
+                var cnt = 0;
+                for (var i = 0; i < monstersArray.length; i++) {
+                    if (monstersArray[i] != current) {
+                        if (cnt > 0) {
+                            await deck.addDeckHasMonster(current, { through: {quantity: cnt}});
+                        }
+                        current = monstersArray[i];
+                        cnt = 1;
+                    } else {
+                        cnt++;
+                    }
+                }
+                if (cnt > 0) {
+                    await deck.addDeckHasMonster(current, { through: {quantity: cnt}});
+                }
+            
+
+                // GET OCCURENCIES OF EACH BOOSTER VALUES AND ADDING IN DATABASE
+                boostersArray.sort();
+
+                var current2 = null;
+                var cnt2 = 0;
+                for (var i = 0; i < boostersArray.length; i++) {
+                    if (boostersArray[i] != current2) {
+                        if (cnt2 > 0) {
+                            await deck.addDeckHasBooster(current2, { through: {quantity: cnt2}});
+                        }
+                        current2 = boostersArray[i];
+                        cnt2 = 1;
+                    } else {
+                        cnt2++;
+                    }
+                }
+                if (cnt2 > 0) {
+                    await deck.addDeckHasBooster(current2, { through: {quantity: cnt2}});
+                }
 
 
             } else if(entity === 'monster') {

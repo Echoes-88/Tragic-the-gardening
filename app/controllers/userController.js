@@ -64,31 +64,45 @@ const userController = {
         });
 
         if(user) {
-            res.render('signup', {
-                error: 'Un utilisateur existe déjà avec cet email',
-                field: req.body // if yes, return form with the textcontent
-            });
+
+            res.json({error: `userExist`, field: req.body});
+            // field : return form with the textcontent
+
         } else {
             // Checking password & confirm password
             if(req.body.password !== req.body.passwordConfirm) {
-                res.render('signup'), {
-                    error: 'La confirmation du mot de passe est incorrecte',
-                    fields: req.body
-                }
+                res.json({error: `wrongConfirm`, field: req.body});
+                // field : return form with the textcontent
             } else {
               // Creating bcrypt password
               const hashPwd = bcrypt.hashSync(req.body.password, 10);
 
               // Add user in database
-              await models.User.create({
+              const user = await models.User.create({
                   email: req.body.email,
                   psw: hashPwd,
                   pseudo: req.body.pseudo,
                   firstname: req.body.firstname,
                   lastname: req.body.lastname
               });
-              // Redirection to login page after register
-              res.redirect('/login');
+
+              // ADDING USER INFORMATIONS TO SESSION
+              req.session.user = {
+                firstname: user.firstname,
+                lastname: user.lastname,
+                pseudo: user.pseudo,
+                email: user.email,
+                role: user.role,
+                id: user.id
+            };
+
+            delete user.dataValues.hit_point;
+            delete user.dataValues.psw;
+            delete user.dataValues.createdAt;
+            delete user.dataValues.updatedAt
+
+            res.json(user);
+
             }
         }
     },

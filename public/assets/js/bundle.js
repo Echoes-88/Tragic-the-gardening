@@ -22,6 +22,14 @@ eventListener: function() {
     // ACCOUNT BUTTON
     const menuAccount = document.querySelector('li[set-menu="account"] a');
     menuAccount.addEventListener('click', user.account);
+
+    // SHOW CREATE ACCOUNT FORM
+    const menuCreateAccount = document.querySelector('li[set-menu="createAccount"] a');
+    menuCreateAccount.addEventListener('click', utils.showCreateAccountForm);
+
+    // CREATE ACCOUNT SUBMIT
+    const createAccountForm = document.querySelector('form[id="createAccount"]');
+    createAccountForm.addEventListener('submit', user.handleCreateAccountForm);
 },
 
 init: function () {
@@ -50,18 +58,15 @@ const game = {
         const userDatas = sessionStorage.getItem('userDatas');
         const user = JSON.parse(userDatas);
 
-
         const requestConfig = {
             method: 'GET'
         };
 
         const response = await fetch(`${game.baseUrl}/user-decks/${user.id}`, requestConfig);
-		const jsonResponse = await response.json();
+        const jsonResponse = await response.json();
 
         if(response.status === 404) {
 
-
-            console.log(jsonResponse)
         } else {
 
             // Creating main elements in dom
@@ -70,9 +75,12 @@ const game = {
             mainArea.appendChild(article);
 
                         
-            if(jsonResponse.userHasDecks > 0) {
-                console.log('user has some decks')
-                // afficher les decks
+            if(jsonResponse[0].userHasDecks > 0) {
+                
+                console.log(jsonResponse[0].userHasDecks)
+
+                // Appendchild un visuel global par deck
+                // Onclick du deck afficher les cartes
 
             } else {
                 console.log('no decks')
@@ -81,9 +89,9 @@ const game = {
                 textNewDeck.textContent = 'Create your first deck to play !'
 
                 const form = document.createElement('form');
-
+                form.classList.add('form');
                 article.appendChild(textNewDeck);
-                textNewDeck.appendChild(form);
+                article.appendChild(form);
 
                 const deckName = document.createElement('input');
                 deckName.placeholder = 'name';
@@ -97,6 +105,7 @@ const game = {
                 form.appendChild(userId);
 
                 const createDeckButton = document.createElement('button');
+                createDeckButton.type = 'submit';
                 createDeckButton.textContent = 'Create a deck';
                 form.appendChild(createDeckButton);
 
@@ -136,10 +145,10 @@ const game = {
             body: datas
         };
 
-        const response = await fetch(`${game.baseUrl}/crud/deck`, requestConfig);
-        const jsonResponse = await response.json();
+        await fetch(`${game.baseUrl}/crud/deck`, requestConfig);
+        // const jsonResponse = await response.json();
         
-        console.log(jsonResponse);
+        // console.log(jsonResponse);
 
         // for (var value of datas.values()) {
         //     console.log(value); 
@@ -233,6 +242,65 @@ const user = {
 
         // EVENTLISTENER "BACK TO MAIN MENU"
         backMenu.addEventListener('click', utils.showLoggedMenu);
+    },
+
+    handleCreateAccountForm: async function(data) {
+
+        event.preventDefault();
+
+        let dataForm = new FormData(data.target);
+
+        const requestConfig = {
+            method: 'POST',
+            body: dataForm
+        }
+
+        const response = await fetch(`${user.baseUrl}/signup`, requestConfig);
+
+        const jsonResponse = await response.json();
+
+        const form = document.querySelector('form[id="createAccount"]');
+        const paragraph = document.createElement('p');
+
+        // responseString = JSON.stringify(jsonResponse);
+        console.log(jsonResponse.error);
+
+        if(response.status === 404) {
+
+            paragraph.textContent = `Erreur 404`
+            form.appendChild(paragraph);
+
+        } else if (jsonResponse.error === 'userExist') {
+            
+            paragraph.textContent = `l'utilisateur existe déjà`
+            form.appendChild(paragraph);
+            
+        } else if (jsonResponse.error === 'wrongConfirm') {
+
+            paragraph.textContent = `Erreur de confirmation de mot de passe`
+            form.appendChild(paragraph);
+
+        } else {
+
+        // Saving json response in local session
+        userDatas = JSON.stringify(jsonResponse);
+        sessionStorage.setItem('userDatas', userDatas);
+
+        // CLEAR DISPLAY
+        utils.clearEverything();
+
+        // ADDING "BACK TO MAIN MENU"
+        const main = document.querySelector('main');
+        const backMenu = document.createElement('button');
+        backMenu.classList.add('nav-button');
+        backMenu.textContent = "GO BACK"
+        main.appendChild(backMenu);
+
+        // EVENTLISTENER "BACK TO MAIN MENU"
+        backMenu.addEventListener('click', utils.showLoggedMenu);
+        }
+
+
     }
 
 };
@@ -297,6 +365,17 @@ const utils = {
         const loginForm = document.querySelector('form[id="login"]')
         loginForm.classList.remove('is-hidden');
     },
+
+    showCreateAccountForm: function(event) {
+        event.preventDefault();
+
+        // CLEAR DISPLAY
+        utils.clearEverything();
+
+        // SHOW CREATE ACCOUNT FORM
+        const createAccountForm = document.querySelector('form[id="createAccount"]');
+        createAccountForm.classList.remove('is-hidden');
+    }
 };
 
 module.exports = utils;

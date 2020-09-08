@@ -21,6 +21,14 @@ eventListener: function() {
     // ACCOUNT BUTTON
     const menuAccount = document.querySelector('li[set-menu="account"] a');
     menuAccount.addEventListener('click', user.account);
+
+    // SHOW CREATE ACCOUNT FORM
+    const menuCreateAccount = document.querySelector('li[set-menu="createAccount"] a');
+    menuCreateAccount.addEventListener('click', utils.showCreateAccountForm);
+
+    // CREATE ACCOUNT SUBMIT
+    const createAccountForm = document.querySelector('form[id="createAccount"]');
+    createAccountForm.addEventListener('submit', user.handleCreateAccountForm);
 },
 
 init: function () {

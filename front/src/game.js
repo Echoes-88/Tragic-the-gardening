@@ -15,18 +15,15 @@ const game = {
         const userDatas = sessionStorage.getItem('userDatas');
         const user = JSON.parse(userDatas);
 
-
         const requestConfig = {
             method: 'GET'
         };
 
         const response = await fetch(`${game.baseUrl}/user-decks/${user.id}`, requestConfig);
-		const jsonResponse = await response.json();
+        const jsonResponse = await response.json();
 
         if(response.status === 404) {
 
-
-            console.log(jsonResponse)
         } else {
 
             // Creating main elements in dom
@@ -35,9 +32,12 @@ const game = {
             mainArea.appendChild(article);
 
                         
-            if(jsonResponse.userHasDecks > 0) {
-                console.log('user has some decks')
-                // afficher les decks
+            if(jsonResponse[0].userHasDecks > 0) {
+                
+                console.log(jsonResponse[0].userHasDecks)
+
+                // Appendchild un visuel global par deck
+                // Onclick du deck afficher les cartes
 
             } else {
                 console.log('no decks')
@@ -46,9 +46,9 @@ const game = {
                 textNewDeck.textContent = 'Create your first deck to play !'
 
                 const form = document.createElement('form');
-
+                form.classList.add('form');
                 article.appendChild(textNewDeck);
-                textNewDeck.appendChild(form);
+                article.appendChild(form);
 
                 const deckName = document.createElement('input');
                 deckName.placeholder = 'name';
@@ -62,6 +62,7 @@ const game = {
                 form.appendChild(userId);
 
                 const createDeckButton = document.createElement('button');
+                createDeckButton.type = 'submit';
                 createDeckButton.textContent = 'Create a deck';
                 form.appendChild(createDeckButton);
 
@@ -101,10 +102,10 @@ const game = {
             body: datas
         };
 
-        const response = await fetch(`${game.baseUrl}/crud/deck`, requestConfig);
-        const jsonResponse = await response.json();
+        await fetch(`${game.baseUrl}/crud/deck`, requestConfig);
+        // const jsonResponse = await response.json();
         
-        console.log(jsonResponse);
+        // console.log(jsonResponse);
 
         // for (var value of datas.values()) {
         //     console.log(value); 

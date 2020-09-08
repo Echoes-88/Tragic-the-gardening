@@ -73,6 +73,65 @@ const user = {
 
         // EVENTLISTENER "BACK TO MAIN MENU"
         backMenu.addEventListener('click', utils.showLoggedMenu);
+    },
+
+    handleCreateAccountForm: async function(data) {
+
+        event.preventDefault();
+
+        let dataForm = new FormData(data.target);
+
+        const requestConfig = {
+            method: 'POST',
+            body: dataForm
+        }
+
+        const response = await fetch(`${user.baseUrl}/signup`, requestConfig);
+
+        const jsonResponse = await response.json();
+
+        const form = document.querySelector('form[id="createAccount"]');
+        const paragraph = document.createElement('p');
+
+        // responseString = JSON.stringify(jsonResponse);
+        console.log(jsonResponse.error);
+
+        if(response.status === 404) {
+
+            paragraph.textContent = `Erreur 404`
+            form.appendChild(paragraph);
+
+        } else if (jsonResponse.error === 'userExist') {
+            
+            paragraph.textContent = `l'utilisateur existe déjà`
+            form.appendChild(paragraph);
+            
+        } else if (jsonResponse.error === 'wrongConfirm') {
+
+            paragraph.textContent = `Erreur de confirmation de mot de passe`
+            form.appendChild(paragraph);
+
+        } else {
+
+        // Saving json response in local session
+        userDatas = JSON.stringify(jsonResponse);
+        sessionStorage.setItem('userDatas', userDatas);
+
+        // CLEAR DISPLAY
+        utils.clearEverything();
+
+        // ADDING "BACK TO MAIN MENU"
+        const main = document.querySelector('main');
+        const backMenu = document.createElement('button');
+        backMenu.classList.add('nav-button');
+        backMenu.textContent = "GO BACK"
+        main.appendChild(backMenu);
+
+        // EVENTLISTENER "BACK TO MAIN MENU"
+        backMenu.addEventListener('click', utils.showLoggedMenu);
+        }
+
+
     }
 
 };

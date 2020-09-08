@@ -3,8 +3,10 @@ BEGIN;
 -- -----------------------------------------------------
 -- Ajout de données USER
 -- -----------------------------------------------------
+/*
 INSERT INTO "user"("id", "firstname", "lastname", "pseudo", "email", "hit_point", "victory", "defeat", "psw", "role") VALUES
 (1, 'Bender', 'Tordeur Rodríguez','Computer', 'futurama@aol.com', 0, 0, 0, 'Bender', 'user'), (2, 'Simon', 'Jacquemin','Nikabalte', 'test@test.fr', 0, 0, 0, '1234', 'admin');
+*/
 
 -- -----------------------------------------------------
 -- Ajout de données MONSTER
@@ -38,40 +40,40 @@ INSERT INTO "booster"("id", "title", "text", "special_effect_value", "special_ef
 -- -----------------------------------------------------
 -- Ajout de données DECK
 -- -----------------------------------------------------
-INSERT INTO "deck"("id", "title", "user_id") VALUES
-(1, 'Deck computer 1', 1),
-(2, 'Deck test 1', 2);
+-- INSERT INTO "deck"("id", "title", "user_id") VALUES
+-- (1, 'Deck computer 1', 1),
+-- (2, 'Deck test 1', 2);
 
 -- -----------------------------------------------------
 -- Ajout de données DECK_HAS_MONSTER
 -- -----------------------------------------------------
-INSERT INTO "deck_has_monster"("deck_id", "monster_id", "quantity") VALUES
-(1, 2, 1),
-(1, 4, 3),
-(1, 5, 2),
-(1, 6, 1),
-(1, 8, 2),
-(1, 9, 2),
-(1, 10, 1),
-(1, 12, 3),
-(1, 13, 1),
-(2, 1, 2),
-(2, 3, 3),
-(2, 4, 1),
-(2, 7, 2),
-(2, 9, 2),
-(2, 11, 3),
-(2, 13, 3);
+-- INSERT INTO "deck_has_monster"("deck_id", "monster_id", "quantity") VALUES
+-- (1, 2, 1),
+-- (1, 4, 3),
+-- (1, 5, 2),
+-- (1, 6, 1),
+-- (1, 8, 2),
+-- (1, 9, 2),
+-- (1, 10, 1),
+-- (1, 12, 3),
+-- (1, 13, 1),
+-- (2, 1, 2),
+-- (2, 3, 3),
+-- (2, 4, 1),
+-- (2, 7, 2),
+-- (2, 9, 2),
+-- (2, 11, 3),
+-- (2, 13, 3);
 
 -- -----------------------------------------------------
 -- Ajout de données DECK_HAS_BOOSTER
 -- -----------------------------------------------------
-INSERT INTO "deck_has_booster"("deck_id", "booster_id", "quantity") VALUES
-(1, 1, 2),
-(1, 3, 2),
-(1, 5, 2),
-(2, 2, 2),
-(2, 4, 2),
-(2, 5, 2);
+-- INSERT INTO "deck_has_booster"("deck_id", "booster_id", "quantity") VALUES
+-- (1, 1, 2),
+-- (1, 3, 2),
+-- (1, 5, 2),
+-- (2, 2, 2),
+-- (2, 4, 2),
+-- (2, 5, 2);
 
 COMMIT;

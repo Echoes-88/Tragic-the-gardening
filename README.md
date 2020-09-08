@@ -1,14 +1,23 @@
-TO DO :
+[TO DO]
 
-app.js (dans le dossier FRONT) execute la methode login dans eventListener.js (situé dans le meme dossier)
+-- Améliorer verifications formulaire creer un compte (supprimer possibilité des champs vides)
 
-La methode login execute ensuite au clic la methode showLoginForm (DANS LE FICHIER UTILS, meme dossier)
+-- app.js (dans le dossier FRONT) execute la methode login dans eventListener.js (situé dans le meme dossier)
 
-Cette méthode masque le menu principal pour laisser la place au formulaire de login
+-- La methode login execute ensuite au clic la methode showLoginForm (DANS LE FICHIER UTILS, meme dossier)
+
+-- Cette méthode masque le menu principal pour laisser la place au formulaire de login
 Ensuite je souhaite écouter la soumission du formulaire pour interroger la BDD en back
 
 
-AMELIORER LE ADD / REMOVE CLASSLIST POUR CACHER ET AFFICHER LES ELEMENTS
+-- AMELIORER LE ADD / REMOVE CLASSLIST POUR CACHER ET AFFICHER LES ELEMENTS
+
+
+## GERER LES ERREURS DE KEY ID EN CAS DE RESET DE LA BDD
+https://forums.postgresql.fr/viewtopic.php?id=637
+
+
+
 
 
 Chaque joueur pose en début de match 3 cartes de type character sur le plateau
