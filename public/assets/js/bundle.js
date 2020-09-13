@@ -40,8 +40,60 @@ init: function () {
 };
 
 document.addEventListener('DOMContentLoaded', app.init);
-},{"./game":2,"./user":3,"./utils":4}],2:[function(require,module,exports){
-    const utils = require('./utils');
+},{"./game":3,"./user":4,"./utils":5}],2:[function(require,module,exports){
+const game = require('./game');
+const utils = require('./utils');
+
+var cardGenerator = {
+
+    deck: function(deckDatas) {
+
+        // Creating div for the deck with deck picture, title and buttons (deck manager / play with deck)
+        const deckContainer = document.createElement('div');
+        deckContainer.classList.add('deck-container');
+        const deckTitle = document.createElement('p');
+        deckTitle.textContent = deckDatas.title;
+        const deckImage = document.createElement('div');
+        deckImage.classList.add('card');
+        deckImage.classList.add('deck');
+
+        const article = document.querySelector('article');
+
+        deckContainer.setAttribute('set-id', deckDatas.id);
+
+        article.appendChild(deckContainer);
+        deckContainer.appendChild(deckTitle)
+        deckContainer.appendChild(deckImage);
+
+        const seeThisDeck = document.createElement('button');
+        const playThisDeck = document.createElement('button');
+        seeThisDeck.textContent = 'Manage deck'
+        playThisDeck.textContent = 'Play with this deck'
+
+        deckContainer.appendChild(seeThisDeck)
+        deckContainer.appendChild(playThisDeck);
+
+        // EventListeners for buttons (deck manager / play with deck)
+        seeThisDeck.addEventListener('click', function(event){
+            utils.showDeck(deckDatas);
+        });
+        playThisDeck.addEventListener('click', game.launchGame);
+    },
+
+    monster: function(caracterstics) {
+
+    },
+
+    booster: function(caracterstics) {
+
+    },
+}
+
+
+module.exports = cardGenerator;
+},{"./game":3,"./utils":5}],3:[function(require,module,exports){
+const utils = require('./utils');
+const cardGenerator = require('./cardGenerator');
 
 const game = {
 
@@ -74,10 +126,19 @@ const game = {
             const article = document.createElement('article');
             mainArea.appendChild(article);
 
+            // Add decks datas in session (back) !!
+
                         
-            if(jsonResponse[0].userHasDecks > 0) {
-                
-                console.log(jsonResponse[0].userHasDecks)
+            if(jsonResponse[0].userHasDecks.length > 0) {
+
+                const decks = jsonResponse[0].userHasDecks;
+
+                for(const deck of decks) {
+
+                    cardGenerator.deck(deck);
+
+
+                }
 
                 // Appendchild un visuel global par deck
                 // Onclick du deck afficher les cartes
@@ -112,15 +173,6 @@ const game = {
                 form.addEventListener('submit', game.deckGenerator);
             }
         }
-
-
-        // if yes, call show decks method and ask to choose the deck to play + button manage decks
-
-            
-            //
-
-        // if no, show button create deck, on click addEvent to show deckGenerator method
-
 
         // ADDING "BACK TO MAIN MENU"
         const backMenu = document.createElement('button');
@@ -161,12 +213,16 @@ const game = {
         // Fetch API get all decks from user id
 
         // OnClick on a deck, add launch game button
+    },
+
+    launchGame: function() {
+
     }
 
 }
 
 module.exports = game;
-},{"./utils":4}],3:[function(require,module,exports){
+},{"./cardGenerator":2,"./utils":5}],4:[function(require,module,exports){
 const utils = require('./utils');
 
 const user = {
@@ -306,7 +362,7 @@ const user = {
 };
 
 module.exports = user;
-},{"./utils":4}],4:[function(require,module,exports){
+},{"./utils":5}],5:[function(require,module,exports){
 
 const utils = {
 
@@ -375,6 +431,59 @@ const utils = {
         // SHOW CREATE ACCOUNT FORM
         const createAccountForm = document.querySelector('form[id="createAccount"]');
         createAccountForm.classList.remove('is-hidden');
+    },
+
+    showDeck: function(deckDatas) {
+
+        // CLEAR DISPLAY
+        utils.clearEverything();
+
+        // SHOW ARTICLE AREA 
+        const article = document.querySelector('article');
+        article.innerHTML = '';
+        article.classList.remove('is-hidden');
+
+        const monsters = deckDatas.deckHasMonster;
+        const boosters = deckDatas.deckHasBooster;
+
+        for(const monster of monsters) {
+
+            const monsterCard = document.createElement('div');
+            monsterCard.classList.add('card');
+            monsterCard.classList.add('monster');
+
+            const monsterPicture = document.createElement('img');
+            monsterPicture.classList.add('card-picture');
+            monsterPicture.src =  `./assets/img/monsters/${monster.id}.jpg`
+
+            const article = document.querySelector('article');
+            article.classList.add('deckContainer')
+            article.appendChild(monsterCard);
+            monsterCard.appendChild(monsterPicture);
+        }
+
+        for(const booster of boosters) {
+
+            const boosterCard = document.createElement('div');
+            boosterCard.classList.add('card');
+            boosterCard.classList.add('booster');
+
+            const boosterPicture = document.createElement('img');
+            boosterPicture.classList.add('card-picture');
+            boosterPicture.src =  `./assets/img/boosters/${booster.id}.jpg`
+
+            article.appendChild(boosterCard);
+            boosterCard.appendChild(boosterPicture);
+        }
+
+        // "BACK TO CHOOSE DECK MENU"
+        const backMenu = document.createElement('button');
+        backMenu.classList.add('nav-button');
+        backMenu.textContent = "GO BACK"
+        article.appendChild(backMenu);
+
+        // EVENTLISTENER "BACK TO CHOOSE DECK MENU"
+        backMenu.addEventListener('click', utils.showLoggedMenu);
     }
 };
 

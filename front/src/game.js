@@ -1,4 +1,5 @@
-    const utils = require('./utils');
+const utils = require('./utils');
+const cardGenerator = require('./cardGenerator');
 
 const game = {
 
@@ -31,10 +32,19 @@ const game = {
             const article = document.createElement('article');
             mainArea.appendChild(article);
 
+            // Add decks datas in session (back) !!
+
                         
-            if(jsonResponse[0].userHasDecks > 0) {
-                
-                console.log(jsonResponse[0].userHasDecks)
+            if(jsonResponse[0].userHasDecks.length > 0) {
+
+                const decks = jsonResponse[0].userHasDecks;
+
+                for(const deck of decks) {
+
+                    cardGenerator.deck(deck);
+
+
+                }
 
                 // Appendchild un visuel global par deck
                 // Onclick du deck afficher les cartes
@@ -69,15 +79,6 @@ const game = {
                 form.addEventListener('submit', game.deckGenerator);
             }
         }
-
-
-        // if yes, call show decks method and ask to choose the deck to play + button manage decks
-
-            
-            //
-
-        // if no, show button create deck, on click addEvent to show deckGenerator method
-
 
         // ADDING "BACK TO MAIN MENU"
         const backMenu = document.createElement('button');
@@ -118,6 +119,10 @@ const game = {
         // Fetch API get all decks from user id
 
         // OnClick on a deck, add launch game button
+    },
+
+    launchGame: function() {
+
     }
 
 }

@@ -1,5 +1,7 @@
 [TO DO]
 
+## CONNECTION A LA BDD : psql -U tragic
+
 -- Améliorer verifications formulaire creer un compte (supprimer possibilité des champs vides)
 
 -- app.js (dans le dossier FRONT) execute la methode login dans eventListener.js (situé dans le meme dossier)

@@ -112,4 +112,44 @@ button {
     text-align: center;
     font-size: 1.5em;
     cursor: pointer;
+    margin: 0.7rem auto;
+    display: block;
+}
+
+/* CARDS */
+
+.deckContainer {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.card {
+    height: 300px;
+    width: 200px;
+    background-size: 100%;
+    margin: auto;
+    margin:2rem;
+}
+
+.deck {
+    background-image: url(../img/Deck.png);
+}
+
+.monster {
+    background-image: url(../img/Monster.png);
+}
+
+.booster {
+    background-image: url(../img/Booster.png);
+}
+
+.card-picture {
+    margin-top: 45px;
+    position: relative;
+    width:146px;
+    height: 90px;
+    background-size: 100%;
 }
