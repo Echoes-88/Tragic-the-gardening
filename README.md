@@ -2,6 +2,10 @@
 
 ## CONNECTION A LA BDD : psql -U tragic
 
+## REGLER LES PROBLEMES D'ALLER-RETOUR DE DONNEES. RE ORGANISER LES FICHIERS JS + METTRE EN SESSION LES DONNEES POUR EVITER ALLER RETOURS
+
+## AJOUTER UNE ROUTE CHOOSEDECK QUI RECUPERE L'ID DU DECK CHOISI DEPUIS LE FRONT ET L'AJOUTE A LA SESSION
+
 -- Améliorer verifications formulaire creer un compte (supprimer possibilité des champs vides)
 
 -- app.js (dans le dossier FRONT) execute la methode login dans eventListener.js (situé dans le meme dossier)

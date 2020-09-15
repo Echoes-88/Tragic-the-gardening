@@ -23,18 +23,15 @@ var cardGenerator = {
         deckContainer.appendChild(deckImage);
 
         const seeThisDeck = document.createElement('button');
+        seeThisDeck.classList.add('print-deck');
         const playThisDeck = document.createElement('button');
+        seeThisDeck.classList.add('play-deck');
         seeThisDeck.textContent = 'Manage deck'
         playThisDeck.textContent = 'Play with this deck'
 
         deckContainer.appendChild(seeThisDeck)
         deckContainer.appendChild(playThisDeck);
 
-        // EventListeners for buttons (deck manager / play with deck)
-        seeThisDeck.addEventListener('click', function(event){
-            utils.showDeck(deckDatas);
-        });
-        playThisDeck.addEventListener('click', game.launchGame);
     },
 
     monster: function(caracterstics) {
@@ -44,6 +41,7 @@ var cardGenerator = {
     booster: function(caracterstics) {
 
     },
+
 }
 
 
