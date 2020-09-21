@@ -7,7 +7,7 @@ const capture = require('./middlewares/capture')
 const router = express.Router();
 const genericController = require('./controllers/genericController')
 const userController = require('./controllers/userController');
-const deckController = require('./controllers/deckController');
+// const deckController = require('./controllers/deckController');
 
 
 // USER
@@ -25,6 +25,6 @@ router.delete('/crud/:entity/:id', capture(genericController.deleteOne));
 // ASSOCIATIONS
 router.get('/user-decks/:id', capture(userController.userHasDecks));
 
-// ROUTE POUR CREER UN DECK
+
 
 module.exports = router;

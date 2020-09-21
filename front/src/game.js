@@ -1,9 +1,10 @@
 const utils = require('./utils');
+const play = require('./play');
 const cardGenerator = require('./cardGenerator');
 
 const game = {
 
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'http://localhost:5000',
 
     play: async function(event) {
         event.preventDefault();
@@ -48,13 +49,13 @@ const game = {
 
                     // EventListeners for buttons (deck manager / play with deck)
 
-                    const seeThisDeck = document.querySelector('.print-deck');
+                    const seeThisDeck = document.querySelector('.see-deck');
                     const playThisDeck = document.querySelector('.play-deck');
 
                     seeThisDeck.addEventListener('click', function(event){
                         game.showDeck(deck);
                     });
-                    playThisDeck.addEventListener('click', game.launchGame);
+                    playThisDeck.addEventListener('click', play.launchGame);
 
                 }
 
@@ -179,10 +180,6 @@ const game = {
         console.log(game)
         backMenu.addEventListener('click', game.play);
     },
-
-    launchGame: function() {
-
-    }
 
 }
 

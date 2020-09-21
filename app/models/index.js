@@ -47,7 +47,7 @@ BoosterQuantity = sequelize.define('deck_has_booster', {
 
 Monster.belongsToMany(Deck, {
     as: "monsterHasDeck",
-    through: BoosterQuantity,
+    through: 'deck_has_monster',
     foreignKey: 'monster_id',
     otherKey: 'deck_id'
 });

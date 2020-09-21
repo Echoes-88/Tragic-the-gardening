@@ -40,11 +40,13 @@ init: function () {
 };
 
 document.addEventListener('DOMContentLoaded', app.init);
-},{"./game":3,"./user":4,"./utils":5}],2:[function(require,module,exports){
+},{"./game":3,"./user":5,"./utils":6}],2:[function(require,module,exports){
 const game = require('./game');
 const utils = require('./utils');
 
 var cardGenerator = {
+
+    baseUrl: 'http://localhost:5000',
 
     deck: function(deckDatas) {
 
@@ -66,9 +68,9 @@ var cardGenerator = {
         deckContainer.appendChild(deckImage);
 
         const seeThisDeck = document.createElement('button');
-        seeThisDeck.classList.add('print-deck');
+        seeThisDeck.classList.add('see-deck');
         const playThisDeck = document.createElement('button');
-        seeThisDeck.classList.add('play-deck');
+        playThisDeck.classList.add('play-deck');
         seeThisDeck.textContent = 'Manage deck'
         playThisDeck.textContent = 'Play with this deck'
 
@@ -77,25 +79,81 @@ var cardGenerator = {
 
     },
 
-    monster: function(caracterstics) {
+    createDeck: async function(type) {
 
-    },
+        // GETTING LEVEL OF USER // DEBBUG + TARD POUR GENERER LES CARTES CPTER SELON NIVEAU JOUEUR
+        const userDatas = sessionStorage.getItem('userDatas');
+        const user = JSON.parse(userDatas);
+        const userLevel = user.level;
+        console.log(userLevel);
 
-    booster: function(caracterstics) {
+        const requestConfig = {
+            method: 'GET'
+        };
 
+        const getMonsters = await fetch(`${cardGenerator.baseUrl}/crud/monster`, requestConfig);
+        const monsters = await getMonsters.json();
+
+        const getBoosters = await fetch(`${cardGenerator.baseUrl}/crud/booster`, requestConfig);
+        const boosters = await getBoosters.json();
+
+        // Init monster and booster arrays
+        let monstersArray = [];
+        let boostersArray = [];
+
+        if (type === 'player-deck') {
+
+        // Choosing 5 random monsters and adding in arrays
+        for (var i = 0; i < 5; i++) {
+            let monster = monsters[Math.floor(Math.random()*monsters.length)];
+            monstersArray.push(monster.id)       
+        }
+
+        // Choosing 3 random booster and adding in arrays
+        for (var i = 0; i < 3; i++) {
+            let booster = boosters[Math.floor(Math.random()*boosters.length)];
+            boostersArray.push(booster.id)       
+        }
+
+        // Add cards to the player deck
+
+        const requestConfig = {
+            method: 'POST'
+        };
+
+
+        } else if (type === 'cpter-deck') {
+
+        // DEBUGGER : GENERER DES MONSTRES EN FONCTION DU NIVEAU DU JOUEUR
+
+        for (var i = 0; i < 5; i++) {
+            let monster = monsters[Math.floor(Math.random()*monsters.length)];
+            monstersArray.push(monster.id)       
+        }
+
+        for (var i = 0; i < 3; i++) {
+            let booster = boosters[Math.floor(Math.random()*boosters.length)];
+            boostersArray.push(booster.id)       
+        }
+
+        }
+
+        const cards = {monsters: monstersArray, boosters: boostersArray};
+        return cards;
     },
 
 }
 
 
 module.exports = cardGenerator;
-},{"./game":3,"./utils":5}],3:[function(require,module,exports){
+},{"./game":3,"./utils":6}],3:[function(require,module,exports){
 const utils = require('./utils');
+const play = require('./play');
 const cardGenerator = require('./cardGenerator');
 
 const game = {
 
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'http://localhost:5000',
 
     play: async function(event) {
         event.preventDefault();
@@ -140,13 +198,13 @@ const game = {
 
                     // EventListeners for buttons (deck manager / play with deck)
 
-                    const seeThisDeck = document.querySelector('.print-deck');
+                    const seeThisDeck = document.querySelector('.see-deck');
                     const playThisDeck = document.querySelector('.play-deck');
 
                     seeThisDeck.addEventListener('click', function(event){
                         game.showDeck(deck);
                     });
-                    playThisDeck.addEventListener('click', game.launchGame);
+                    playThisDeck.addEventListener('click', play.launchGame);
 
                 }
 
@@ -272,19 +330,38 @@ const game = {
         backMenu.addEventListener('click', game.play);
     },
 
-    launchGame: function() {
-
-    }
-
 }
 
 module.exports = game;
-},{"./cardGenerator":2,"./utils":5}],4:[function(require,module,exports){
+},{"./cardGenerator":2,"./play":4,"./utils":6}],4:[function(require,module,exports){
+const utils = require('./utils');
+const cardGenerator = require('./cardGenerator');
+
+const play = {
+
+    launchGame: function(deck) {
+
+        // CLEAR DISPLAY
+        utils.clearEverything();
+
+        utils.createBoardGame();
+
+        cardGenerator.createDeck('cpter-deck');
+        // utils.insertPlayerCards();
+
+
+    }
+
+
+}
+
+module.exports = play;
+},{"./cardGenerator":2,"./utils":6}],5:[function(require,module,exports){
 const utils = require('./utils');
 
 const user = {
 
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'http://localhost:5000',
 
 
     handleLoginForm: async function(data) {
@@ -309,6 +386,7 @@ const user = {
 
             // Saving json response in local session
             userDatas = JSON.stringify(jsonResponse);
+            console.log(userDatas);
             sessionStorage.setItem('userDatas', userDatas);
 
             utils.showLoggedMenu();
@@ -419,8 +497,9 @@ const user = {
 };
 
 module.exports = user;
-},{"./utils":5}],5:[function(require,module,exports){
+},{"./utils":6}],6:[function(require,module,exports){
 const utils = {
+
 
     showMainMenu: function() {
         
@@ -488,6 +567,41 @@ const utils = {
         const createAccountForm = document.querySelector('form[id="createAccount"]');
         createAccountForm.classList.remove('is-hidden');
     },
+
+    createBoardGame: function() {
+
+        const main = document.querySelector('main');
+        main.classList.add('board-game');
+
+        const sideArea = document.createElement('div');
+        sideArea.classList.add('sideArea');
+
+        const playArea = document.createElement('div');
+        playArea.classList.add('playArea');
+
+        // COMPUTER CARDS AREA
+        const cpterCards = document.createElement('div');
+        cpterCards.classList.add('cardsContainer');
+        cpterCards.classList.add('cpter');
+
+        // PLAYER CARDS AREA
+        const playerCards = document.createElement('div');
+        playerCards.classList.add('cardsContainer');
+        playerCards.classList.add('player');
+
+        // DROP AREA
+        const dropArea = document.createElement('div');
+        dropArea.classList.add('drop-area');
+
+        // ADD ELEMENTS IN DOM
+
+        main.appendChild(sideArea);
+        main.appendChild(playArea);
+
+        playArea.appendChild(cpterCards);
+        playArea.appendChild(dropArea);
+        playArea.appendChild(playerCards);
+    }
 
 };
 

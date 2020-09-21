@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS "user" (
   "hit_point" INT NULL,
   "victory" INT NULL,
   "defeat" INT NULL,
+  "level" INT NULL,
   "psw" text NOT NULL,
   "role" text DEFAULT 'user',
   "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),

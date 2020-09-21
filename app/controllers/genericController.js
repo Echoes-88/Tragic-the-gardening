@@ -21,7 +21,7 @@ const genericController = {
         if(!TargetModel) {
             res.status(404).json({error: `Model ${entity} not found`});
         } else {
-            const allInstances = await TargetModel.findAll({include: {all:true, nested:true}});
+            const allInstances = await TargetModel.findAll();
 
             res.json(allInstances);
         }
@@ -54,7 +54,9 @@ const genericController = {
 
         // Checking if class does exist
         if (!TargetModel) {
-            res.status(404).json({error: `Model ${entity} not found`});
+
+                res.status(404).json({error: `Model ${entity} not found`});
+
         } else {
 
             // CREATE DECK
@@ -131,9 +133,8 @@ const genericController = {
                 }
 
 
-            } else if(entity === 'monster') {
+            } else if(entity === 'other') {
 
-            } else if (entity === 'booster') {
 
             } else {
 

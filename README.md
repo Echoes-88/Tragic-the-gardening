@@ -1,5 +1,19 @@
 [TO DO]
 
+# FACTORISATION DU CODE
+
+ - FORMS : LOGIN, CREATE ACCOUNT
+
+ - DECKS : 
+
+## A FAIRE
+
+Generer le 1er du player en front a partir du getAll monster/booster puis envoyer les données en back pour l'enregistrer dans la bdd ?? Bonne methode ??
+
+Modifier le tirage aleatoire du deck computer selon le niveau du player
+
+Generer les cartes du cpter de maniere aleatoire en fonction du niveau de l'user
+
 ## CONNECTION A LA BDD : psql -U tragic
 
 ## REGLER LES PROBLEMES D'ALLER-RETOUR DE DONNEES. RE ORGANISER LES FICHIERS JS + METTRE EN SESSION LES DONNEES POUR EVITER ALLER RETOURS
@@ -17,6 +31,23 @@ Ensuite je souhaite écouter la soumission du formulaire pour interroger la BDD 
 
 
 -- AMELIORER LE ADD / REMOVE CLASSLIST POUR CACHER ET AFFICHER LES ELEMENTS
+
+## LANCER LE SCRIPT BUILD
+npm run-script build
+
+
+## GESTION DE LA BDD
+
+**SUPPRIMER UN DECK**
+1-Supprimer les cartes monsters & boosters associées
+`DELETE FROM deck_has_monster WHERE "deck_id"=5;`
+`DELETE FROM deck_has_booster WHERE "deck_id"=5;`
+2-Supprimer le deck en question
+`DELETE FROM deck WHERE id=5;`
+
+
+
+
 
 
 ## GERER LES ERREURS DE KEY ID EN CAS DE RESET DE LA BDD

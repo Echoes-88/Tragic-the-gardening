@@ -1,5 +1,6 @@
 const utils = {
 
+
     showMainMenu: function() {
         
         // SHOW MENU
@@ -66,6 +67,41 @@ const utils = {
         const createAccountForm = document.querySelector('form[id="createAccount"]');
         createAccountForm.classList.remove('is-hidden');
     },
+
+    createBoardGame: function() {
+
+        const main = document.querySelector('main');
+        main.classList.add('board-game');
+
+        const sideArea = document.createElement('div');
+        sideArea.classList.add('sideArea');
+
+        const playArea = document.createElement('div');
+        playArea.classList.add('playArea');
+
+        // COMPUTER CARDS AREA
+        const cpterCards = document.createElement('div');
+        cpterCards.classList.add('cardsContainer');
+        cpterCards.classList.add('cpter');
+
+        // PLAYER CARDS AREA
+        const playerCards = document.createElement('div');
+        playerCards.classList.add('cardsContainer');
+        playerCards.classList.add('player');
+
+        // DROP AREA
+        const dropArea = document.createElement('div');
+        dropArea.classList.add('drop-area');
+
+        // ADD ELEMENTS IN DOM
+
+        main.appendChild(sideArea);
+        main.appendChild(playArea);
+
+        playArea.appendChild(cpterCards);
+        playArea.appendChild(dropArea);
+        playArea.appendChild(playerCards);
+    }
 
 };
 

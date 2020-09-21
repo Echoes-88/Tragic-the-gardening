@@ -2,7 +2,7 @@ const utils = require('./utils');
 
 const user = {
 
-    baseUrl: 'http://localhost:3000',
+    baseUrl: 'http://localhost:5000',
 
 
     handleLoginForm: async function(data) {
@@ -27,6 +27,7 @@ const user = {
 
             // Saving json response in local session
             userDatas = JSON.stringify(jsonResponse);
+            console.log(userDatas);
             sessionStorage.setItem('userDatas', userDatas);
 
             utils.showLoggedMenu();

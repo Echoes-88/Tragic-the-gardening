@@ -18,6 +18,7 @@ class User extends Sequelize.Model {
         hit_point: Sequelize.INTEGER,
         victory: Sequelize.INTEGER,
         defeat: Sequelize.INTEGER,
+        level: Sequelize.INTEGER,
         psw: Sequelize.STRING,
         role: Sequelize.STRING
     }, {
