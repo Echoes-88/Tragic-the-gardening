@@ -69,39 +69,19 @@ const genericController = {
                     user_id: req.body.id
                 });
 
-
-                // Getting all monsters and booster from database
-                const monsters = await models.Monster.findAll({});
-                const boosters = await models.Booster.findAll({});
-
-                // Init monster and booster arrays
-                let monstersArray = [];
-                let boostersArray = [];
-
-
-                // Choosing X random monsters and adding in arrays
-                for (var i = 0; i < 5; i++) {
-                    let monster = monsters[Math.floor(Math.random()*monsters.length)];
-                    monstersArray.push(monster.id)       
-                }
-
-                // Choosing X random booster and adding in arrays
-                for (var i = 0; i < 3; i++) {
-                    let booster = boosters[Math.floor(Math.random()*boosters.length)];
-                    boostersArray.push(booster.id)       
-                }
+                const monsters =  JSON.parse("[" + req.body.monsters + "]");
 
                 // GET OCCURENCIES OF EACH MONSTER VALUES AND ADDING IN DATABASE
-                monstersArray.sort();
+                monsters.sort();
 
                 var current = null;
                 var cnt = 0;
-                for (var i = 0; i < monstersArray.length; i++) {
-                    if (monstersArray[i] != current) {
+                for (var i = 0; i < monsters.length; i++) {
+                    if (monsters[i] != current) {
                         if (cnt > 0) {
                             await deck.addDeckHasMonster(current, { through: {quantity: cnt}});
                         }
-                        current = monstersArray[i];
+                        current = monsters[i];
                         cnt = 1;
                     } else {
                         cnt++;
@@ -113,16 +93,19 @@ const genericController = {
             
 
                 // GET OCCURENCIES OF EACH BOOSTER VALUES AND ADDING IN DATABASE
-                boostersArray.sort();
+
+                const boosters =  JSON.parse("[" + req.body.boosters + "]");
+
+                boosters.sort();
 
                 var current2 = null;
                 var cnt2 = 0;
-                for (var i = 0; i < boostersArray.length; i++) {
-                    if (boostersArray[i] != current2) {
+                for (var i = 0; i < boosters.length; i++) {
+                    if (boosters[i] != current2) {
                         if (cnt2 > 0) {
                             await deck.addDeckHasBooster(current2, { through: {quantity: cnt2}});
                         }
-                        current2 = boostersArray[i];
+                        current2 = boosters[i];
                         cnt2 = 1;
                     } else {
                         cnt2++;
@@ -139,8 +122,6 @@ const genericController = {
             } else {
 
             }
-
-            // res.json(instance);
         }
     },
 

@@ -1,185 +1,268 @@
 body {
- height: 100vh;
-}
+    height: 100vh;
+   }
+   
+   
+   @font-face {
+       font-family: "AdobeDia";
+       src: url('../font/AdobeDia.ttf');
+   }
+   
+   p {
+       color: greenyellow;
+       font-size: 2em;
+       font-family: "AdobeDia";
+   }
+   
+   
+   .container {
+       background-image: url(../img/background.jpg);
+       width: 100%;
+       height: 100%;
+       background-position: center;
+       background-repeat: no-repeat;
+       background-size: cover;
+       display: flex;
+       justify-content: center;
+       align-items: center;
+   }
+   
+   .menu {
+   
+   }
+   
+   .menu a {
+       color: greenyellow;
+       padding: 1rem 3rem;
+       display: block;
+   }
+   
+   .menu a:hover {
+       color: #101010;
+   }
+   
+   .menu-list {
+   background-color: #101010;
+   color:greenyellow;
+   list-style: none;
+   margin: 1rem;
+   font-family: 'AdobeDia';
+   text-align: center;
+   font-size: 1.6em;
+   cursor: pointer;
+   }
+   
+   .menu li:hover {
+       background-color: greenyellow;
+       color: #101010;
+   }
+   
+   li:hover a {
+       color: inherit;
+   }
+   
+   
+   .is-hidden {
+       display: none;
+   }
+   
+   /* NAV */
+   .nav-button {
+       background-color: #101010;
+       color:greenyellow;
+       font-family: 'AdobeDia';
+       text-align: center;
+       font-size: 1.6em;
+       cursor: pointer;
+       margin-top:2rem;
+   }
+   
+   /* FORM */
+   form {
+       flex-direction: column;
+   }
+   
+   label {
+       display: block;
+       color: greenyellow;
+       font-size: 2em;
+       font-family: "AdobeDia";
+   
+   }
+   
+   input
+   {   
+       color:green;
+       background-color: black;
+       height: 28px;
+       padding-left: 10px;
+       text-decoration: none;
+       border: 1px solid green;
+   }
+   
+   /* FORM */
+   article {
+       text-align: center;
+   }
+   
+   button {
+       background-color: #101010;
+       color:greenyellow;
+       font-family: 'AdobeDia';
+       text-align: center;
+       font-size: 1.5em;
+       cursor: pointer;
+       margin: 0.7rem auto;
+       display: block;
+   }
+   
+   /* CARDS */
+   
+   .deckContainer {
+       display: flex;
+       flex-wrap: wrap;
+       flex-direction: row;
+       align-items: center;
+       justify-content: center;
+   }
+   
+   
+   .card-deck {
+       height: 300px;
+       width: 200px;
+       background-size: 100%;
+       margin: auto;
+       margin:2rem;
+       background-image: url(../img/Deck.png);
+   }
+   
+   
+   .card-monster {
+       z-index: 1;
+       max-height: -webkit-fill-available;
+   }
+   
+   .card-booster {
+       z-index: 1;
+       max-height: -webkit-fill-available;
+   }
 
+   /* NB : faire une fonction js qui refresh max-height: -webkit-fill-available si l'utilisateur modifie la taille de la fenettre*/
+   .cardElementsContainer {
+       z-index: 2;
+       position: absolute;
+       max-height: -webkit-fill-available;
+   }
+   
+   .card-picture {
+       margin-top: 26%;
+       width: 80%;
+       background-size: 100%;
+       margin-left: 9%;
+   }
 
-@font-face {
-    font-family: "AdobeDia";
-    src: url('../font/AdobeDia.ttf');
-}
+   .cardElementsContainer p {
+       color: black;
+       font-family: monospace;
+       font-size: 1em;
+   }
 
-p {
-    color: greenyellow;
-    font-size: 2em;
-    font-family: "AdobeDia";
-}
+   .card-name {
+       margin-top:9%;
+       margin-left:5%;
+    }
 
+    .card-description {
+        margin-top:22%;
+        margin-left:10%;
+     }
 
-.container {
-    background-image: url(../img/background.jpg);
+     .card-attack {
+        margin-top:3%;
+        margin-left:2%;
+     }
+
+     .card-defense {
+        margin-top:3%;
+        margin-left:2%;
+     }
+
+     .card-hitpoint {
+        margin-top:3%;
+        margin-left:2%;
+     }
+
+     .card-value {
+        margin-top:3%;
+        margin-left:2%;
+     }
+
+   
+   /* BOARD */
+   
+   .board-game {
+   }
+   
+   .sideArea {
+       width: 20%;
+       height: 100%;
+       background-color: hotpink;
+   }
+   
+   .playArea {
+       width: 80%;
+       height: 100%;
+       display: flex;
+       flex-wrap: wrap ;
+   }
+   
+   .cpterCards {
+       width: 100%;
+       height: 33%;
+       display: flex;
+       flex-wrap: wrap ;
+   }
+   
+   .playerCards {
+       width: 100%;
+       height: 33%;
+       background-color: rgb(46, 46, 46);
+       display: -webkit-inline-box;
+       align-items: flex-end;
+       overflow-x: scroll;
+       overflow-y: hidden;
+       overflow-x: hidden;
+       white-space: nowrap;
+   }
+   
+   .drop-area {
     width: 100%;
-    height: 100%;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: cover;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+    height: 33%;
+    display: -webkit-inline-box;
+    align-items: flex-end;
+    overflow-x: scroll;
+    overflow-y: hidden;
+    overflow-x: hidden;
+    white-space: nowrap;
+   }
+   
+   .cardComponent {
+       display: grid;
+       position: relative;
+       background: none;
+   }
+   
+   .imgContainer {
+       width: 80%;
+   }
 
-.menu {
-
-}
-
-.menu a {
-    color: greenyellow;
-    padding: 1rem 3rem;
-    display: block;
-}
-
-.menu a:hover {
-    color: #101010;
-}
-
-.menu-list {
-background-color: #101010;
-color:greenyellow;
-list-style: none;
-margin: 1rem;
-font-family: 'AdobeDia';
-text-align: center;
-font-size: 1.6em;
-cursor: pointer;
-}
-
-.menu li:hover {
-    background-color: greenyellow;
-    color: #101010;
-}
-
-li:hover a {
-    color: inherit;
-}
-
-
-.is-hidden {
-    display: none;
-}
-
-/* NAV */
-.nav-button {
-    background-color: #101010;
-    color:greenyellow;
-    font-family: 'AdobeDia';
-    text-align: center;
-    font-size: 1.6em;
-    cursor: pointer;
-    margin-top:2rem;
-}
-
-/* FORM */
-form {
-    flex-direction: column;
-}
-
-label {
-    display: block;
-    color: greenyellow;
-    font-size: 2em;
-    font-family: "AdobeDia";
-
-}
-
-input
-{   
-    color:green;
-    background-color: black;
-    height: 28px;
-    padding-left: 10px;
-    text-decoration: none;
-    border: 1px solid green;
-}
-
-/* FORM */
-article {
-    text-align: center;
-}
-
-button {
-    background-color: #101010;
-    color:greenyellow;
-    font-family: 'AdobeDia';
-    text-align: center;
-    font-size: 1.5em;
-    cursor: pointer;
-    margin: 0.7rem auto;
-    display: block;
-}
-
-/* CARDS */
-
-.deckContainer {
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-}
-
-.card {
-    height: 300px;
-    width: 200px;
+   /* SAVE WEBKIT FIX IMG
+   
+   .card-monster {
+    width: 13rem; 
+    min-height: -webkit-fill-available;
     background-size: 100%;
-    margin: auto;
-    margin:2rem;
-}
-
-.deck {
-    background-image: url(../img/Deck.png);
-}
-
-.monster {
-    background-image: url(../img/Monster.png);
-}
-
-.booster {
-    background-image: url(../img/Booster.png);
-}
-
-.card-picture {
-    margin-top: 45px;
-    position: relative;
-    width:146px;
-    height: 90px;
-    background-size: 100%;
-}
-
-/* BOARD */
-
-.board-game {
-}
-
-.sideArea {
-    width: 20%;
-    height: 100%;
-    background-color: hotpink;
-}
-
-.playArea {
-    width: 80%;
-    height: 100%;
-    display: flex;
-    flex-wrap: wrap ;
-}
-
-.cardsContainer {
-    width: 100%;
-    height: 21%;
-    background-color: rgb(46, 46, 46);
-}
-
-.drop-area {
-    width: 100%;
-    height: 58%;
-    background-color: rgb(105, 128, 0);
-}
+    background: url(../img/Monster.png) no-repeat;
+    background-size: contain;
+    display: inline-block;
+} */

@@ -52,10 +52,10 @@ const game = {
                     const seeThisDeck = document.querySelector('.see-deck');
                     const playThisDeck = document.querySelector('.play-deck');
 
-                    seeThisDeck.addEventListener('click', function(event){
+                    seeThisDeck.addEventListener('click', function(){
                         game.showDeck(deck);
                     });
-                    playThisDeck.addEventListener('click', play.launchGame);
+                    playThisDeck.addEventListener('click', function(){ play.launchGame(deck)});
 
                 }
 
@@ -89,7 +89,7 @@ const game = {
                 createDeckButton.textContent = 'Create a deck';
                 form.appendChild(createDeckButton);
 
-                form.addEventListener('submit', game.deckGenerator);
+                form.addEventListener('submit', cardGenerator.firstUserDeck);
             }
         }
 
@@ -105,27 +105,27 @@ const game = {
     },
 
 
-    deckGenerator: async function(data) {
+    // deckGenerator: async function(data) {
 
-        event.preventDefault();
+    //     event.preventDefault();
 
-        const datas = new FormData(data.target);
+    //     const datas = new FormData(data.target);
 
-        const requestConfig = {
-            method: 'POST',
-            body: datas
-        };
+    //     const requestConfig = {
+    //         method: 'POST',
+    //         body: datas
+    //     };
 
-        await fetch(`${game.baseUrl}/crud/deck`, requestConfig);
-        // const jsonResponse = await response.json();
+    //     await fetch(`${game.baseUrl}/crud/deck`, requestConfig);
+    //     // const jsonResponse = await response.json();
         
-        // console.log(jsonResponse);
+    //     // console.log(jsonResponse);
 
-        // for (var value of datas.values()) {
-        //     console.log(value); 
-        //  }
+    //     // for (var value of datas.values()) {
+    //     //     console.log(value); 
+    //     //  }
 
-    },
+    // },
     
     showDeck: function(deckDatas) {
 
@@ -137,8 +137,8 @@ const game = {
         article.innerHTML = '';
         article.classList.remove('is-hidden');
 
-        const monsters = deckDatas.deckHasMonster;
-        const boosters = deckDatas.deckHasBooster;
+        const monsters = deckDatas.monsters;
+        const boosters = deckDatas.boosters;
 
         for(const monster of monsters) {
 

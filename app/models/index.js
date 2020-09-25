@@ -29,7 +29,7 @@ MonsterQuantity = sequelize.define('deck_has_monster', {
 
 // "Un Deck possède plusieurs monstres"
 Deck.belongsToMany(Monster, {
-    as: "deckHasMonster",
+    as: "monsters",
     through: MonsterQuantity,
     foreignKey: 'deck_id',
     otherKey: 'monster_id'
@@ -45,27 +45,27 @@ BoosterQuantity = sequelize.define('deck_has_booster', {
     tableName: 'deck_has_booster',
   });
 
-Monster.belongsToMany(Deck, {
-    as: "monsterHasDeck",
-    through: 'deck_has_monster',
-    foreignKey: 'monster_id',
-    otherKey: 'deck_id'
-});
+// Monster.belongsToMany(Deck, {
+//     as: "monsterHasDeck",
+//     through: 'deck_has_monster',
+//     foreignKey: 'monster_id',
+//     otherKey: 'deck_id'
+// });
 
 
 // "Un Deck possède plusieurs booster"
 Deck.belongsToMany(Booster, {
-    as: "deckHasBooster",
+    as: "boosters",
     through: 'deck_has_booster',
     foreignKey: 'deck_id',
     otherKey: 'booster_id',
 });
 // // ... et la réciproque !
-Booster.belongsToMany(Deck, {
-    as: "boosterHasDeck",
-    through: 'deck_has_booster',
-    foreignKey: 'booster_id',
-    otherKey: 'deck_id'
-});
+// Booster.belongsToMany(Deck, {
+//     as: "boosterHasDeck",
+//     through: 'deck_has_booster',
+//     foreignKey: 'booster_id',
+//     otherKey: 'deck_id'
+// });
 
 module.exports = { Booster, Monster, Deck, User };

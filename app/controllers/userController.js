@@ -112,7 +112,7 @@ const userController = {
         const decks = await models.User.findAll({
             include: [{
                 association: "userHasDecks",
-                include: ["deckHasMonster", "deckHasBooster"]
+                include: ["monsters", "boosters"]
             }],
             where: {
                 id: req.params.id

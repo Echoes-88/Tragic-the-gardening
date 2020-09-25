@@ -29,12 +29,14 @@ eventListener: function() {
     // CREATE ACCOUNT SUBMIT
     const createAccountForm = document.querySelector('form[id="createAccount"]');
     createAccountForm.addEventListener('submit', user.handleCreateAccountForm);
+    
 },
 
 init: function () {
     utils.clearEverything();
     utils.showMainMenu();
     app.eventListener();
+    utils.reloadCss();
 },
 };
 

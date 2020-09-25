@@ -81,17 +81,25 @@ const utils = {
 
         // COMPUTER CARDS AREA
         const cpterCards = document.createElement('div');
-        cpterCards.classList.add('cardsContainer');
-        cpterCards.classList.add('cpter');
+        cpterCards.classList.add('cpterCards');
+        cpterCards.setAttribute('user', 'cpter')
 
         // PLAYER CARDS AREA
         const playerCards = document.createElement('div');
-        playerCards.classList.add('cardsContainer');
-        playerCards.classList.add('player');
+        playerCards.classList.add('playerCards');
+        playerCards.setAttribute('user', 'player')
+
+        // ALLOW HORIZONTAL SCROLL WITH WHEEL
+        window.addEventListener('wheel', function(e) {
+
+        if (e.deltaY > 0) playerCards.scrollLeft += 40;
+        else playerCards.scrollLeft -= 40;
+        });
 
         // DROP AREA
         const dropArea = document.createElement('div');
         dropArea.classList.add('drop-area');
+        dropArea.setAttribute('draggable', true);
 
         // ADD ELEMENTS IN DOM
 
@@ -101,6 +109,21 @@ const utils = {
         playArea.appendChild(cpterCards);
         playArea.appendChild(dropArea);
         playArea.appendChild(playerCards);
+    },
+
+    // Reload du css au changement de la taille de la fenetre pour eviter bug d'affichage sur les cartes joueur
+    reloadCss: function() {
+
+    var links = document.getElementsByTagName("link");
+
+    window.onresize = function(){
+
+        for (var cl in links) {
+            var link = links[cl];
+            if (link.rel === "stylesheet")
+                link.href += "";
+        }
+     }
     }
 
 };
