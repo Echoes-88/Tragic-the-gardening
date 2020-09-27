@@ -1,4 +1,13 @@
+const play = require('./play');
+
 const dragAndDrop = {
+
+
+    state: {
+        playerCardsOnBoard: 0,
+        cpterCardsOnBoard: 0,
+        gameInProgress: true,
+        },
 
 
     init: function() {
@@ -121,21 +130,54 @@ const dragAndDrop = {
 
     for (const card of cards) {
         new Drag(card);
-
+;
         card.addEventListener('dragend', function () {
 
         var x = event.clientX, y = event.clientY,
         elementMouseIsOver = document.elementFromPoint(x, y);
 
-        console.log(elementMouseIsOver.className)
 
         const dropArea = document.querySelector(`.${elementMouseIsOver.className}`);
-        dropArea.appendChild(card);
+        console.log(dropArea);
+        
+        if(dropArea != 'drop-area') {
+            alert('pas ici malheureux !')
+        } else {
+            dropArea.appendChild(card);
+            dragAndDrop.listenDrop();
+        }
+
+        
+
+
     });
 
     }
- 
 
+    },
+
+    listenDrop: function() {
+
+        let nbrOfChildren = document.querySelector('.drop-area').childElementCount;
+
+        const endOfRoundButton = document.querySelector('.endOfRound');
+
+        const infosField = document.querySelector('.infosField');
+        infosField.innerHTML = '';
+
+        if(dragAndDrop.state.playerCardsOnBoard == nbrOfChildren - 1) {
+            infosField.textContent = 'Cliquez sur "end of round" pour valider votre carte';
+            endOfRoundButton.classList.remove('inactive');
+            play.state.roundInProgress = false;
+
+            // MISE A JOUR DES PLAYERSCARDSONBOARD + DONNER ACCES A FINIR SON TOUR
+        } else if(dragAndDrop.state.playerCardsOnBoard < nbrOfChildren)  {
+            infosField.textContent = 'Vous ne pouvez jouer qu\'une carte par tour, veuillez en retirer';
+        } else if(dragAndDrop.state.playerCardsOnBoard >= nbrOfChildren)  {
+            infosField.textContent = 'Veuillez insérer une carte sur le plateau';
+        } else {
+            console.log('error')
+        }
     }
 };
 

@@ -130,7 +130,7 @@ var cardGenerator = {
     },
 
     monsters: function(deck, user) {
-        console.log(user)
+
         for(const monster of deck) {
 
             const cardComponent = document.createElement('div');

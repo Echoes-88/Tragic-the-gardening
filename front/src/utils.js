@@ -1,5 +1,5 @@
-const utils = {
 
+const utils = {
 
     showMainMenu: function() {
         
@@ -73,8 +73,19 @@ const utils = {
         const main = document.querySelector('main');
         main.classList.add('board-game');
 
+        // SIDE AREA : SHOW BIG CARD, END OF ROUND...
         const sideArea = document.createElement('div');
         sideArea.classList.add('sideArea');
+
+          // Informations field
+          const infosField = document.createElement('div');
+          infosField.classList.add('infosField');
+          
+          // End of round
+          const endOfRound = document.createElement('button');
+          endOfRound.classList.add('endOfRound')
+          endOfRound.classList.add('inactive')
+          endOfRound.textContent = 'END OF ROUND'
 
         const playArea = document.createElement('div');
         playArea.classList.add('playArea');
@@ -105,6 +116,9 @@ const utils = {
 
         main.appendChild(sideArea);
         main.appendChild(playArea);
+
+        sideArea.appendChild(infosField);
+        sideArea.appendChild(endOfRound);
 
         playArea.appendChild(cpterCards);
         playArea.appendChild(dropArea);
