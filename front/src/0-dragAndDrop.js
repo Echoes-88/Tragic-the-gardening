@@ -126,7 +126,7 @@ const dragAndDrop = {
     };
 
 
-    const cards = document.getElementsByClassName('cardComponent');
+    const cards = document.getElementsByClassName('playerCard');
 
     for (const card of cards) {
         new Drag(card);
@@ -139,7 +139,7 @@ const dragAndDrop = {
 
         const dropArea = document.querySelector(`.${elementMouseIsOver.className}`);
         console.log(dropArea);
-        
+
         if(dropArea != 'drop-area') {
             alert('pas ici malheureux !')
         } else {

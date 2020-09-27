@@ -181,8 +181,18 @@ var cardGenerator = {
 
             const cardComponent = document.createElement('div');
             cardComponent.classList.add('cardComponent');
-            cardComponent.setAttribute("draggable", true);
+            cardComponent.classList.add('monster');
 
+            if(user != 'cpter') {
+            cardComponent.setAttribute("position", 'in-hand' )
+            cardComponent.classList.add('playerCard');
+            cardComponent.setAttribute("draggable", true);
+            }
+
+            if(user === 'cpter') {
+                cardComponent.classList.add('cpterCard');
+            }
+            
             // CARD
             const monsterCard = document.createElement('img');
             monsterCard.classList.add('card-monster');
@@ -238,7 +248,17 @@ var cardGenerator = {
 
             const cardComponent = document.createElement('div');
             cardComponent.classList.add('cardComponent');
-            cardComponent.setAttribute("draggable", true);
+            cardComponent.classList.add('booster');
+
+            if(user != 'cpter') {
+                cardComponent.setAttribute("position", 'in-hand' )
+                cardComponent.classList.add('playerCard');
+                cardComponent.setAttribute("draggable", true);
+            }
+
+            if(user === 'cpter') {
+                cardComponent.classList.add('cpterCard');
+            }
 
             // CARD
             const boosterCard = document.createElement('img');
@@ -436,7 +456,7 @@ const dragAndDrop = {
     };
 
 
-    const cards = document.getElementsByClassName('cardComponent');
+    const cards = document.getElementsByClassName('playerCard');
 
     for (const card of cards) {
         new Drag(card);
@@ -449,7 +469,7 @@ const dragAndDrop = {
 
         const dropArea = document.querySelector(`.${elementMouseIsOver.className}`);
         console.log(dropArea);
-        
+
         if(dropArea != 'drop-area') {
             alert('pas ici malheureux !')
         } else {
@@ -726,7 +746,8 @@ const play = {
             // Quand une carte est posée Si le nombre de carte sur le plateau est inférieur à celui avant le début du tour 
             // envoyer un message
         if(play.state.playerRound) {
-            play.listenDrop();
+            play.dragAndDrop();
+            // play.listenDrop();
         } else {
             play.cpterRound();
         }
@@ -931,13 +952,21 @@ const play = {
     
     
             const dropArea = document.querySelector(`.${elementMouseIsOver.className}`);
-            console.log(dropArea);
-        
-            if((dropArea.className != 'drop-area') && (dropArea.className != 'playerCards')) {
-                // alert('pas ici malheureux !')
+            
+            // Handle where user can drop cards
+            if((dropArea.className === 'sideArea') || (dropArea.className === 'cpterCards') || (dropArea.className === 'playerCard')) {
+                alert('pas ici malheureux !')
             } else {
-                dropArea.appendChild(card);
-                play.listenDrop();
+                if((dropArea.className === 'drop-area') || (dropArea.className === 'playerCards')) {
+                    dropArea.appendChild(card);
+                    play.listenDrop();
+                } else if(dropArea.closest('.cpterCard')) {
+                    // Ajouter une condition, si carte booster on ne fait rien (ou message alerte pas possible)
+                    console.log('le combat peut commencer !')
+                    console.log(elementMouseIsOver.closest('.cpterCard'))
+                    // play.fight();
+                }
+
             }
     
         });
