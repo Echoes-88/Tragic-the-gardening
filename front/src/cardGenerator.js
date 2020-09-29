@@ -266,18 +266,20 @@ var cardGenerator = {
 
         const cards = document.getElementsByClassName('cardComponent');
 
+        let bigCard = document.querySelector('.bigCardContainer');
+
+
         for(const card of cards) {
             card.addEventListener('click', function(e) {
+                bigCard.innerHTML = '';
+                const container = document.querySelector('.sideArea')
 
-                const bigCardContainer = document.querySelector('.sideArea');
-                bigCardContainer.innerHTML = '';
 
                 const card = e.target.closest('.cardComponent');
 
-                const bigCard = card.cloneNode(true);
+                bigCard = card.cloneNode(true);
 
-
-                bigCardContainer.appendChild(bigCard);
+                container.appendChild(bigCard);
 
             })
         }

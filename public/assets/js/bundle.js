@@ -312,18 +312,20 @@ var cardGenerator = {
 
         const cards = document.getElementsByClassName('cardComponent');
 
+        let bigCard = document.querySelector('.bigCardContainer');
+
+
         for(const card of cards) {
             card.addEventListener('click', function(e) {
+                bigCard.innerHTML = '';
+                const container = document.querySelector('.sideArea')
 
-                const bigCardContainer = document.querySelector('.sideArea');
-                bigCardContainer.innerHTML = '';
 
                 const card = e.target.closest('.cardComponent');
 
-                const bigCard = card.cloneNode(true);
+                bigCard = card.cloneNode(true);
 
-
-                bigCardContainer.appendChild(bigCard);
+                container.appendChild(bigCard);
 
             })
         }
@@ -583,10 +585,9 @@ const play = {
 
     game: function() {
 
-        // console.log(play.state.playerDeck.monsters);
-        // console.log(play.state.playerDeck.boosters);
-        // console.log(play.state.cpterDeck.monsters)
-        // console.log(play.state.cpterDeck.boosters)
+        console.log(play.state.playerDeck.monsters);
+        console.log(play.state.cpterDeck.monsters)
+
 
         // Le joueur doit déposer une premiere carte sur le plateau puis valide son tour
             // Quand une carte est posée Si le nombre de carte sur le plateau est inférieur à celui avant le début du tour 
@@ -627,25 +628,28 @@ const play = {
 
             // Getting 1 random card in cpter deck
             const cpterCardInHand = play.state.cpterCardInHand.monsters;
-            let monster = [cpterCardInHand[Math.floor(Math.random()*cpterCardInHand.length)]];
 
-            // Generating card on board
-            cardGenerator.monsters(monster, 'cpter')
-            console.log(monster);
+            if(cpterCardInHand.length > 0) {
 
-            
-            // Find index of selected card
-            let indexMonster = null;
+                let monster = [cpterCardInHand[Math.floor(Math.random()*cpterCardInHand.length)]];
 
-            for(var i = 0; i < cpterCardInHand.length; i++) {
-                if(cpterCardInHand[i].id === monster[0].id) {
-                    indexMonster = i;
+                // Generating card on board
+                cardGenerator.monsters(monster, 'cpter')
+    
+                // Find index of selected card
+                let indexMonster = null;
+    
+                for(var i = 0; i < cpterCardInHand.length; i++) {
+                    if(cpterCardInHand[i].id === monster[0].id) {
+                        indexMonster = i;
+                    }
                 }
+                // remove from state cardInHand
+                cpterCardInHand.splice(indexMonster, 1);
+    
             }
-            console.log(cpterCardInHand)
-            // Add selected card in state cpterCardInHand and remove from main deck
-            cpterCardInHand.splice(indexMonster, 1);
-            console.log(cpterCardInHand)
+            
+
 
         // IF COMPUTER PLAY A CARD
 
@@ -662,16 +666,9 @@ const play = {
 
     fight: function(attacker, defenser) {
 
-        // console.log(attacker.getAttribute('key'))
-        // console.log(defenser.getAttribute('key'))
-
-
-        const container = document.querySelector('.container');
+        const playArea = document.querySelector('.playArea');
         const fightArea = document.createElement('div');
         fightArea.classList.add('fightArea');
-
-        // Fight container
-        container.appendChild(fightArea);
 
         // cogwheel 
         const cogWheel = document.createElement('div');
@@ -680,21 +677,9 @@ const play = {
         cogWheel.textContent = '⚙'
 
         // Components in DOM
-        fightArea.appendChild(attacker);
-        fightArea.appendChild(cogWheel);
-        fightArea.appendChild(defenser);
+        playArea.appendChild(fightArea);
+        playArea.appendChild(cogWheel);
 
-        // Animation
-
-        attacker.classList.add('blink_me');
-        defenser.classList.add('blink_me');
-        setTimeout(function(){ 
-            attacker.classList.remove('blink_me');
-            defenser.classList.remove('blink_me');
-
-            attacker.classList.add('shake');
-            defenser.classList.add('shake');
-        }, 2000);
 
         // Algorithm
 
@@ -712,23 +697,72 @@ const play = {
             const defenserCards = play.state[defenserName];
             const defenserCard = defenserCards.monsters.find(element => element.key == defenserKey);
 
-            console.log(attackerCard)
-            console.log(defenserCard)
+            const coefficient = attackerCard.attack - defenserCard.defense;
+
+            let damageToDefenser = null;
+            if(coefficient <= 0) {
+                damageToDefenser = Math.floor(Math.random()*2)+1;
+            } else {
+                damageToDefenser = Math.floor(Math.random()*3)+coefficient;
+            }
+
+            let damageToAttacker = null;
+            if(damageToDefenser == 1) {
+                damageToAttacker = 0;
+            } else {
+                damageToAttacker = damageToDefenser - 1;
+            }
+
+            attackerCard.hit_point = attackerCard.hit_point - damageToAttacker;
+            defenserCard.hit_point = defenserCard.hit_point - damageToDefenser;
 
 
-        // const attackerName = attacker.getAttribute('player');
+        // Animation
 
-        // const defenserName = defenser.getAttribute('player');
+        attacker.classList.add('blink_me');
+        defenser.classList.add('blink_me');
+        setTimeout(function(){ 
+            attacker.classList.remove('blink_me');
+            defenser.classList.remove('blink_me');
 
+            attacker.classList.add('shake');
+            defenser.classList.add('shake');
+            fightArea.remove();
+            cogWheel.remove();
 
-        // console.log(play.state[attackerName])
-        // console.log(play.state[defenserName])
-        
-        // formule math : value = attack currentPlayer - defense otherPlayer
-            // si value <= 0 : hit-point = random number between 0 & 2
-            // si value > 0 : hit-point = random number between value & value +2.
+            attacker.querySelector('.card-hitpoint').textContent = attackerCard.hit_point;
+            defenser.querySelector('.card-hitpoint').textContent = defenserCard.hit_point;
+
+            setTimeout(function(){ 
+
+            // IF HIT-POINTS ARE NEGATIVES, DELETE CARD FROM BOARD
+            if(attackerCard.hit_point <= 0) {
+                // delete card on board
+                attacker.remove();
+                // delete card in state
+                attackerCards.monsters.splice(attackerCard.key, 1);
+            }
+            
+            if(defenserCard.hit_point <= 0) {
+                // delete card on board
+                defenser.remove();
+                // delete card in state
+                defenserCards.monsters.splice(defenserCard.key, 1);
+            }
+
+            // FAIRE UN TOGGLE SUR PLAYERROUND : AMELIORER !!!!
+            if(play.state.playerRound = true) { play.state.playerRound = false} else {play.state.playerRound = true};
+            attacker.classList.remove('shake');
+            defenser.classList.remove('shake');
+            play.game();
+            }, 1000);
+        }, 2000);
+
 
         // => return value puis dans game modifier la valeur hit point de la carte qui défend.
+
+
+
     },
 
     // ============= //
@@ -874,7 +908,6 @@ const play = {
                     play.listenDrop();
                 } else if(elementMouseIsOver.parentNode.dataset.player === 'cpterDeck') {
                     // Ajouter une condition, si carte booster on ne fait rien (ou message alerte pas possible)
-                    console.log('le combat peut commencer !')
                     const cpterCard = elementMouseIsOver.closest('.cardComponent');
 
                     if(card.classList.contains("booster")) {
@@ -1152,6 +1185,11 @@ const utils = {
           endOfRound.classList.add('inactive')
           endOfRound.textContent = 'END OF ROUND'
 
+          // Big card container
+          const bigCardContainer = document.createElement('div');
+          bigCardContainer.classList.add('bigCardContainer')
+
+
         const playArea = document.createElement('div');
         playArea.classList.add('playArea');
 
@@ -1184,6 +1222,7 @@ const utils = {
 
         sideArea.appendChild(infosField);
         sideArea.appendChild(endOfRound);
+        sideArea.appendChild(bigCardContainer);
 
         playArea.appendChild(cpterCards);
         playArea.appendChild(dropArea);

@@ -277,7 +277,7 @@ body {
         }
 
         .drop-area p {
-            font-size: 0.3vw;
+            font-size: 0.9vw;
         }
         
         .cardComponent {
@@ -319,6 +319,9 @@ body {
         font-size: 10em;
         text-shadow: 6em 6em 6em #000000;
         animation: rotation 4s infinite linear;
+        position: absolute;
+        left: 50%;
+        top: 25%;
     }
 
     /* .shadow {

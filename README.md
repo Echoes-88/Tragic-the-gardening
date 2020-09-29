@@ -1,5 +1,18 @@
 [TO DO]
 
+# V1.0
+
+ - Ajouter un bouton rules pendant le jeu
+ - Au 2eme tour on peut poser une carte + jouer
+ - Ajouter le système des boosters : on pose la carte sur un monstre pour booster les competences
+
+# V2.0
+
+ - Ajouter un système de points d'actions.
+- => Chaque joueur de niveau 1 à 7 points d'actions
+  => Poser une carte coute 3 points, jouer une carte 4
+  => Au niveau 3 le joueur gagne une carte non jouable qui ajoute 1 point d'action. au niveau 7 il gagne un autre point d'actions
+
 # FACTORISATION DU CODE
 
  - FORMS : LOGIN, CREATE ACCOUNT

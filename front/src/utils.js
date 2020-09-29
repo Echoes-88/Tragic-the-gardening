@@ -87,6 +87,11 @@ const utils = {
           endOfRound.classList.add('inactive')
           endOfRound.textContent = 'END OF ROUND'
 
+          // Big card container
+          const bigCardContainer = document.createElement('div');
+          bigCardContainer.classList.add('bigCardContainer')
+
+
         const playArea = document.createElement('div');
         playArea.classList.add('playArea');
 
@@ -119,6 +124,7 @@ const utils = {
 
         sideArea.appendChild(infosField);
         sideArea.appendChild(endOfRound);
+        sideArea.appendChild(bigCardContainer);
 
         playArea.appendChild(cpterCards);
         playArea.appendChild(dropArea);
