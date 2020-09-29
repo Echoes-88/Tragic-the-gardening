@@ -1,6 +1,6 @@
 const utils = require('./utils');
 const cardGenerator = require('./cardGenerator');
-const dragAndDrop = require('./dragAndDrop');
+// const dragAndDrop = require('./dragAndDrop');
 
 const play = {
 
@@ -10,6 +10,8 @@ const play = {
         playerRound: true,
         playerDeck: null,
         cpterDeck: null,
+        playerDeckInHand: null,
+        cpterCardInHand: null,
         },
   
 
@@ -22,9 +24,32 @@ const play = {
 
         cpterDeck = await cardGenerator.cpterDeck();
 
+        // Add a key to each card for identification
+        let inc = 0;
+        for(const card of cpterDeck.monsters) {
+            card.key = inc++;
+        }
+
+        for(const card of cpterDeck.boosters) {
+            card.key = inc++;
+        }
+
+        inc = 0;
+        for(const card of playerDeck.monsters) {
+            card.key = inc++;
+        }
+
+        for(const card of playerDeck.boosters) {
+            card.key = inc++;
+        }
+
+        // State to handle real card stats
         play.state.playerDeck = playerDeck;
         play.state.cpterDeck = cpterDeck;
-         
+
+        // Deep copy of cpter cards to handle visual cards
+        play.state.cpterCardInHand = JSON.parse(JSON.stringify(cpterDeck));
+        
         cardGenerator.monsters(playerDeck.monsters, 'player')
         cardGenerator.boosters(playerDeck.boosters, 'player')
 
@@ -78,22 +103,26 @@ const play = {
         // IF COMPUTER PUT A CARD ON BOARD
 
             // Getting 1 random card in cpter deck
-            const cpterDeck = play.state.cpterDeck.monsters;
-            let monster = [cpterDeck[Math.floor(Math.random()*cpterDeck.length)]];
+            const cpterCardInHand = play.state.cpterCardInHand.monsters;
+            let monster = [cpterCardInHand[Math.floor(Math.random()*cpterCardInHand.length)]];
 
             // Generating card on board
             cardGenerator.monsters(monster, 'cpter')
+            console.log(monster);
 
+            
             // Find index of selected card
             let indexMonster = null;
 
-            for(var i = 0; i < cpterDeck.length; i += 1) {
-                if(cpterDeck[i].id === monster[0].id) {
+            for(var i = 0; i < cpterCardInHand.length; i++) {
+                if(cpterCardInHand[i].id === monster[0].id) {
                     indexMonster = i;
                 }
             }
-            // Remove card from deck in hand
-            play.state.cpterDeck.monsters.splice(indexMonster, 1);
+            console.log(cpterCardInHand)
+            // Add selected card in state cpterCardInHand and remove from main deck
+            cpterCardInHand.splice(indexMonster, 1);
+            console.log(cpterCardInHand)
 
         // IF COMPUTER PLAY A CARD
 
@@ -109,7 +138,69 @@ const play = {
     },
 
     fight: function(attacker, defenser) {
-        console.log('hello')
+
+        // console.log(attacker.getAttribute('key'))
+        // console.log(defenser.getAttribute('key'))
+
+
+        const container = document.querySelector('.container');
+        const fightArea = document.createElement('div');
+        fightArea.classList.add('fightArea');
+
+        // Fight container
+        container.appendChild(fightArea);
+
+        // cogwheel 
+        const cogWheel = document.createElement('div');
+        cogWheel.classList.add('cogwheel')
+        cogWheel.classList.add('rotate')
+        cogWheel.textContent = '⚙'
+
+        // Components in DOM
+        fightArea.appendChild(attacker);
+        fightArea.appendChild(cogWheel);
+        fightArea.appendChild(defenser);
+
+        // Animation
+
+        attacker.classList.add('blink_me');
+        defenser.classList.add('blink_me');
+        setTimeout(function(){ 
+            attacker.classList.remove('blink_me');
+            defenser.classList.remove('blink_me');
+
+            attacker.classList.add('shake');
+            defenser.classList.add('shake');
+        }, 2000);
+
+        // Algorithm
+
+            // find card in the state to avoid false value write by user in dom
+            const attackerKey = attacker.getAttribute('key');
+            const defenserKey = defenser.getAttribute('key');
+
+            const attackerName = attacker.getAttribute('data-player');
+            const defenserName = defenser.getAttribute('data-player');
+
+            
+            const attackerCards = play.state[attackerName];
+            const attackerCard = attackerCards.monsters.find(element => element.key == attackerKey);
+
+            const defenserCards = play.state[defenserName];
+            const defenserCard = defenserCards.monsters.find(element => element.key == defenserKey);
+
+            console.log(attackerCard)
+            console.log(defenserCard)
+
+
+        // const attackerName = attacker.getAttribute('player');
+
+        // const defenserName = defenser.getAttribute('player');
+
+
+        // console.log(play.state[attackerName])
+        // console.log(play.state[defenserName])
+        
         // formule math : value = attack currentPlayer - defense otherPlayer
             // si value <= 0 : hit-point = random number between 0 & 2
             // si value > 0 : hit-point = random number between value & value +2.
@@ -248,21 +339,27 @@ const play = {
             var x = event.clientX, y = event.clientY,
             elementMouseIsOver = document.elementFromPoint(x, y);
     
-    
-            const dropArea = document.querySelector(`.${elementMouseIsOver.className}`);
-            
+
+            // const dropArea = document.querySelector(`.${elementMouseIsOver.className}`);
+
             // Handle where user can drop cards
-            if((dropArea.className === 'sideArea') || (dropArea.className === 'cpterCards') || (dropArea.className === 'playerCard')) {
+            if((elementMouseIsOver.className === 'sideArea') || (elementMouseIsOver.className === 'cpterCards') || (elementMouseIsOver.className === 'playerCard')) {
                 alert('pas ici malheureux !')
             } else {
-                if((dropArea.className === 'drop-area') || (dropArea.className === 'playerCards')) {
-                    dropArea.appendChild(card);
+                if((elementMouseIsOver.className === 'drop-area') || (elementMouseIsOver.className === 'playerCards')) {
+                    elementMouseIsOver.appendChild(card);
                     play.listenDrop();
-                } else if(dropArea.closest('.cpterCard')) {
+                } else if(elementMouseIsOver.parentNode.dataset.player === 'cpterDeck') {
                     // Ajouter une condition, si carte booster on ne fait rien (ou message alerte pas possible)
                     console.log('le combat peut commencer !')
-                    console.log(elementMouseIsOver.closest('.cpterCard'))
-                    // play.fight();
+                    const cpterCard = elementMouseIsOver.closest('.cardComponent');
+
+                    if(card.classList.contains("booster")) {
+                        alert('vous ne pouvez pas combattre avec une carte booster')
+                    } else {
+                        play.fight(card, cpterCard);
+                    }
+
                 }
 
             }

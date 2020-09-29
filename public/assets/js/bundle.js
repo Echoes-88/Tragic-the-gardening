@@ -2,7 +2,7 @@
 const utils = require('./utils');
 const user = require('./user');
 const game = require('./game');
-const dragAndDrop = require('./dragAndDrop');
+// const dragAndDrop = require('./dragAndDrop');
 var app = {
 
 eventListener: function() {
@@ -38,12 +38,12 @@ init: function () {
     utils.showMainMenu();
     app.eventListener();
     utils.reloadCss();
-    dragAndDrop.init();
+    // dragAndDrop.init();
 },
 };
 
 document.addEventListener('DOMContentLoaded', app.init);
-},{"./dragAndDrop":3,"./game":4,"./user":6,"./utils":7}],2:[function(require,module,exports){
+},{"./game":3,"./user":5,"./utils":6}],2:[function(require,module,exports){
 const game = require('./game');
 const utils = require('./utils');
 
@@ -182,15 +182,18 @@ var cardGenerator = {
             const cardComponent = document.createElement('div');
             cardComponent.classList.add('cardComponent');
             cardComponent.classList.add('monster');
+            cardComponent.setAttribute('key', monster.key);
 
             if(user != 'cpter') {
             cardComponent.setAttribute("position", 'in-hand' )
             cardComponent.classList.add('playerCard');
+            cardComponent.setAttribute('data-player', 'playerDeck');
             cardComponent.setAttribute("draggable", true);
             }
 
             if(user === 'cpter') {
                 cardComponent.classList.add('cpterCard');
+                cardComponent.setAttribute('data-player', 'cpterDeck');
             }
             
             // CARD
@@ -249,15 +252,18 @@ var cardGenerator = {
             const cardComponent = document.createElement('div');
             cardComponent.classList.add('cardComponent');
             cardComponent.classList.add('booster');
+            cardComponent.setAttribute('key', booster.key);
 
             if(user != 'cpter') {
                 cardComponent.setAttribute("position", 'in-hand' )
                 cardComponent.classList.add('playerCard');
+                cardComponent.setAttribute('data-player', 'playerDeck');
                 cardComponent.setAttribute("draggable", true);
             }
 
             if(user === 'cpter') {
                 cardComponent.classList.add('cpterCard');
+                cardComponent.setAttribute('data-player', 'cpterDeck');
             }
 
             // CARD
@@ -327,192 +333,7 @@ var cardGenerator = {
 
 
 module.exports = cardGenerator;
-},{"./game":4,"./utils":7}],3:[function(require,module,exports){
-const play = require('./play');
-
-const dragAndDrop = {
-
-
-    state: {
-        playerCardsOnBoard: 0,
-        cpterCardsOnBoard: 0,
-        gameInProgress: true,
-        },
-
-
-    init: function() {
-
-    function Drag (subject) {
-        var dative = this,
-            handle,
-            dragClickOffsetX,
-            dragClickOffsetY,
-            lastDragX,
-            lastDragY;
-    
-        subject.draggable = true;
-    
-        dative.styleHandle(subject);
-    
-        subject.addEventListener('dragstart', function (e) {    
-            handle = dative.makeHandle(subject);
-    
-            dragClickOffsetX = e.layerX;
-            dragClickOffsetY = e.layerY;
-    
-            this.style.opacity = 0;
-        });
-    
-        subject.addEventListener('drag', function (e) {
-            var useX = e.x,
-                useY = e.y;
-    
-            // Odd glitch
-            if (useX === 0 && useY === 0) {
-                useX = lastDragX;
-                useY = lastDragY;
-            }
-    
-            if (useX === lastDragX && useY === lastDragY) {
-                return;
-            }
-    
-            dative.translate(useX - dragClickOffsetX, useY - dragClickOffsetY, handle, subject);
-    
-            lastDragX = useX;
-            lastDragY = useY;
-        });
-    
-        subject.addEventListener('dragend', function (e) {
-            this.style.opacity = 1;
-    
-            handle.parentNode.removeChild(handle);
-        });
-    };
-    
-    /**
-     * Prevent the text contents of the handle element from being selected.
-     */
-    Drag.prototype.styleHandle = function (node) {
-        node.style['userSelect'] = 'none';
-    };
-    
-    /**
-     * @param {HTMLElement} subject
-     * @return {HTMLElement}
-     */
-    Drag.prototype.makeHandle = function (subject) {
-        return this.makeClone(subject);
-    };
-    
-    /**
-     * Clone node.
-     * 
-     * @param {HTMLElement} node
-     * @return {HTMLElement}
-     */
-    Drag.prototype.makeClone = function (node) {
-        var clone;
-    
-        clone = node.cloneNode(true);
-    
-        this.styleClone(clone, node.offsetWidth, node.offsetHeight);
-    
-        node.parentNode.insertBefore(clone, node);
-    
-        return clone;
-    };
-    
-    /**
-     * Make clone width and height static.
-     * Take clone out of the element flow.
-     *
-     * @param {HTMLElement} node
-     * @param {Number} width
-     * @param {Nubmer} height
-     */
-    Drag.prototype.styleClone = function (node, width, height) {
-        node.style.position = 'fixed';
-        node.style.zIndex = 9999;
-        node.style.width = width + 'px';
-        node.style.height = height + 'px';
-        node.style.left = '-9999px';
-    
-        node.style.margin = 0;
-        node.style.padding = 0;
-    };
-    
-    /**
-     * Used to position the handle element.
-     * 
-     * @param {Number} x
-     * @param {Number} y
-     * @param {HTMLElement} handle
-     * @parma {HTMLElement} subject
-     */
-    Drag.prototype.translate = function (x, y, handle, subject) {
-        handle.style.left = x + 'px';
-        handle.style.top = y + 'px';
-    };
-
-
-    const cards = document.getElementsByClassName('playerCard');
-
-    for (const card of cards) {
-        new Drag(card);
-;
-        card.addEventListener('dragend', function () {
-
-        var x = event.clientX, y = event.clientY,
-        elementMouseIsOver = document.elementFromPoint(x, y);
-
-
-        const dropArea = document.querySelector(`.${elementMouseIsOver.className}`);
-        console.log(dropArea);
-
-        if(dropArea != 'drop-area') {
-            alert('pas ici malheureux !')
-        } else {
-            dropArea.appendChild(card);
-            dragAndDrop.listenDrop();
-        }
-
-        
-
-
-    });
-
-    }
-
-    },
-
-    listenDrop: function() {
-
-        let nbrOfChildren = document.querySelector('.drop-area').childElementCount;
-
-        const endOfRoundButton = document.querySelector('.endOfRound');
-
-        const infosField = document.querySelector('.infosField');
-        infosField.innerHTML = '';
-
-        if(dragAndDrop.state.playerCardsOnBoard == nbrOfChildren - 1) {
-            infosField.textContent = 'Cliquez sur "end of round" pour valider votre carte';
-            endOfRoundButton.classList.remove('inactive');
-            play.state.roundInProgress = false;
-
-            // MISE A JOUR DES PLAYERSCARDSONBOARD + DONNER ACCES A FINIR SON TOUR
-        } else if(dragAndDrop.state.playerCardsOnBoard < nbrOfChildren)  {
-            infosField.textContent = 'Vous ne pouvez jouer qu\'une carte par tour, veuillez en retirer';
-        } else if(dragAndDrop.state.playerCardsOnBoard >= nbrOfChildren)  {
-            infosField.textContent = 'Veuillez insérer une carte sur le plateau';
-        } else {
-            console.log('error')
-        }
-    }
-};
-
-module.exports = dragAndDrop;
-},{"./play":5}],4:[function(require,module,exports){
+},{"./game":3,"./utils":6}],3:[function(require,module,exports){
 const utils = require('./utils');
 const play = require('./play');
 const cardGenerator = require('./cardGenerator');
@@ -699,10 +520,10 @@ const game = {
 }
 
 module.exports = game;
-},{"./cardGenerator":2,"./play":5,"./utils":7}],5:[function(require,module,exports){
+},{"./cardGenerator":2,"./play":4,"./utils":6}],4:[function(require,module,exports){
 const utils = require('./utils');
 const cardGenerator = require('./cardGenerator');
-const dragAndDrop = require('./dragAndDrop');
+// const dragAndDrop = require('./dragAndDrop');
 
 const play = {
 
@@ -712,6 +533,8 @@ const play = {
         playerRound: true,
         playerDeck: null,
         cpterDeck: null,
+        playerDeckInHand: null,
+        cpterCardInHand: null,
         },
   
 
@@ -724,9 +547,32 @@ const play = {
 
         cpterDeck = await cardGenerator.cpterDeck();
 
+        // Add a key to each card for identification
+        let inc = 0;
+        for(const card of cpterDeck.monsters) {
+            card.key = inc++;
+        }
+
+        for(const card of cpterDeck.boosters) {
+            card.key = inc++;
+        }
+
+        inc = 0;
+        for(const card of playerDeck.monsters) {
+            card.key = inc++;
+        }
+
+        for(const card of playerDeck.boosters) {
+            card.key = inc++;
+        }
+
+        // State to handle real card stats
         play.state.playerDeck = playerDeck;
         play.state.cpterDeck = cpterDeck;
-         
+
+        // Deep copy of cpter cards to handle visual cards
+        play.state.cpterCardInHand = JSON.parse(JSON.stringify(cpterDeck));
+        
         cardGenerator.monsters(playerDeck.monsters, 'player')
         cardGenerator.boosters(playerDeck.boosters, 'player')
 
@@ -780,22 +626,26 @@ const play = {
         // IF COMPUTER PUT A CARD ON BOARD
 
             // Getting 1 random card in cpter deck
-            const cpterDeck = play.state.cpterDeck.monsters;
-            let monster = [cpterDeck[Math.floor(Math.random()*cpterDeck.length)]];
+            const cpterCardInHand = play.state.cpterCardInHand.monsters;
+            let monster = [cpterCardInHand[Math.floor(Math.random()*cpterCardInHand.length)]];
 
             // Generating card on board
             cardGenerator.monsters(monster, 'cpter')
+            console.log(monster);
 
+            
             // Find index of selected card
             let indexMonster = null;
 
-            for(var i = 0; i < cpterDeck.length; i += 1) {
-                if(cpterDeck[i].id === monster[0].id) {
+            for(var i = 0; i < cpterCardInHand.length; i++) {
+                if(cpterCardInHand[i].id === monster[0].id) {
                     indexMonster = i;
                 }
             }
-            // Remove card from deck in hand
-            play.state.cpterDeck.monsters.splice(indexMonster, 1);
+            console.log(cpterCardInHand)
+            // Add selected card in state cpterCardInHand and remove from main deck
+            cpterCardInHand.splice(indexMonster, 1);
+            console.log(cpterCardInHand)
 
         // IF COMPUTER PLAY A CARD
 
@@ -811,7 +661,69 @@ const play = {
     },
 
     fight: function(attacker, defenser) {
-        console.log('hello')
+
+        // console.log(attacker.getAttribute('key'))
+        // console.log(defenser.getAttribute('key'))
+
+
+        const container = document.querySelector('.container');
+        const fightArea = document.createElement('div');
+        fightArea.classList.add('fightArea');
+
+        // Fight container
+        container.appendChild(fightArea);
+
+        // cogwheel 
+        const cogWheel = document.createElement('div');
+        cogWheel.classList.add('cogwheel')
+        cogWheel.classList.add('rotate')
+        cogWheel.textContent = '⚙'
+
+        // Components in DOM
+        fightArea.appendChild(attacker);
+        fightArea.appendChild(cogWheel);
+        fightArea.appendChild(defenser);
+
+        // Animation
+
+        attacker.classList.add('blink_me');
+        defenser.classList.add('blink_me');
+        setTimeout(function(){ 
+            attacker.classList.remove('blink_me');
+            defenser.classList.remove('blink_me');
+
+            attacker.classList.add('shake');
+            defenser.classList.add('shake');
+        }, 2000);
+
+        // Algorithm
+
+            // find card in the state to avoid false value write by user in dom
+            const attackerKey = attacker.getAttribute('key');
+            const defenserKey = defenser.getAttribute('key');
+
+            const attackerName = attacker.getAttribute('data-player');
+            const defenserName = defenser.getAttribute('data-player');
+
+            
+            const attackerCards = play.state[attackerName];
+            const attackerCard = attackerCards.monsters.find(element => element.key == attackerKey);
+
+            const defenserCards = play.state[defenserName];
+            const defenserCard = defenserCards.monsters.find(element => element.key == defenserKey);
+
+            console.log(attackerCard)
+            console.log(defenserCard)
+
+
+        // const attackerName = attacker.getAttribute('player');
+
+        // const defenserName = defenser.getAttribute('player');
+
+
+        // console.log(play.state[attackerName])
+        // console.log(play.state[defenserName])
+        
         // formule math : value = attack currentPlayer - defense otherPlayer
             // si value <= 0 : hit-point = random number between 0 & 2
             // si value > 0 : hit-point = random number between value & value +2.
@@ -950,21 +862,27 @@ const play = {
             var x = event.clientX, y = event.clientY,
             elementMouseIsOver = document.elementFromPoint(x, y);
     
-    
-            const dropArea = document.querySelector(`.${elementMouseIsOver.className}`);
-            
+
+            // const dropArea = document.querySelector(`.${elementMouseIsOver.className}`);
+
             // Handle where user can drop cards
-            if((dropArea.className === 'sideArea') || (dropArea.className === 'cpterCards') || (dropArea.className === 'playerCard')) {
+            if((elementMouseIsOver.className === 'sideArea') || (elementMouseIsOver.className === 'cpterCards') || (elementMouseIsOver.className === 'playerCard')) {
                 alert('pas ici malheureux !')
             } else {
-                if((dropArea.className === 'drop-area') || (dropArea.className === 'playerCards')) {
-                    dropArea.appendChild(card);
+                if((elementMouseIsOver.className === 'drop-area') || (elementMouseIsOver.className === 'playerCards')) {
+                    elementMouseIsOver.appendChild(card);
                     play.listenDrop();
-                } else if(dropArea.closest('.cpterCard')) {
+                } else if(elementMouseIsOver.parentNode.dataset.player === 'cpterDeck') {
                     // Ajouter une condition, si carte booster on ne fait rien (ou message alerte pas possible)
                     console.log('le combat peut commencer !')
-                    console.log(elementMouseIsOver.closest('.cpterCard'))
-                    // play.fight();
+                    const cpterCard = elementMouseIsOver.closest('.cardComponent');
+
+                    if(card.classList.contains("booster")) {
+                        alert('vous ne pouvez pas combattre avec une carte booster')
+                    } else {
+                        play.fight(card, cpterCard);
+                    }
+
                 }
 
             }
@@ -1003,7 +921,7 @@ const play = {
 }
 
 module.exports = play;
-},{"./cardGenerator":2,"./dragAndDrop":3,"./utils":7}],6:[function(require,module,exports){
+},{"./cardGenerator":2,"./utils":6}],5:[function(require,module,exports){
 const utils = require('./utils');
 
 const user = {
@@ -1144,7 +1062,7 @@ const user = {
 };
 
 module.exports = user;
-},{"./utils":7}],7:[function(require,module,exports){
+},{"./utils":6}],6:[function(require,module,exports){
 
 const utils = {
 

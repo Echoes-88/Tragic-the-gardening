@@ -1,7 +1,7 @@
 const utils = require('./utils');
 const user = require('./user');
 const game = require('./game');
-const dragAndDrop = require('./dragAndDrop');
+// const dragAndDrop = require('./dragAndDrop');
 var app = {
 
 eventListener: function() {
@@ -37,7 +37,7 @@ init: function () {
     utils.showMainMenu();
     app.eventListener();
     utils.reloadCss();
-    dragAndDrop.init();
+    // dragAndDrop.init();
 },
 };
 

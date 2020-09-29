@@ -301,3 +301,106 @@ body {
     background-size: contain;
     display: inline-block;
 } */
+
+    /* FIGHT AREA */
+    .fightArea {
+        position: absolute;
+        width: 60%;
+        height: 60%;
+        margin: auto;
+        z-index: 4;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+    }
+
+    .cogwheel {
+        color: white;
+        font-size: 10em;
+        text-shadow: 6em 6em 6em #000000;
+        animation: rotation 4s infinite linear;
+    }
+
+    /* .shadow {
+        -webkit-box-shadow: 10px 10px 23px -4px rgba(0,0,0,0.43);
+        -moz-box-shadow: 10px 10px 23px -4px rgba(0,0,0,0.43);
+        box-shadow: 10px 10px 23px -4px rgba(0,0,0,0.43);
+    } */
+
+ /* ANIMATIONS */
+
+.blink_me {
+    animation: blinker 1s linear infinite;
+  }
+  
+  @keyframes blinker {
+    50% {
+      opacity: 0;
+    }
+  }
+
+.shake {
+    animation: shake 1.2s cubic-bezier(.36,.07,.19,.97) both;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+  
+  @keyframes shake {
+    10%, 90% {
+      transform: translate3d(-4px, 0, -10px);
+    }
+    
+    20%, 80% {
+      transform: translate3d(5px, 0, 15px);
+    }
+  
+    30%, 50%, 70% {
+      transform: translate3d(-8px, 0, -15px);
+    }
+  
+    40%, 60% {
+      transform: translate3d(8px, 0, 15px);
+    }
+  }
+
+ 
+  @keyframes rotation {
+    from {
+        -webkit-transform: rotate(0deg);
+    }
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+  }
+
+/* 
+  .moveCenterFromLeft{
+    animation: moveCenterFromLeft linear 0.5s;
+    animation-iteration-count: 1;
+    transform-origin: 50% 50%;
+  }
+  
+  @keyframes moveCenterFromLeft{
+    0% {
+        transform:  translate(0%,0%)  ;
+      }
+      100% {
+        transform:  translate(30%,0%)  ;
+      }
+    }
+
+.moveCenterFromRight{
+    animation: moveCenterFromRight linear 0.5s;
+    animation-iteration-count: 1;
+    transform-origin: 50% 50%;
+    }
+    
+    @keyframes moveCenterFromRight{
+    0% {
+        transform:  translate(0%,0%)  ;
+        }
+        100% {
+        transform:  translate(-30%,0%)  ;
+        }
+    } */

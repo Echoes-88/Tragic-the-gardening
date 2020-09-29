@@ -136,15 +136,18 @@ var cardGenerator = {
             const cardComponent = document.createElement('div');
             cardComponent.classList.add('cardComponent');
             cardComponent.classList.add('monster');
+            cardComponent.setAttribute('key', monster.key);
 
             if(user != 'cpter') {
             cardComponent.setAttribute("position", 'in-hand' )
             cardComponent.classList.add('playerCard');
+            cardComponent.setAttribute('data-player', 'playerDeck');
             cardComponent.setAttribute("draggable", true);
             }
 
             if(user === 'cpter') {
                 cardComponent.classList.add('cpterCard');
+                cardComponent.setAttribute('data-player', 'cpterDeck');
             }
             
             // CARD
@@ -203,15 +206,18 @@ var cardGenerator = {
             const cardComponent = document.createElement('div');
             cardComponent.classList.add('cardComponent');
             cardComponent.classList.add('booster');
+            cardComponent.setAttribute('key', booster.key);
 
             if(user != 'cpter') {
                 cardComponent.setAttribute("position", 'in-hand' )
                 cardComponent.classList.add('playerCard');
+                cardComponent.setAttribute('data-player', 'playerDeck');
                 cardComponent.setAttribute("draggable", true);
             }
 
             if(user === 'cpter') {
                 cardComponent.classList.add('cpterCard');
+                cardComponent.setAttribute('data-player', 'cpterDeck');
             }
 
             // CARD
