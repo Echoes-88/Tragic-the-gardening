@@ -139,7 +139,7 @@ var cardGenerator = {
             cardComponent.setAttribute('key', monster.key);
 
             if(user != 'cpter') {
-            cardComponent.setAttribute("position", 'in-hand' )
+            // cardComponent.setAttribute("position", 'in-hand' )
             cardComponent.classList.add('playerCard');
             cardComponent.setAttribute('data-player', 'playerDeck');
             cardComponent.setAttribute("draggable", true);
@@ -157,18 +157,26 @@ var cardGenerator = {
 
             const cardElementsContainer = document.createElement('div');
             cardElementsContainer.classList.add('cardElementsContainer');
-
+            if(user != 'cpter') {
+                cardElementsContainer.setAttribute('data-player', 'playerDeck');
+            }
+            if(user === 'cpter') {
+                cardElementsContainer.setAttribute('data-player', 'cpterDeck');
+            }
+            
             // NAME
             const monsterName = document.createElement('p');
             monsterName.classList.add('card-name');
             monsterName.textContent = monster.title;
 
             // DESCRIPTION
-            const monsterDescription = document.createElement('p');
-            monsterDescription.classList.add('card-description');
-            monsterDescription.textContent = monster.text;
+            // const monsterDescription = document.createElement('p');
+            // monsterDescription.classList.add('card-description');
+            // monsterDescription.textContent = monster.text;
 
             // PICTURE
+            const imgContainer = document.createElement('div');
+            imgContainer.classList.add('imgContainer');
             const monsterPicture = document.createElement('img');
             monsterPicture.classList.add('card-picture');
             monsterPicture.src =  `./assets/img/monsters/${monster.id}.jpg`
@@ -190,12 +198,14 @@ var cardGenerator = {
             container.appendChild(cardComponent);
             cardComponent.appendChild(monsterCard);
             cardComponent.appendChild(cardElementsContainer);
+            cardElementsContainer.appendChild(monsterHitpoint);
             cardElementsContainer.appendChild(monsterName);
-            cardElementsContainer.appendChild(monsterPicture);
-            cardElementsContainer.appendChild(monsterDescription);
+            cardElementsContainer.appendChild(imgContainer);
+            imgContainer.appendChild(monsterPicture);
+            // cardElementsContainer.appendChild(monsterDescription);
             cardElementsContainer.appendChild(monsterAttack);
             cardElementsContainer.appendChild(monsterDefense);
-            cardElementsContainer.appendChild(monsterHitpoint);
+
         }
     },
 
@@ -227,6 +237,12 @@ var cardGenerator = {
 
             const cardElementsContainer = document.createElement('div');
             cardElementsContainer.classList.add('cardElementsContainer');
+            if(user != 'cpter') {
+                cardElementsContainer.setAttribute('data-player', 'playerDeck');
+            }
+            if(user === 'cpter') {
+                cardElementsContainer.setAttribute('data-player', 'cpterDeck');
+            }
 
             // NAME
             const boosterName = document.createElement('p');
@@ -234,11 +250,13 @@ var cardGenerator = {
             boosterName.textContent = booster.title;
 
             // DESCRIPTION
-            const boosterDescription = document.createElement('p');
-            boosterDescription.classList.add('card-description');
-            boosterDescription.textContent = booster.special_effect_text;
+            // const boosterDescription = document.createElement('p');
+            // boosterDescription.classList.add('card-description');
+            // boosterDescription.textContent = booster.special_effect_text;
 
             // PICTURE
+            const imgContainer = document.createElement('div');
+            imgContainer.classList.add('imgContainer');
             const boosterPicture = document.createElement('img');
             boosterPicture.classList.add('card-picture');
             boosterPicture.src =  `./assets/img/boosters/${booster.id}.jpg`
@@ -254,8 +272,9 @@ var cardGenerator = {
             cardComponent.appendChild(boosterCard);
             cardComponent.appendChild(cardElementsContainer);
             cardElementsContainer.appendChild(boosterName);
-            cardElementsContainer.appendChild(boosterPicture);
-            cardElementsContainer.appendChild(boosterDescription);
+            cardElementsContainer.appendChild(imgContainer);
+            imgContainer.appendChild(boosterPicture);
+            // cardElementsContainer.appendChild(boosterDescription);
             cardElementsContainer.appendChild(boosterValue);
         }
 
@@ -278,6 +297,9 @@ var cardGenerator = {
                 const card = e.target.closest('.cardComponent');
 
                 bigCard = card.cloneNode(true);
+
+                bigCard.classList = 'cardComponent';
+                bigCard.setAttribute('draggable', 'false');
 
                 container.appendChild(bigCard);
 

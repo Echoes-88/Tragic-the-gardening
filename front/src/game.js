@@ -11,6 +11,13 @@ const game = {
 
         // CLEAR DISPLAY
         utils.clearEverything();
+
+        const logo = document.querySelector('.logo')
+        logo.classList.add('is-hidden');
+
+        const container = document.querySelector('.container');
+        container.style.justifyContent = 'center';
+
         const article = document.querySelector('article');
         if(article) { document.querySelector('article').innerHTML = ''; }
         

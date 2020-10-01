@@ -185,7 +185,7 @@ var cardGenerator = {
             cardComponent.setAttribute('key', monster.key);
 
             if(user != 'cpter') {
-            cardComponent.setAttribute("position", 'in-hand' )
+            // cardComponent.setAttribute("position", 'in-hand' )
             cardComponent.classList.add('playerCard');
             cardComponent.setAttribute('data-player', 'playerDeck');
             cardComponent.setAttribute("draggable", true);
@@ -203,18 +203,26 @@ var cardGenerator = {
 
             const cardElementsContainer = document.createElement('div');
             cardElementsContainer.classList.add('cardElementsContainer');
-
+            if(user != 'cpter') {
+                cardElementsContainer.setAttribute('data-player', 'playerDeck');
+            }
+            if(user === 'cpter') {
+                cardElementsContainer.setAttribute('data-player', 'cpterDeck');
+            }
+            
             // NAME
             const monsterName = document.createElement('p');
             monsterName.classList.add('card-name');
             monsterName.textContent = monster.title;
 
             // DESCRIPTION
-            const monsterDescription = document.createElement('p');
-            monsterDescription.classList.add('card-description');
-            monsterDescription.textContent = monster.text;
+            // const monsterDescription = document.createElement('p');
+            // monsterDescription.classList.add('card-description');
+            // monsterDescription.textContent = monster.text;
 
             // PICTURE
+            const imgContainer = document.createElement('div');
+            imgContainer.classList.add('imgContainer');
             const monsterPicture = document.createElement('img');
             monsterPicture.classList.add('card-picture');
             monsterPicture.src =  `./assets/img/monsters/${monster.id}.jpg`
@@ -236,12 +244,14 @@ var cardGenerator = {
             container.appendChild(cardComponent);
             cardComponent.appendChild(monsterCard);
             cardComponent.appendChild(cardElementsContainer);
+            cardElementsContainer.appendChild(monsterHitpoint);
             cardElementsContainer.appendChild(monsterName);
-            cardElementsContainer.appendChild(monsterPicture);
-            cardElementsContainer.appendChild(monsterDescription);
+            cardElementsContainer.appendChild(imgContainer);
+            imgContainer.appendChild(monsterPicture);
+            // cardElementsContainer.appendChild(monsterDescription);
             cardElementsContainer.appendChild(monsterAttack);
             cardElementsContainer.appendChild(monsterDefense);
-            cardElementsContainer.appendChild(monsterHitpoint);
+
         }
     },
 
@@ -273,6 +283,12 @@ var cardGenerator = {
 
             const cardElementsContainer = document.createElement('div');
             cardElementsContainer.classList.add('cardElementsContainer');
+            if(user != 'cpter') {
+                cardElementsContainer.setAttribute('data-player', 'playerDeck');
+            }
+            if(user === 'cpter') {
+                cardElementsContainer.setAttribute('data-player', 'cpterDeck');
+            }
 
             // NAME
             const boosterName = document.createElement('p');
@@ -280,11 +296,13 @@ var cardGenerator = {
             boosterName.textContent = booster.title;
 
             // DESCRIPTION
-            const boosterDescription = document.createElement('p');
-            boosterDescription.classList.add('card-description');
-            boosterDescription.textContent = booster.special_effect_text;
+            // const boosterDescription = document.createElement('p');
+            // boosterDescription.classList.add('card-description');
+            // boosterDescription.textContent = booster.special_effect_text;
 
             // PICTURE
+            const imgContainer = document.createElement('div');
+            imgContainer.classList.add('imgContainer');
             const boosterPicture = document.createElement('img');
             boosterPicture.classList.add('card-picture');
             boosterPicture.src =  `./assets/img/boosters/${booster.id}.jpg`
@@ -300,8 +318,9 @@ var cardGenerator = {
             cardComponent.appendChild(boosterCard);
             cardComponent.appendChild(cardElementsContainer);
             cardElementsContainer.appendChild(boosterName);
-            cardElementsContainer.appendChild(boosterPicture);
-            cardElementsContainer.appendChild(boosterDescription);
+            cardElementsContainer.appendChild(imgContainer);
+            imgContainer.appendChild(boosterPicture);
+            // cardElementsContainer.appendChild(boosterDescription);
             cardElementsContainer.appendChild(boosterValue);
         }
 
@@ -324,6 +343,9 @@ var cardGenerator = {
                 const card = e.target.closest('.cardComponent');
 
                 bigCard = card.cloneNode(true);
+
+                bigCard.classList = 'cardComponent';
+                bigCard.setAttribute('draggable', 'false');
 
                 container.appendChild(bigCard);
 
@@ -349,6 +371,13 @@ const game = {
 
         // CLEAR DISPLAY
         utils.clearEverything();
+
+        const logo = document.querySelector('.logo')
+        logo.classList.add('is-hidden');
+
+        const container = document.querySelector('.container');
+        container.style.justifyContent = 'center';
+
         const article = document.querySelector('article');
         if(article) { document.querySelector('article').innerHTML = ''; }
         
@@ -542,6 +571,10 @@ const play = {
 
     launchGame: async function(playerDeck) {
 
+        // CHANGE FLEX DIRECTION
+        const container = document.querySelector('.container');
+        container.style.flexDirection = 'row';
+
         // CLEAR DISPLAY
         utils.clearEverything();
 
@@ -662,6 +695,10 @@ const play = {
 
         play.state.playerRound = true;
         play.game();
+    },
+
+    fightMoveCpter: function() {
+        
     },
 
     fight: function(attacker, defenser) {
@@ -884,6 +921,10 @@ const play = {
             handle.style.left = x + 'px';
             handle.style.top = y + 'px';
         };
+
+
+        const infosField = document.querySelector('.infosField');
+        infosField.innerHTML = 'Posez une carte sur le plateau ou attaquez une carte ennemie';
     
     
         const cards = document.getElementsByClassName('cardComponent');
@@ -896,8 +937,6 @@ const play = {
             var x = event.clientX, y = event.clientY,
             elementMouseIsOver = document.elementFromPoint(x, y);
     
-
-            // const dropArea = document.querySelector(`.${elementMouseIsOver.className}`);
 
             // Handle where user can drop cards
             if((elementMouseIsOver.className === 'sideArea') || (elementMouseIsOver.className === 'cpterCards') || (elementMouseIsOver.className === 'playerCard')) {
@@ -923,8 +962,50 @@ const play = {
         });
     
         }
+    },
+
+            
+
+
+
+
+                        
+            // if((elementMouseIsOver.className === 'sideArea') || (elementMouseIsOver.className === 'cpterCards') || (elementMouseIsOver.className === 'playerCard')) {
+            //     alert('pas ici malheureux !')
+            // } else {
+
+            //     if(card.classList.contains("booster")) {
+
+            //         if (elementMouseIsOver.className === 'drop-area') {
+            //             alert('Vous devez poser la carte booster sur une de vos cartes au choix')          
+            //         } else if (elementMouseIsOver.parentNode.dataset.player === 'cpterDeck') {
+            //             alert('Vous ne pouvez pas poser votre booster sur une carte de l\'adversaire');
+            //         } else {
+            //             console.log('on vise une carte sur notre board')
+            //         }
+
+            //     } else if(card.classList.contains("monster")) {
+
+            //         if ((elementMouseIsOver.className === 'playerCards') || (elementMouseIsOver.className === 'drop-area')){
+            //             elementMouseIsOver.appendChild(card);
+            //             play.listenDrop();
+            //         } if (elementMouseIsOver.parentNode.dataset.player === 'playerDeck') {
+            //             alert('vous devez poser votre carte sur le plateau de jeu')
+            //         } if(elementMouseIsOver.parentNode.dataset.player === 'cpterDeck') {
+            //             // Ajouter une condition, si carte booster on ne fait rien (ou message alerte pas possible)
+            //             const cpterCard = elementMouseIsOver.closest('.cardComponent');
+        
+            //             if(card.classList.contains("booster")) {
+            //                 alert('vous ne pouvez pas combattre avec une carte booster')
+            //             } else {
+            //                 play.fight(card, cpterCard);
+            //             }
+            //         }
     
-        },
+            //     }
+            // }
+
+ 
     
         listenDrop: function() {
 
@@ -1100,7 +1181,7 @@ module.exports = user;
 const utils = {
 
     showMainMenu: function() {
-        
+
         // SHOW MENU
         const menu = document.querySelector('.menu')
         menu.classList.remove('is-hidden');
@@ -1220,9 +1301,9 @@ const utils = {
         main.appendChild(sideArea);
         main.appendChild(playArea);
 
+        sideArea.appendChild(bigCardContainer);
         sideArea.appendChild(infosField);
         sideArea.appendChild(endOfRound);
-        sideArea.appendChild(bigCardContainer);
 
         playArea.appendChild(cpterCards);
         playArea.appendChild(dropArea);

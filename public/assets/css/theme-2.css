@@ -7,6 +7,11 @@ body {
        font-family: "AdobeDia";
        src: url('../font/AdobeDia.ttf');
    }
+
+   @font-face {
+    font-family: "SierraMadre-JVYM";
+    src: url('../font/SierraMadre-JVYM.ttf');
+}
    
    p {
        color: greenyellow;
@@ -25,34 +30,38 @@ body {
    
    
    .container {
-       background-image: url(../img/background.jpg);
+        background-color: #3e7688;
        width: 100%;
        height: 100%;
        background-position: center;
        background-repeat: no-repeat;
        background-size: cover;
        display: flex;
-       justify-content: center;
        align-items: center;
+       flex-direction: column;
+   }
+
+   .logo {
+       margin-top: 3rem;
    }
    
    .menu {
-   
+    margin-top: 1rem;
    }
    
    .menu a {
-       color: greenyellow;
+        color:#FDFF2F;
        padding: 1rem 3rem;
        display: block;
    }
    
    .menu a:hover {
-       color: #101010;
+       color: #223f48;
    }
    
    .menu-list {
-   background-color: #101010;
-   color:greenyellow;
+   background-color: #223f48;
+
    list-style: none;
    margin: 1rem;
    font-family: 'AdobeDia';
@@ -62,7 +71,7 @@ body {
    }
    
    .menu li:hover {
-       background-color: greenyellow;
+       background-color: #FDFF2F;
        color: #101010;
    }
    
@@ -167,36 +176,57 @@ body {
        position: absolute;
        max-height: -webkit-fill-available;
        max-width: -webkit-fill-available;
+       text-align: center;
+       height:100%;
    }
    
    .card-picture {
-       margin-top: 10%;
-       width: 80%;
-       background-size: 100%;
-       margin-left: 10%;
+        width: 84%;
+        background-size: 100%;
+        display: block;
+        margin: auto;
    }
+   /* save img detoure */
+   /* .card-picture {
+    width: 66%;
+    background-size: 100%;
+    display: block;
+    margin: auto;
+    } */
 
    .card-name, .card-description {
-       color: black;
-       font-family: monospace;
-       font-size: 0.5vw;
+       color: #373737;
+       font-family: 'SierraMadre-JVYM';
+       font-size: 0.8vw;
    }
    .card-attack, .card-defense, .card-hitpoint, .card-value {
-       font-size: 1.7vw;
-       font-weight: bold;
-       color: black;
-       font-family: monospace;
-       background-color: white;
-       border-radius: 50%;
-       border: 1px solid;
-       display: inline;
-       padding: 0.6vw;
+        font-size: 1.35vw;
+        font-weight: bold;
+        color: #3e7688;
+        font-family: 'SierraMadre-JVYM';
+        display: inline;
+        padding: 0.5vw 0.8vw;
    }
 
    .card-name {
        margin-top:9%;
-       margin-left:5%;
+       background-color: white;
+       padding: 2%;
+       width: 76%;
+       font-size: 100%;
+       margin-left: 20%;
     }
+
+    .imgContainer {
+        height: 90%;
+        margin-top: 23%;
+    }
+    /* save img detoure */
+    /* .imgContainer {
+        height: 90%;
+        display: flex;
+    } */
+
 
     .card-description {
         margin-top:22%;
@@ -204,18 +234,31 @@ body {
      }
 
      .card-attack {
-        margin-top:3%;
-        margin-left:2%;
+        position: absolute;
+        left: 1%;
+        top:84%;
+        color: #9f5252;
      }
 
      .card-defense {
-        margin-top:3%;
-        margin-left:2%;
+        position: absolute;
+        left:78%;
+        top:84%;
+        color:#52869f;
      }
 
      .card-hitpoint {
         margin-top:3%;
         margin-left:2%;
+        position: absolute;
+        left: -2%;
+        color:#535f37;
+        background-color: #f8f3ec;
+        border-style: groove;
+        background-color: #f8f3ec;
+        border: 2px solid;
+        border-radius: 5px;
+        border-color: #e3d5bf;
      }
 
      .card-value {
@@ -282,6 +325,8 @@ body {
             overflow-y: hidden;
             overflow-x: hidden;
             white-space: nowrap;
+            background-color: #2e5f6f;
+            
         }
 
         .drop-area p {
@@ -293,11 +338,9 @@ body {
             position: relative;
             background: none;
             width: fit-content; /* A SUPPRIMER SI BUG */
+            margin: 0 0.2rem;
         }
-        
-        .imgContainer {
-            width: 80%;
-        }
+
 
    /* SAVE WEBKIT FIX IMG
    

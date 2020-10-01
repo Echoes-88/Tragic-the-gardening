@@ -17,6 +17,10 @@ const play = {
 
     launchGame: async function(playerDeck) {
 
+        // CHANGE FLEX DIRECTION
+        const container = document.querySelector('.container');
+        container.style.flexDirection = 'row';
+
         // CLEAR DISPLAY
         utils.clearEverything();
 
@@ -137,6 +141,10 @@ const play = {
 
         play.state.playerRound = true;
         play.game();
+    },
+
+    fightMoveCpter: function() {
+        
     },
 
     fight: function(attacker, defenser) {
@@ -359,6 +367,10 @@ const play = {
             handle.style.left = x + 'px';
             handle.style.top = y + 'px';
         };
+
+
+        const infosField = document.querySelector('.infosField');
+        infosField.innerHTML = 'Posez une carte sur le plateau ou attaquez une carte ennemie';
     
     
         const cards = document.getElementsByClassName('cardComponent');
@@ -371,8 +383,6 @@ const play = {
             var x = event.clientX, y = event.clientY,
             elementMouseIsOver = document.elementFromPoint(x, y);
     
-
-            // const dropArea = document.querySelector(`.${elementMouseIsOver.className}`);
 
             // Handle where user can drop cards
             if((elementMouseIsOver.className === 'sideArea') || (elementMouseIsOver.className === 'cpterCards') || (elementMouseIsOver.className === 'playerCard')) {
@@ -398,8 +408,50 @@ const play = {
         });
     
         }
+    },
+
+            
+
+
+
+
+                        
+            // if((elementMouseIsOver.className === 'sideArea') || (elementMouseIsOver.className === 'cpterCards') || (elementMouseIsOver.className === 'playerCard')) {
+            //     alert('pas ici malheureux !')
+            // } else {
+
+            //     if(card.classList.contains("booster")) {
+
+            //         if (elementMouseIsOver.className === 'drop-area') {
+            //             alert('Vous devez poser la carte booster sur une de vos cartes au choix')          
+            //         } else if (elementMouseIsOver.parentNode.dataset.player === 'cpterDeck') {
+            //             alert('Vous ne pouvez pas poser votre booster sur une carte de l\'adversaire');
+            //         } else {
+            //             console.log('on vise une carte sur notre board')
+            //         }
+
+            //     } else if(card.classList.contains("monster")) {
+
+            //         if ((elementMouseIsOver.className === 'playerCards') || (elementMouseIsOver.className === 'drop-area')){
+            //             elementMouseIsOver.appendChild(card);
+            //             play.listenDrop();
+            //         } if (elementMouseIsOver.parentNode.dataset.player === 'playerDeck') {
+            //             alert('vous devez poser votre carte sur le plateau de jeu')
+            //         } if(elementMouseIsOver.parentNode.dataset.player === 'cpterDeck') {
+            //             // Ajouter une condition, si carte booster on ne fait rien (ou message alerte pas possible)
+            //             const cpterCard = elementMouseIsOver.closest('.cardComponent');
+        
+            //             if(card.classList.contains("booster")) {
+            //                 alert('vous ne pouvez pas combattre avec une carte booster')
+            //             } else {
+            //                 play.fight(card, cpterCard);
+            //             }
+            //         }
     
-        },
+            //     }
+            // }
+
+ 
     
         listenDrop: function() {
 

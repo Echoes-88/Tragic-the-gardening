@@ -2,7 +2,7 @@
 const utils = {
 
     showMainMenu: function() {
-        
+
         // SHOW MENU
         const menu = document.querySelector('.menu')
         menu.classList.remove('is-hidden');
@@ -122,9 +122,9 @@ const utils = {
         main.appendChild(sideArea);
         main.appendChild(playArea);
 
+        sideArea.appendChild(bigCardContainer);
         sideArea.appendChild(infosField);
         sideArea.appendChild(endOfRound);
-        sideArea.appendChild(bigCardContainer);
 
         playArea.appendChild(cpterCards);
         playArea.appendChild(dropArea);
