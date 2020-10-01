@@ -5,6 +5,7 @@
  - Ajouter un bouton rules pendant le jeu
  - Au 2eme tour on peut poser une carte + jouer
  - Ajouter le système des boosters : on pose la carte sur un monstre pour booster les competences
+ - enlever option draggable pour cartes computer
 
 # V2.0
 

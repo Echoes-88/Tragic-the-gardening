@@ -12,6 +12,8 @@ const play = {
         cpterDeck: null,
         playerDeckInHand: null,
         cpterCardInHand: null,
+        cpterCardsOnBoard: [],
+        round: 0,
         },
   
 
@@ -64,9 +66,8 @@ const play = {
 
     game: function() {
 
-        console.log(play.state.playerDeck.monsters);
-        console.log(play.state.cpterDeck.monsters)
-
+        // console.log(play.state.playerDeck.monsters);
+        // console.log(play.state.cpterDeck.monsters)
 
         // Le joueur doit déposer une premiere carte sur le plateau puis valide son tour
             // Quand une carte est posée Si le nombre de carte sur le plateau est inférieur à celui avant le début du tour 
@@ -102,11 +103,14 @@ const play = {
         infosField.innerHTML = 'Computer is playing';
 
         setTimeout(function(){ 
-            
+        const round = play.state.round;
+        if(round == 1 || round == 3 || round == 6 || round == 7 || round == 10 || round == 11 || round == 13) {
+         
         // IF COMPUTER PUT A CARD ON BOARD
 
             // Getting 1 random card in cpter deck
             const cpterCardInHand = play.state.cpterCardInHand.monsters;
+            const cpterCardsOnBoard = play.state.cpterCardsOnBoard;
 
             if(cpterCardInHand.length > 0) {
 
@@ -123,14 +127,28 @@ const play = {
                         indexMonster = i;
                     }
                 }
-                // remove from state cardInHand
+                // remove from state cardInHand and add cardOnBoard
                 cpterCardInHand.splice(indexMonster, 1);
-    
+                cpterCardsOnBoard.push(monster)
             }
-            
-
-
+        } else {
         // IF COMPUTER PLAY A CARD
+        const cpterCardsOnBoard = play.state.cpterCardsOnBoard;
+            
+            // Choose one random card on board
+            let monster = cpterCardsOnBoard[Math.floor(Math.random()*cpterCardsOnBoard.length)];
+
+            // elementMouseIsOver.parentNode.dataset.player === 'cpterDeck'
+            const cardOnBoard = document.querySelector(`div[data-key="${monster[0].key}"]`);
+            console.log(cardOnBoard);
+            play.fightMoveCpter(cardOnBoard);
+
+
+        
+        }     
+
+
+
 
             infosField.innerHTML = 'A vous de jouer !'; }, 1000);
 
@@ -138,13 +156,18 @@ const play = {
     
     // END OF ROUND
 
-
+        play.state.round++;
+        console.log('round: ', play.state.round);
         play.state.playerRound = true;
         play.game();
     },
 
-    fightMoveCpter: function() {
+    fightMoveCpter: function(card) {
+
+        // On recupere en parametre la carte que l'on souhaite bouger
         
+        // On créé un objet avec la fonction dragAndDrop : new Drag(card);
+        new play.dragAndDrop.Drag(card);
     },
 
     fight: function(attacker, defenser) {
@@ -167,8 +190,8 @@ const play = {
         // Algorithm
 
             // find card in the state to avoid false value write by user in dom
-            const attackerKey = attacker.getAttribute('key');
-            const defenserKey = defenser.getAttribute('key');
+            const attackerKey = attacker.getAttribute('data-key');
+            const defenserKey = defenser.getAttribute('data-key');
 
             const attackerName = attacker.getAttribute('data-player');
             const defenserName = defenser.getAttribute('data-player');

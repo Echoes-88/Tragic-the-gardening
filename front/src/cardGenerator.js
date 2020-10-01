@@ -136,7 +136,7 @@ var cardGenerator = {
             const cardComponent = document.createElement('div');
             cardComponent.classList.add('cardComponent');
             cardComponent.classList.add('monster');
-            cardComponent.setAttribute('key', monster.key);
+            cardComponent.setAttribute('data-key', monster.key);
 
             if(user != 'cpter') {
             // cardComponent.setAttribute("position", 'in-hand' )
@@ -216,7 +216,7 @@ var cardGenerator = {
             const cardComponent = document.createElement('div');
             cardComponent.classList.add('cardComponent');
             cardComponent.classList.add('booster');
-            cardComponent.setAttribute('key', booster.key);
+            cardComponent.setAttribute('data-key', booster.key);
 
             if(user != 'cpter') {
                 cardComponent.setAttribute("position", 'in-hand' )
