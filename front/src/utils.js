@@ -70,65 +70,99 @@ const utils = {
 
     createBoardGame: function() {
 
+        // THE ALL BOARD GAME
         const main = document.querySelector('main');
         main.classList.add('board-game');
 
-        // SIDE AREA : SHOW BIG CARD, END OF ROUND...
+        // SIDE LEFT + DROP AREA
+        const sideAndDrop = document.createElement('div');
+        sideAndDrop.classList.add('side-and-drop');
+
+        // SIDE AREA.
         const sideArea = document.createElement('div');
         sideArea.classList.add('sideArea');
 
-          // Informations field
+        const borderSideArea = document.createElement('div');
+        borderSideArea.classList.add('border-left-side');
+
+          //-- Informations field
           const infosField = document.createElement('div');
           infosField.classList.add('infosField');
           
-          // End of round
+          //-- End of round
           const endOfRound = document.createElement('button');
           endOfRound.classList.add('endOfRound')
           endOfRound.classList.add('inactive')
           endOfRound.textContent = 'END OF ROUND'
 
-          // Big card container
+          //-- Big card container
           const bigCardContainer = document.createElement('div');
           bigCardContainer.classList.add('bigCardContainer')
 
+        // BOARD AREA
+        const boardArea = document.createElement('div');
+        boardArea.classList.add('boardArea');
 
-        const playArea = document.createElement('div');
-        playArea.classList.add('playArea');
+          //-- COMPUTER CARDS AREA
+          const cpterCards = document.createElement('div');
+          cpterCards.classList.add('cpterCards');
+          cpterCards.setAttribute('user', 'cpter')
 
-        // COMPUTER CARDS AREA
-        const cpterCards = document.createElement('div');
-        cpterCards.classList.add('cpterCards');
-        cpterCards.setAttribute('user', 'cpter')
+          //-- DROP AREA
+          const dropArea = document.createElement('div');
+          dropArea.classList.add('drop-area');
+        //   dropArea.setAttribute('draggable', true);
 
         // PLAYER CARDS AREA
-        const playerCards = document.createElement('div');
-        playerCards.classList.add('playerCards');
-        playerCards.setAttribute('user', 'player')
+        const playerArea = document.createElement('div');
+        playerArea.classList.add('playerArea');
+
+
+          //-- BORDER TOP
+          const borderPlayerAreaTop = document.createElement('div');
+          borderPlayerAreaTop.classList.add('border-player-area');
+
+          //-- CARDS
+          const playerCards = document.createElement('div');
+          playerCards.classList.add('playerCards');
+          playerCards.setAttribute('user', 'player')
+
+          //-- BORDER BOTTOM
+          const borderPlayerAreaBottom = document.createElement('div');
+          borderPlayerAreaBottom.classList.add('border-player-area');
+
 
         // ALLOW HORIZONTAL SCROLL WITH WHEEL
         window.addEventListener('wheel', function(e) {
 
-        if (e.deltaY > 0) playerCards.scrollLeft += 40;
-        else playerCards.scrollLeft -= 40;
+        if (e.deltaY > 0) playerArea.scrollLeft += 40;
+        else playerArea.scrollLeft -= 40;
         });
 
-        // DROP AREA
-        const dropArea = document.createElement('div');
-        dropArea.classList.add('drop-area');
-        dropArea.setAttribute('draggable', true);
 
         // ADD ELEMENTS IN DOM
+        // MAIN
+        main.appendChild(sideAndDrop);
+        main.appendChild(playerArea);
 
-        main.appendChild(sideArea);
-        main.appendChild(playArea);
+        // SIDE AND DROP
+        sideAndDrop.appendChild(sideArea);
+        sideAndDrop.appendChild(borderSideArea);
+        sideAndDrop.appendChild(boardArea);
 
         sideArea.appendChild(bigCardContainer);
         sideArea.appendChild(infosField);
         sideArea.appendChild(endOfRound);
 
-        playArea.appendChild(cpterCards);
-        playArea.appendChild(dropArea);
-        playArea.appendChild(playerCards);
+        boardArea.appendChild(cpterCards);
+        boardArea.appendChild(dropArea);
+        
+        // PLAYER AREA
+        playerArea.appendChild(borderPlayerAreaTop);
+        playerArea.appendChild(playerCards);
+        playerArea.appendChild(borderPlayerAreaBottom);
+
+
     },
 
     // Reload du css au changement de la taille de la fenetre pour eviter bug d'affichage sur les cartes joueur
@@ -144,6 +178,14 @@ const utils = {
                 link.href += "";
         }
      }
+    },
+
+    getPosition: function(elt) {
+
+        var rect = elt.getBoundingClientRect(),
+        scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
+        scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        return { top: rect.top + scrollTop, left: rect.left + scrollLeft }
     }
 
 };

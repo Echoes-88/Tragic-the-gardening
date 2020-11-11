@@ -97,12 +97,6 @@ var cardGenerator = {
 
     cpterDeck: async function() {
 
-        // GETTING LEVEL OF USER // DEBBUG + TARD POUR GENERER LES CARTES CPTER SELON NIVEAU JOUEUR
-        // const userDatas = sessionStorage.getItem('userDatas');
-        // const user = JSON.parse(userDatas);
-        // const userLevel = user.level;
-        // console.log(userLevel);
-
         const cards = await cardGenerator.getAllCards();
 
         const monsters = cards.monsters
@@ -129,183 +123,47 @@ var cardGenerator = {
 
     },
 
-    monsters: function(deck, user) {
+    cardGenerator: function(card, type, user) {
 
-        for(const monster of deck) {
+        var template = document.querySelector('#template-card');
+        var clone = document.importNode(template.content, true);
 
-            const cardComponent = document.createElement('div');
-            cardComponent.classList.add('cardComponent');
-            cardComponent.classList.add('monster');
-            cardComponent.setAttribute('data-key', monster.key);
+        // ATTRIBUTE
+        const container = clone.querySelector('.cardComponent');
+        container.setAttribute('data-key', card.key);
 
-            if(user != 'cpter') {
-            // cardComponent.setAttribute("position", 'in-hand' )
-            cardComponent.classList.add('playerCard');
-            cardComponent.setAttribute('data-player', 'playerDeck');
-            cardComponent.setAttribute("draggable", true);
-            }
-
-            if(user === 'cpter') {
-                cardComponent.classList.add('cpterCard');
-                cardComponent.setAttribute('data-player', 'cpterDeck');
-            }
-            
-            // CARD
-            const monsterCard = document.createElement('img');
-            monsterCard.classList.add('card-monster');
-            monsterCard.src =  `./assets/img/Monster.png`
-
-            const cardElementsContainer = document.createElement('div');
-            cardElementsContainer.classList.add('cardElementsContainer');
-            if(user != 'cpter') {
-                cardElementsContainer.setAttribute('data-player', 'playerDeck');
-            }
-            if(user === 'cpter') {
-                cardElementsContainer.setAttribute('data-player', 'cpterDeck');
-            }
-            
-            // NAME
-            const monsterName = document.createElement('p');
-            monsterName.classList.add('card-name');
-            monsterName.textContent = monster.title;
-
-            // DESCRIPTION
-            // const monsterDescription = document.createElement('p');
-            // monsterDescription.classList.add('card-description');
-            // monsterDescription.textContent = monster.text;
-
-            // PICTURE
-            const imgContainer = document.createElement('div');
-            imgContainer.classList.add('imgContainer');
-            const monsterPicture = document.createElement('img');
-            monsterPicture.classList.add('card-picture');
-            monsterPicture.src =  `./assets/img/monsters/${monster.id}.jpg`
-
-            // ATTACK - DEFENSE - HIT POINT
-            const monsterAttack = document.createElement('p');
-            monsterAttack.classList.add('card-attack');
-            monsterAttack.textContent = monster.attack;
-
-            const monsterDefense = document.createElement('p');
-            monsterDefense.classList.add('card-defense');
-            monsterDefense.textContent = monster.defense;
-
-            const monsterHitpoint = document.createElement('p');
-            monsterHitpoint.classList.add('card-hitpoint');
-            monsterHitpoint.textContent = monster.hit_point;
-
-            const container = document.querySelector(`div[user="${user}"]`);
-            container.appendChild(cardComponent);
-            cardComponent.appendChild(monsterCard);
-            cardComponent.appendChild(cardElementsContainer);
-            cardElementsContainer.appendChild(monsterHitpoint);
-            cardElementsContainer.appendChild(monsterName);
-            cardElementsContainer.appendChild(imgContainer);
-            imgContainer.appendChild(monsterPicture);
-            // cardElementsContainer.appendChild(monsterDescription);
-            cardElementsContainer.appendChild(monsterAttack);
-            cardElementsContainer.appendChild(monsterDefense);
-
+        if(user != 'cpter') {
+            container.classList.add('playerCard');
+            container.setAttribute('data-player', 'userDeck');
+            container.setAttribute("draggable", true);
+            container.setAttribute('data-status', 'onHand');
         }
+
+        if(user === 'cpter') {
+            container.setAttribute('data-player', 'cpterDeck');
+            clone.querySelector('.card-picture').classList.add('cpter');
+        }
+
+        // TITLE
+        clone.querySelector('.card-name').textContent = card.title;
+
+        // PICTURE
+        clone.querySelector('.card-picture').src =  `./assets/img/${type}/${card.id}.png`;
+
+        // STATISTICS & BACKGROUND
+        if(type === 'monster') {
+            clone.querySelector('.card-background').src =  `./assets/img/Monster.png`;
+
+            clone.querySelector('.attack').textContent = card.attack;
+            clone.querySelector('.defense').textContent = card.defense;
+            clone.querySelector('.hitpoint').textContent = card.hit_point;
+        } else {
+            clone.querySelector('.card-background').src =  `./assets/img/Booster.png`;
+            clone.querySelector('.boost').textContent = card.special_effect_value;
+        }
+
+        return clone;
     },
-
-    boosters: function(deck, user) {
-
-        for(const booster of deck) {
-
-            const cardComponent = document.createElement('div');
-            cardComponent.classList.add('cardComponent');
-            cardComponent.classList.add('booster');
-            cardComponent.setAttribute('data-key', booster.key);
-
-            if(user != 'cpter') {
-                cardComponent.setAttribute("position", 'in-hand' )
-                cardComponent.classList.add('playerCard');
-                cardComponent.setAttribute('data-player', 'playerDeck');
-                cardComponent.setAttribute("draggable", true);
-            }
-
-            if(user === 'cpter') {
-                cardComponent.classList.add('cpterCard');
-                cardComponent.setAttribute('data-player', 'cpterDeck');
-            }
-
-            // CARD
-            const boosterCard = document.createElement('img');
-            boosterCard.classList.add('card-booster');
-            boosterCard.src =  `./assets/img/Booster.png`
-
-            const cardElementsContainer = document.createElement('div');
-            cardElementsContainer.classList.add('cardElementsContainer');
-            if(user != 'cpter') {
-                cardElementsContainer.setAttribute('data-player', 'playerDeck');
-            }
-            if(user === 'cpter') {
-                cardElementsContainer.setAttribute('data-player', 'cpterDeck');
-            }
-
-            // NAME
-            const boosterName = document.createElement('p');
-            boosterName.classList.add('card-name');
-            boosterName.textContent = booster.title;
-
-            // DESCRIPTION
-            // const boosterDescription = document.createElement('p');
-            // boosterDescription.classList.add('card-description');
-            // boosterDescription.textContent = booster.special_effect_text;
-
-            // PICTURE
-            const imgContainer = document.createElement('div');
-            imgContainer.classList.add('imgContainer');
-            const boosterPicture = document.createElement('img');
-            boosterPicture.classList.add('card-picture');
-            boosterPicture.src =  `./assets/img/boosters/${booster.id}.jpg`
-
-            // BOOSTER VALUE
-            const boosterValue = document.createElement('p');
-            boosterValue.classList.add('card-value');
-            boosterValue.textContent = booster.special_effect_value;
-
-
-            const container = document.querySelector(`div[user="${user}"]`);
-            container.appendChild(cardComponent);
-            cardComponent.appendChild(boosterCard);
-            cardComponent.appendChild(cardElementsContainer);
-            cardElementsContainer.appendChild(boosterName);
-            cardElementsContainer.appendChild(imgContainer);
-            imgContainer.appendChild(boosterPicture);
-            // cardElementsContainer.appendChild(boosterDescription);
-            cardElementsContainer.appendChild(boosterValue);
-        }
-
-        cardGenerator.displayBigCard();
-    },
-
-    displayBigCard: function() {
-
-        const cards = document.getElementsByClassName('cardComponent');
-
-        let bigCard = document.querySelector('.bigCardContainer');
-
-
-        for(const card of cards) {
-            card.addEventListener('click', function(e) {
-                bigCard.innerHTML = '';
-                const container = document.querySelector('.sideArea')
-
-
-                const card = e.target.closest('.cardComponent');
-
-                bigCard = card.cloneNode(true);
-
-                bigCard.classList = 'cardComponent';
-                bigCard.setAttribute('draggable', 'false');
-
-                container.appendChild(bigCard);
-
-            })
-        }
-    }
 
 }
 

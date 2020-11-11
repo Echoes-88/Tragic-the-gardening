@@ -15,7 +15,7 @@ Deck.belongsTo(User, {
 // Un utilisateur possede plusieurs deck
 User.hasMany(Deck, {
     foreignKey: "user_id",
-    as: "userHasDecks"
+    as: "decks"
 })
 
 // Ajout de la colonne quantité pour l'association deck has Monster

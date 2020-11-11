@@ -147,6 +147,7 @@ body {
        justify-content: center;
    }
    
+   
    .card-deck {
        height: 300px;
        width: 200px;
@@ -155,8 +156,30 @@ body {
        margin:2rem;
        background-image: url(../img/Deck.png);
    }
+   
+   
+   .card-monster {
+       z-index: 1;
+       max-height: -webkit-fill-available;
+   }
+   
+   .card-booster {
+       z-index: 1;
+       max-height: -webkit-fill-available;
+   }
 
-   .card-picture-container {
+   /* NB : faire une fonction js qui refresh max-height: -webkit-fill-available si l'utilisateur modifie la taille de la fenettre*/
+   .cardElementsContainer {
+       z-index: 2;
+       position: absolute;
+       max-height: -webkit-fill-available;
+       max-width: -webkit-fill-available;
+       text-align: center;
+       height:100%;
+   }
+
+
+   .imgContainer {
     position: absolute;
     /* width: 100%; */
     height: 100%;
@@ -165,70 +188,32 @@ body {
     align-items: center;
     justify-content: center;
 }
-    .card-background {
-        z-index: 1;
-        max-height: -webkit-fill-available;
-    }
-   /* .card-background, .monster {
-    background-image: url(../img/Booster.png);
-    }
-
-    .card-background, .booster {
-        background-image: url(../img/Monster.png);
+   
+   .card-cpter-picture, .card-player-picture {
+        width: 67%;
+        margin-top: 14%;
+   }
+   /* save img detoure */
+   /* .card-picture {
+    width: 66%;
+    background-size: 100%;
+    display: block;
+    margin: auto;
     } */
 
-   
-   .card-picture {
-    width: 67%;
-    margin-top: 14%;
-   }
-   
-   /* .card-picture {
-    z-index: 1;
-    max-height: -webkit-fill-available;
-} */
-
-   .card-name {
+   .card-name, .card-description {
        color: #373737;
        font-family: 'Staatliches', cursive;
        font-size: 0.8vw;
    }
-
-   .card-value {
-        position: absolute;
-        font-size: 1.2em;
+   .card-attack, .card-defense, .card-hitpoint, .card-value {
+        font-size: 1.35vw;
         font-weight: bold;
         color: #3e7688;
         font-family: 'SierraMadre-JVYM';
         display: inline;
-        /* padding: 0.5vw 0.8vw; */
-        z-index: inherit;
+        padding: 0.5vw 0.8vw;
    }
-
-   .attack {
-    left:8%;
-    top:87%;
-    color: #9f5252;
-    }
-
-    .defense {
-        left:83%;
-        top:87%;
-        color:#52869f;
-
-    }
-
-    .hitpoint {
-        margin-top:5%;
-        margin-left:13%;
-        left: -2%;
-        color:#535f37;
-    }
-
-    .boost {
-        margin-top:6%;
-        margin-left:-37%;
-    }
 
    .card-name {
        position: absolute;
@@ -241,7 +226,35 @@ body {
        color: white;
     }
 
+     .card-attack {
+        position: absolute;
+        left:4%;
+        top:86%;
+        color: #9f5252;
+        z-index: inherit;
+     }
 
+     .card-defense {
+        position: absolute;
+        left:80%;
+        top:86%;
+        color:#52869f;
+        z-index: inherit;
+     }
+
+     .card-hitpoint {
+        margin-top:3%;
+        margin-left:8%;
+        position: absolute;
+        left: -2%;
+        color:#535f37;
+        z-index: inherit;
+     }
+
+     .card-value {
+        margin-top:3%;
+        margin-left:2%;
+     }
 
    
    /* BOARD */

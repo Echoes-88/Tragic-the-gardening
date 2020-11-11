@@ -6,6 +6,7 @@
  - Au 2eme tour on peut poser une carte + jouer
  - Ajouter le système des boosters : on pose la carte sur un monstre pour booster les competences
  - enlever option draggable pour cartes computer
+ - Remplacer le cardGenerator par un template dans le index.html
 
 # V2.0
 
@@ -13,6 +14,23 @@
 - => Chaque joueur de niveau 1 à 7 points d'actions
   => Poser une carte coute 3 points, jouer une carte 4
   => Au niveau 3 le joueur gagne une carte non jouable qui ajoute 1 point d'action. au niveau 7 il gagne un autre point d'actions
+
+# V3.0
+
+   TOUJOURS DEPENDRE DU STATE POUR GERER LES AFFICHAGES !! On modifie d'abord le state puis on créé l'affichage en partant des données du state !!
+
+   CREER EN HTML LES CONTAINERS UNIQUEMENT (COMME DES COMPONENTS) // LE CONTENU SERA CREE DYNAMIQUEMENT
+   EX : POUR LES FORMS, BOUCLE DE INPUT AVEC VIA UN STATE LE NOM DES ELEMENTS (STATE FORM : LOGIN=[FIRSTNAME, LASTNAME, EMAIL...])
+
+ - DOMHANDLER.JS :  GESTION DES BOUTONS MENU AVEC STATE ELTS MENUS (for const button of state.menu) / AFFICHER LE LOGIN / AFFICHER LE CREATE ACCOUNT / AFFICHER LES RULES / AFFICHER LES ELEMENTS DU JEU
+ - CARDCREATOR.JS : GENERER LES CARTES AVEC : class=cardComponent + monster/booster | status onboard/onhand | status player/cpter | status draggable/nonDraggable | data-key
+ - DRAGANDDROP.JS : REPRENDRE LE FICHIER TEL QUEL
+ - FORMHANDLER.JS : GESTION DES FORMULAIRES
+ - GAME.JS : GESTION DES TOURS / GESTION DES ATTAQUES / GESTION DES DRAGEND (MONSTER OR BOOSTER) / GESTION AJOUT CARTES CPTER (MONSTER OR BOOSTER)
+
+  ==> STATE GAME : cpterDeck // playerDeck // cardsInhand{ cpter:[]; player:[]} // cardsOnBoard{ cpter:[], player:[]} // round: 0
+
+  ==> CARDS : class = cardComponent monster // data-user="player" // data-key=3 // data-status="onHand" // draggable="true"
 
 # FACTORISATION DU CODE
 

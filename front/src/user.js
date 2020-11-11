@@ -1,4 +1,5 @@
 const utils = require('./utils');
+const Store = require('./store');
 
 const user = {
 
@@ -25,10 +26,12 @@ const user = {
 
         } else {
 
-            // Saving json response in local session
+            // Saving datas in local session
             userDatas = JSON.stringify(jsonResponse);
-            console.log(userDatas);
             sessionStorage.setItem('userDatas', userDatas);
+            
+            // Saving datas in store
+            Store.user = jsonResponse;
 
             utils.showLoggedMenu();
         }

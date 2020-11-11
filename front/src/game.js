@@ -1,6 +1,7 @@
 const utils = require('./utils');
 const play = require('./play');
 const cardGenerator = require('./cardGenerator');
+const Store = require('./store');
 
 const game = {
 
@@ -18,123 +19,72 @@ const game = {
         const container = document.querySelector('.container');
         container.style.justifyContent = 'center';
 
-        const article = document.querySelector('article');
-        if(article) { document.querySelector('article').innerHTML = ''; }
+        // const article = document.querySelector('article');
+        // if(article) { document.querySelector('article').innerHTML = ''; }
         
+        // Creating main elements in dom
+        const mainArea = document.querySelector('main');
+        const article = document.createElement('article');
+        mainArea.appendChild(article);
 
-        // Checking if user has decks from API
+        // Checking if user has decks
 
-        const userDatas = sessionStorage.getItem('userDatas');
-        const user = JSON.parse(userDatas);
+        if(Store.user.decks) {
 
-        const requestConfig = {
-            method: 'GET'
-        };
+            for(const deck of Store.user.decks) {
 
-        const response = await fetch(`${game.baseUrl}/user-decks/${user.id}`, requestConfig);
-        const jsonResponse = await response.json();
+                cardGenerator.deck(deck);
 
-        if(response.status === 404) {
+                const seeThisDeck = document.querySelector('.see-deck');
+                const playThisDeck = document.querySelector('.play-deck');
+
+                seeThisDeck.addEventListener('click', function(){ game.showDeck(deck);});
+                playThisDeck.addEventListener('click', function(){ play.launchGame(deck)});
+            }
 
         } else {
+            
+            // Generating a deck for new user
 
-            // Creating main elements in dom
-            const mainArea = document.querySelector('main');
-            const article = document.createElement('article');
-            mainArea.appendChild(article);
+            const textNewDeck = document.createElement('p');
+            textNewDeck.textContent = 'Create your first deck to play !'
 
-            // Add decks datas in session (back) !!
+            const form = document.createElement('form');
+            form.classList.add('form');
+            article.appendChild(textNewDeck);
+            article.appendChild(form);
 
-                        
-            if(jsonResponse[0].userHasDecks.length > 0) {
+            const deckName = document.createElement('input');
+            deckName.placeholder = 'name';
+            deckName.name = 'title';
+            form.appendChild(deckName);
 
-                const decks = jsonResponse[0].userHasDecks;
+            const userId = document.createElement('input');
+            userId.name = 'id';
+            userId.value = user.id;
+            userId.style.display = 'none';
+            form.appendChild(userId);
 
-                for(const deck of decks) {
+            const createDeckButton = document.createElement('button');
+            createDeckButton.type = 'submit';
+            createDeckButton.textContent = 'Create a deck';
+            form.appendChild(createDeckButton);
 
-                    cardGenerator.deck(deck);
-
-                    // EventListeners for buttons (deck manager / play with deck)
-
-                    const seeThisDeck = document.querySelector('.see-deck');
-                    const playThisDeck = document.querySelector('.play-deck');
-
-                    seeThisDeck.addEventListener('click', function(){
-                        game.showDeck(deck);
-                    });
-                    playThisDeck.addEventListener('click', function(){ play.launchGame(deck)});
-
-                }
-
-                // Appendchild un visuel global par deck
-                // Onclick du deck afficher les cartes
-
-            } else {
-                console.log('no decks')
-
-                const textNewDeck = document.createElement('p');
-                textNewDeck.textContent = 'Create your first deck to play !'
-
-                const form = document.createElement('form');
-                form.classList.add('form');
-                article.appendChild(textNewDeck);
-                article.appendChild(form);
-
-                const deckName = document.createElement('input');
-                deckName.placeholder = 'name';
-                deckName.name = 'title';
-                form.appendChild(deckName);
-
-                const userId = document.createElement('input');
-                userId.name = 'id';
-                userId.value = user.id;
-                userId.style.display = 'none';
-                form.appendChild(userId);
-
-                const createDeckButton = document.createElement('button');
-                createDeckButton.type = 'submit';
-                createDeckButton.textContent = 'Create a deck';
-                form.appendChild(createDeckButton);
-
-                form.addEventListener('submit', cardGenerator.firstUserDeck);
-            }
+            form.addEventListener('submit', cardGenerator.firstUserDeck);
         }
 
         // ADDING "BACK TO MAIN MENU"
         const backMenu = document.createElement('button');
         backMenu.classList.add('nav-button');
         backMenu.textContent = "GO BACK"
-        // document.appendChild(backMenu);
+        mainArea.appendChild(backMenu);
 
         // EVENTLISTENER "BACK TO MAIN MENU"
         backMenu.addEventListener('click', utils.showLoggedMenu);
 
     },
-
-
-    // deckGenerator: async function(data) {
-
-    //     event.preventDefault();
-
-    //     const datas = new FormData(data.target);
-
-    //     const requestConfig = {
-    //         method: 'POST',
-    //         body: datas
-    //     };
-
-    //     await fetch(`${game.baseUrl}/crud/deck`, requestConfig);
-    //     // const jsonResponse = await response.json();
-        
-    //     // console.log(jsonResponse);
-
-    //     // for (var value of datas.values()) {
-    //     //     console.log(value); 
-    //     //  }
-
-    // },
     
-    showDeck: function(deckDatas) {
+    showDeck: function(deck) {
 
         // CLEAR DISPLAY
         utils.clearEverything();
@@ -144,8 +94,8 @@ const game = {
         article.innerHTML = '';
         article.classList.remove('is-hidden');
 
-        const monsters = deckDatas.monsters;
-        const boosters = deckDatas.boosters;
+        const monsters = deck.monsters;
+        const boosters = deck.boosters;
 
         for(const monster of monsters) {
 
