@@ -32,7 +32,7 @@ const user = {
             
             // Saving datas in store
             Store.user = jsonResponse;
-
+            console.log(jsonResponse)
             utils.showLoggedMenu();
         }
 
@@ -120,6 +120,9 @@ const user = {
         // Saving json response in local session
         userDatas = JSON.stringify(jsonResponse);
         sessionStorage.setItem('userDatas', userDatas);
+
+        // Saving datas in store
+        Store.user = jsonResponse;
 
         // CLEAR DISPLAY
         utils.clearEverything();

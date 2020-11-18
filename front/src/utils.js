@@ -84,10 +84,6 @@ const utils = {
 
         const borderSideArea = document.createElement('div');
         borderSideArea.classList.add('border-left-side');
-
-          //-- Informations field
-          const infosField = document.createElement('div');
-          infosField.classList.add('infosField');
           
           //-- End of round
           const endOfRound = document.createElement('button');
@@ -95,9 +91,19 @@ const utils = {
           endOfRound.classList.add('inactive')
           endOfRound.textContent = 'END OF ROUND'
 
+          //-- Informations field
+          const infosField = document.createElement('div');
+          infosField.classList.add('infosField');
+          const infosFieldBubble = document.createElement('div');
+          infosFieldBubble.classList.add('infosField-bubble');
+
+          // Vault boy
+          const vaultBoy = document.createElement('div');
+          vaultBoy.classList.add('vault-boy');
+
           //-- Big card container
-          const bigCardContainer = document.createElement('div');
-          bigCardContainer.classList.add('bigCardContainer')
+            //   const bigCardContainer = document.createElement('div');
+            //   bigCardContainer.classList.add('bigCardContainer')
 
         // BOARD AREA
         const boardArea = document.createElement('div');
@@ -106,7 +112,7 @@ const utils = {
           //-- COMPUTER CARDS AREA
           const cpterCards = document.createElement('div');
           cpterCards.classList.add('cpterCards');
-          cpterCards.setAttribute('user', 'cpter')
+          cpterCards.setAttribute('player', 'cpter')
 
           //-- DROP AREA
           const dropArea = document.createElement('div');
@@ -125,12 +131,11 @@ const utils = {
           //-- CARDS
           const playerCards = document.createElement('div');
           playerCards.classList.add('playerCards');
-          playerCards.setAttribute('user', 'player')
+          playerCards.setAttribute('player', 'user')
 
           //-- BORDER BOTTOM
           const borderPlayerAreaBottom = document.createElement('div');
           borderPlayerAreaBottom.classList.add('border-player-area');
-
 
         // ALLOW HORIZONTAL SCROLL WITH WHEEL
         window.addEventListener('wheel', function(e) {
@@ -150,9 +155,10 @@ const utils = {
         sideAndDrop.appendChild(borderSideArea);
         sideAndDrop.appendChild(boardArea);
 
-        sideArea.appendChild(bigCardContainer);
-        sideArea.appendChild(infosField);
         sideArea.appendChild(endOfRound);
+        sideArea.appendChild(infosField);
+        sideArea.appendChild(infosFieldBubble);
+        sideArea.appendChild(vaultBoy);
 
         boardArea.appendChild(cpterCards);
         boardArea.appendChild(dropArea);
@@ -186,7 +192,7 @@ const utils = {
         scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
         scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         return { top: rect.top + scrollTop, left: rect.left + scrollLeft }
-    }
+    },
 
 };
 

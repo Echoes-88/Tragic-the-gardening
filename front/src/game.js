@@ -9,7 +9,7 @@ const game = {
 
     play: async function(event) {
         event.preventDefault();
-
+        console.log(Store.user)
         // CLEAR DISPLAY
         utils.clearEverything();
 
@@ -45,7 +45,7 @@ const game = {
         } else {
             
             // Generating a deck for new user
-
+            console.log('on passe par la creation de deck')
             const textNewDeck = document.createElement('p');
             textNewDeck.textContent = 'Create your first deck to play !'
 
@@ -61,7 +61,7 @@ const game = {
 
             const userId = document.createElement('input');
             userId.name = 'id';
-            userId.value = user.id;
+            userId.value = Store.user.id;
             userId.style.display = 'none';
             form.appendChild(userId);
 
@@ -77,7 +77,7 @@ const game = {
         const backMenu = document.createElement('button');
         backMenu.classList.add('nav-button');
         backMenu.textContent = "GO BACK"
-        mainArea.appendChild(backMenu);
+        article.appendChild(backMenu);
 
         // EVENTLISTENER "BACK TO MAIN MENU"
         backMenu.addEventListener('click', utils.showLoggedMenu);
@@ -94,38 +94,21 @@ const game = {
         article.innerHTML = '';
         article.classList.remove('is-hidden');
 
+        article.classList.add('deckManager')
+
+
         const monsters = deck.monsters;
         const boosters = deck.boosters;
 
-        for(const monster of monsters) {
-
-            const monsterCard = document.createElement('div');
-            monsterCard.classList.add('card');
-            monsterCard.classList.add('monster');
-
-            const monsterPicture = document.createElement('img');
-            monsterPicture.classList.add('card-picture');
-            monsterPicture.src =  `./assets/img/monsters/${monster.id}.jpg`
-
-            const article = document.querySelector('article');
-            article.classList.add('deckContainer')
+        monsters.map((card) => {
+            const monsterCard = cardGenerator.card(card, 'monster', 'user');
             article.appendChild(monsterCard);
-            monsterCard.appendChild(monsterPicture);
-        }
+        });
 
-        for(const booster of boosters) {
-
-            const boosterCard = document.createElement('div');
-            boosterCard.classList.add('card');
-            boosterCard.classList.add('booster');
-
-            const boosterPicture = document.createElement('img');
-            boosterPicture.classList.add('card-picture');
-            boosterPicture.src =  `./assets/img/boosters/${booster.id}.jpg`
-
+        boosters.map((card) => {
+            const boosterCard = cardGenerator.card(card, 'booster', 'user');
             article.appendChild(boosterCard);
-            boosterCard.appendChild(boosterPicture);
-        }
+        });
 
         // "BACK TO CHOOSE DECK MENU"
         const backMenu = document.createElement('button');

@@ -40,11 +40,16 @@ body {
    }
 
    .logo {
-       margin-top: 3rem;
+       margin: auto;
+       display: block;
+       padding: 2rem 0;
+       height: 40%;
    }
    
    .menu {
-    margin-top: 1rem;
+    margin: auto;
+    width: 25%;
+    display: block;
    }
    
    .menu a {
@@ -94,27 +99,45 @@ body {
    }
    
    /* FORM */
-   form {
-       flex-direction: column;
+   .form {
+    margin: auto;
+    width: 40%;
+    text-align: center;
+
    }
+
+   .form-label-group {
+       margin-top: 1rem;
+   }
+
+   .form-control {
+    width: 50%;
+}
    
    label {
        display: block;
-       color: greenyellow;
-       font-size: 2em;
-       font-family: "AdobeDia";
+       color: #fdff2f;
+       font-size: 1.3em;
+       font-family: 'Staatliches';
    
    }
    
    input
    {   
-       color:green;
-       background-color: black;
-       height: 28px;
-       padding-left: 10px;
-       text-decoration: none;
-       border: 1px solid green;
+        color: #4c4c4c;
+        background-color: white;
+        height: 1.8rem;
+        padding-left: 10px;
+        text-decoration: none;
+        border: 2px solid #e0e0e0;
+        width: 64%;
    }
+
+   input[type=checkbox] {
+    width: 5%;
+    height: 18px;
+    margin-top: 1rem;
+    }
    
    /* FORM */
    article {
@@ -122,14 +145,19 @@ body {
    }
    
    button {
-       background-color: #101010;
-       color:greenyellow;
-       font-family: 'AdobeDia';
+       background-color: #223f48;
+       color:#FDFF2F;
+       font-family: 'Staatliches';
        text-align: center;
-       font-size: 1.5em;
+       font-size: 1.2em;
        cursor: pointer;
        margin: 0.7rem auto;
        display: block;
+   }
+
+   button:hover {
+    background-color: #0c191d;
+    color:#FDFF2F;
    }
 
    .inactive {
@@ -138,6 +166,17 @@ body {
    }
    
    /* CARDS */
+
+   /* cards container for deck management */
+    .deckManager {
+        height: 30%;
+        display: -webkit-inline-box;
+        align-items: flex-end;
+        overflow-x: scroll;
+        overflow-y: hidden;
+        overflow-x: hidden;
+        white-space: nowrap;
+    }
    
    .deckContainer {
        display: flex;
@@ -158,7 +197,7 @@ body {
 
    .card-picture-container {
     position: absolute;
-    /* width: 100%; */
+    width: 100%;
     height: 100%;
     z-index: inherit;
     display: flex;
@@ -179,8 +218,7 @@ body {
 
    
    .card-picture {
-    width: 67%;
-    margin-top: 14%;
+    width: 90%;
    }
    
    /* .card-picture {
@@ -256,6 +294,7 @@ body {
         height: 65%;
         display: flex;
         }
+
         /* SIDE AREA */
         .sideArea {
             background-image: url(../img/board/bckgrd-Infos.jpg);
@@ -263,7 +302,38 @@ body {
             width: 20%;
             max-width: 260px;
             height: 100%;
-            display: inline-block;
+            position: relative;
+        }
+
+        .black-filter {
+            background-color: rgba(0, 0, 0, 0.7);
+            height: 100%;
+            width: 100%;
+            position: fixed;
+            z-index: 10;
+        }
+
+        .exemple-card {
+            background-image: url(../img/exempleCard.png);
+            width: 14%;
+            height: 35%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: fixed;
+            /* margin: auto; */
+            left: 50%;
+            top: 18%;
+            z-index: 11;
+        }
+
+        .close-button {
+            width: 4%;
+            height: 4%;
+            position: fixed;
+            left: 64%;
+            top: 14%;
+            z-index: 11;
         }
 
         .border-left-side {
@@ -273,12 +343,37 @@ body {
         }
 
         .infosField {
-            background-color: black;
-            color: greenyellow;
+            background-color: white;
+            color: rgb(49, 49, 49);
+            width: 83%;
+            border-radius: 10px;
+            bottom: 23%;
+            position: absolute;
+            margin-left: 9%;
+            padding: 0.8rem;
+            font-family: 'Staatliches';
+            text-align: center;
+        }
+
+        .infosField-bubble {
+            background-image: url(../img/board/buble-speak.png);
+            height: 10%;
+            background-repeat: no-repeat;
+            bottom: 14%;
+            position: absolute;
+            width: 20%;
+            left: 41%;
+        }
+
+        .vault-boy {
+            background-image: url(../img/board/vault-boy.png);
+            width: 50%;
             height: 20%;
-            width: 80%;
-            margin: auto;
-            margin-top: 5%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: absolute;
+            bottom: 0;
         }
 
         /* BOARD AREA */
@@ -319,7 +414,17 @@ body {
             overflow-y: hidden;
             overflow-x: hidden;
             white-space: nowrap;
-           
+        }
+
+        .show {
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .show p {
+            color: #616161;
+            text-shadow: 2px 2px 2px #CEC1B4;
+            font-family: 'Staatliches';
+            margin: auto;
         }
 
 
@@ -370,11 +475,10 @@ body {
     display: inline-block;
 } */
 
-    /* FIGHT AREA */
-    .fightArea {
-        position: absolute;
-        width: 60%;
-        height: 60%;
+    /* ANIMATIONS */
+    .animationContainer {
+        width: 100%;
+        height: 100%;
         margin: auto;
         z-index: 4;
         display: flex;
@@ -390,6 +494,17 @@ body {
         position: absolute;
         left: 50%;
         top: 25%;
+    }
+
+    .textArea {
+        font-size: 3em;
+        text-shadow: 2px 2px 2px #CEC1B4;
+        position: absolute;
+        left: 50%;
+        top: 10%;
+        color:rgb(0, 0, 0);
+        font-family: 'AdobeDia';
+
     }
 
     /* .shadow {
@@ -420,6 +535,18 @@ body {
   
   @keyframes blinker {
     50% {
+      opacity: 0;
+    }
+  }
+
+  .blink_hit-point {
+    color: red;
+    animation: blinker-hit-point 0.5s linear infinite;
+  }
+  
+  @keyframes blinker-hit-point {
+    50% {
+
       opacity: 0;
     }
   }

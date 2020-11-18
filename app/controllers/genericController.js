@@ -61,7 +61,7 @@ const genericController = {
 
             // CREATE DECK
             if(entity === 'deck') {
-
+                console.log(req.body)
                 // Adding deck in database
                 const deck = await models.Deck.create(
                 {
@@ -69,26 +69,38 @@ const genericController = {
                     user_id: req.body.id
                 });
 
+                deckId = deck.id;
+
                 const monsters =  JSON.parse("[" + req.body.monsters + "]");
 
                 // GET OCCURENCIES OF EACH MONSTER VALUES AND ADDING IN DATABASE
                 monsters.sort();
 
-                var current = null;
+                var idMonster = null;
                 var cnt = 0;
                 for (var i = 0; i < monsters.length; i++) {
-                    if (monsters[i] != current) {
+                    if (monsters[i] != idMonster) {
                         if (cnt > 0) {
-                            await deck.addDeckHasMonster(current, { through: {quantity: cnt}});
+                            console.log('current is', deck)
+                            // await monsters(idMonster, { through: {quantity: cnt}});
+                            await MonsterQuantity.create({
+                                deck_id: deckId,
+                                monster_id: idMonster,
+                                quantity: cnt,
+                            });
                         }
-                        current = monsters[i];
+                        idMonster = monsters[i];
                         cnt = 1;
                     } else {
                         cnt++;
                     }
                 }
                 if (cnt > 0) {
-                    await deck.addDeckHasMonster(current, { through: {quantity: cnt}});
+                    await MonsterQuantity.create({
+                        deck_id: deckId,
+                        monster_id: idMonster,
+                        quantity: cnt,
+                    });
                 }
             
 
@@ -98,21 +110,30 @@ const genericController = {
 
                 boosters.sort();
 
-                var current2 = null;
+                var idBooster = null;
                 var cnt2 = 0;
                 for (var i = 0; i < boosters.length; i++) {
-                    if (boosters[i] != current2) {
+                    if (boosters[i] != idBooster) {
                         if (cnt2 > 0) {
-                            await deck.addDeckHasBooster(current2, { through: {quantity: cnt2}});
+                            await BoosterQuantity.create({
+                                deck_id: deckId,
+                                booster_id: idBooster,
+                                quantity: cnt2,
+                            });
+
                         }
-                        current2 = boosters[i];
+                        idBooster = boosters[i];
                         cnt2 = 1;
                     } else {
                         cnt2++;
                     }
                 }
                 if (cnt2 > 0) {
-                    await deck.addDeckHasBooster(current2, { through: {quantity: cnt2}});
+                    await BoosterQuantity.create({
+                        deck_id: deckId,
+                        booster_id: idBooster,
+                        quantity: cnt2,
+                    });
                 }
 
 

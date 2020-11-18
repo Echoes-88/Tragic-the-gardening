@@ -67,13 +67,13 @@ var cardGenerator = {
         let boostersArray = [];
 
         // Choosing 5 random monsters and adding in arrays
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < 4; i++) {
             let monster = monsters[Math.floor(Math.random()*monsters.length)];
             monstersArray.push(monster.id)       
         }
 
-        // Choosing 3 random booster and adding in arrays
-        for (var i = 0; i < 3; i++) {
+        // Choosing 2 random booster and adding in arrays
+        for (var i = 0; i < 2; i++) {
             let booster = boosters[Math.floor(Math.random()*boosters.length)];
             boostersArray.push(booster.id)       
         }
@@ -106,13 +106,14 @@ var cardGenerator = {
         let boostersArray = [];
 
         // Choosing 5 random monsters and adding in arrays
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < 4; i++) {
             let monster = monsters[Math.floor(Math.random()*monsters.length)];
+            monster.key = null;
             monstersArray.push(monster)       
         }
 
         // Choosing 3 random booster and adding in arrays
-        for (var i = 0; i < 3; i++) {
+        for (var i = 0; i < 2; i++) {
             let booster = boosters[Math.floor(Math.random()*boosters.length)];
             boostersArray.push(booster)       
         }
@@ -123,7 +124,7 @@ var cardGenerator = {
 
     },
 
-    cardGenerator: function(card, type, user) {
+    card: function(card, type, user) {
 
         var template = document.querySelector('#template-card');
         var clone = document.importNode(template.content, true);

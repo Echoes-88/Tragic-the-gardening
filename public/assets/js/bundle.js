@@ -1,4 +1,62 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+
+const utils = require('./utils');
+
+var animation = {
+  
+    blink: function(cardone, cardtwo) {
+
+        cardone.classList.add('blink_me');
+        cardtwo.classList.add('blink_me');
+
+        setTimeout(function(){ 
+            cardone.classList.remove('blink_me');
+            cardtwo.classList.remove('blink_me');
+
+        }, 2000);
+
+    },
+
+    moveCards: function(cpterCard, playerCard) {
+
+        const positionPlayerCard = utils.getPosition(playerCard);
+        const positionCpterCard = utils.getPosition(cpterCard);
+
+        cpterCard.style.position = 'fixed';
+
+        cpterCard.animate([{
+            top: positionCpterCard.top+'px',
+            left: positionCpterCard.left+'px'
+        },
+        {
+            top: positionPlayerCard.top+'px',
+            left: positionPlayerCard.left+'px'
+        }
+    ], {
+        duration: 1000,
+    });
+
+    setTimeout(function(){ 
+    cpterCard.removeAttribute('style');
+    animation.blink(cpterCard, playerCard);
+    }, 1000);
+    },
+
+    cpterAddBooster: function(booster, monster) {
+
+        // Select monster card on board
+        let domMonsterCard = document.querySelector(`div[data-key="${monster.key}"]`);
+
+        // Select monster card on board
+        let domBoosterCard = document.querySelector(`div[data-key="${booster.key}"]`);
+
+        animation.blink(domBoosterCard, domMonsterCard);
+    }
+
+}
+
+module.exports = animation;
+},{"./utils":9}],2:[function(require,module,exports){
 const utils = require('./utils');
 const user = require('./user');
 const game = require('./game');
@@ -43,7 +101,7 @@ init: function () {
 };
 
 document.addEventListener('DOMContentLoaded', app.init);
-},{"./game":4,"./user":7,"./utils":8}],2:[function(require,module,exports){
+},{"./game":5,"./user":8,"./utils":9}],3:[function(require,module,exports){
 const game = require('./game');
 const utils = require('./utils');
 
@@ -113,13 +171,13 @@ var cardGenerator = {
         let boostersArray = [];
 
         // Choosing 5 random monsters and adding in arrays
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < 4; i++) {
             let monster = monsters[Math.floor(Math.random()*monsters.length)];
             monstersArray.push(monster.id)       
         }
 
-        // Choosing 3 random booster and adding in arrays
-        for (var i = 0; i < 3; i++) {
+        // Choosing 2 random booster and adding in arrays
+        for (var i = 0; i < 2; i++) {
             let booster = boosters[Math.floor(Math.random()*boosters.length)];
             boostersArray.push(booster.id)       
         }
@@ -152,13 +210,14 @@ var cardGenerator = {
         let boostersArray = [];
 
         // Choosing 5 random monsters and adding in arrays
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < 4; i++) {
             let monster = monsters[Math.floor(Math.random()*monsters.length)];
+            monster.key = null;
             monstersArray.push(monster)       
         }
 
         // Choosing 3 random booster and adding in arrays
-        for (var i = 0; i < 3; i++) {
+        for (var i = 0; i < 2; i++) {
             let booster = boosters[Math.floor(Math.random()*boosters.length)];
             boostersArray.push(booster)       
         }
@@ -169,7 +228,7 @@ var cardGenerator = {
 
     },
 
-    cardGenerator: function(card, type, user) {
+    card: function(card, type, user) {
 
         var template = document.querySelector('#template-card');
         var clone = document.importNode(template.content, true);
@@ -215,7 +274,7 @@ var cardGenerator = {
 
 
 module.exports = cardGenerator;
-},{"./game":4,"./utils":8}],3:[function(require,module,exports){
+},{"./game":5,"./utils":9}],4:[function(require,module,exports){
 
 const dragAndDrop = {
 
@@ -343,7 +402,7 @@ const dragAndDrop = {
 };
 
 module.exports = dragAndDrop;
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 const utils = require('./utils');
 const play = require('./play');
 const cardGenerator = require('./cardGenerator');
@@ -355,7 +414,7 @@ const game = {
 
     play: async function(event) {
         event.preventDefault();
-
+        console.log(Store.user)
         // CLEAR DISPLAY
         utils.clearEverything();
 
@@ -391,7 +450,7 @@ const game = {
         } else {
             
             // Generating a deck for new user
-
+            console.log('on passe par la creation de deck')
             const textNewDeck = document.createElement('p');
             textNewDeck.textContent = 'Create your first deck to play !'
 
@@ -407,7 +466,7 @@ const game = {
 
             const userId = document.createElement('input');
             userId.name = 'id';
-            userId.value = user.id;
+            userId.value = Store.user.id;
             userId.style.display = 'none';
             form.appendChild(userId);
 
@@ -423,7 +482,7 @@ const game = {
         const backMenu = document.createElement('button');
         backMenu.classList.add('nav-button');
         backMenu.textContent = "GO BACK"
-        mainArea.appendChild(backMenu);
+        article.appendChild(backMenu);
 
         // EVENTLISTENER "BACK TO MAIN MENU"
         backMenu.addEventListener('click', utils.showLoggedMenu);
@@ -440,38 +499,21 @@ const game = {
         article.innerHTML = '';
         article.classList.remove('is-hidden');
 
+        article.classList.add('deckManager')
+
+
         const monsters = deck.monsters;
         const boosters = deck.boosters;
 
-        for(const monster of monsters) {
-
-            const monsterCard = document.createElement('div');
-            monsterCard.classList.add('card');
-            monsterCard.classList.add('monster');
-
-            const monsterPicture = document.createElement('img');
-            monsterPicture.classList.add('card-picture');
-            monsterPicture.src =  `./assets/img/monsters/${monster.id}.jpg`
-
-            const article = document.querySelector('article');
-            article.classList.add('deckContainer')
+        monsters.map((card) => {
+            const monsterCard = cardGenerator.card(card, 'monster', 'user');
             article.appendChild(monsterCard);
-            monsterCard.appendChild(monsterPicture);
-        }
+        });
 
-        for(const booster of boosters) {
-
-            const boosterCard = document.createElement('div');
-            boosterCard.classList.add('card');
-            boosterCard.classList.add('booster');
-
-            const boosterPicture = document.createElement('img');
-            boosterPicture.classList.add('card-picture');
-            boosterPicture.src =  `./assets/img/boosters/${booster.id}.jpg`
-
+        boosters.map((card) => {
+            const boosterCard = cardGenerator.card(card, 'booster', 'user');
             article.appendChild(boosterCard);
-            boosterCard.appendChild(boosterPicture);
-        }
+        });
 
         // "BACK TO CHOOSE DECK MENU"
         const backMenu = document.createElement('button');
@@ -487,347 +529,160 @@ const game = {
 }
 
 module.exports = game;
-},{"./cardGenerator":2,"./play":5,"./store":6,"./utils":8}],5:[function(require,module,exports){
+},{"./cardGenerator":3,"./play":6,"./store":7,"./utils":9}],6:[function(require,module,exports){
 const utils = require('./utils');
 const cardGenerator = require('./cardGenerator');
 const dragAndDrop = require('./dragAndDrop');
+const animation = require('./animation');
+
+
+
+
+// Regular variable used for dom selection
+let infosField = null;
+let endOfRoundButton = null;
+// Game
+
+let round = 0;
+
+let userDeck = {
+    monsters: [],
+    boosters: [],
+};
+
+let cpterDeck = {
+    monsters: [],
+    boosters: [],
+};
 
 const play = {
 
-    state: {
-        amountPlayerCardsOnBoard: 0,
-        // cpterCardsOnBoard: 0,
-        playerRound: true,
-        endRoundReady: false,
-        userDeck: null,
-        cpterDeck: null,
-        // playerDeckInHand: null,
-        playerCardsOnboard: [],
-        cpterCardInHand: [],
-        cpterCardsOnBoard: [],
-        round: 0,
-        },
-  
+    launchGame: async function(userDeckDatas) {
 
-    launchGame: async function(playerDeck) {
-
-        // CHANGE FLEX DIRECTION
+        // Change flex direction
         const container = document.querySelector('.container');
         container.style.flexDirection = 'row';
 
-        // CLEAR DISPLAY
+        // Clear display and create board
         utils.clearEverything();
 
+        // Show exemple card
+        const body = document.querySelector('body');
+        const blackFilter = document.createElement('div');
+        const exempleCard = document.createElement('div');
+        const close = document.createElement('button');
+        close.textContent = 'close';
+
+        blackFilter.classList.add('black-filter');
+        exempleCard.classList.add('exemple-card');
+        close.classList.add('close-button');
+
+        body.insertBefore(blackFilter, body.firstChild);
+        container.appendChild(close)
+        container.appendChild(exempleCard)
+        close.addEventListener('click', function() {
+            blackFilter.remove();
+            exempleCard.remove();
+            close.remove();
+        })
+
+        // Create board game and assign frequent called dom elements
         utils.createBoardGame();
+        infosField = document.querySelector('.infosField');
+        endOfRoundButton = document.querySelector('.endOfRound');
 
-        cpterDeck = await cardGenerator.cpterDeck();
+        // Show user board area
+        const userBoard = document.querySelector('.drop-area');
+        userBoard.classList.add('show');
+        const userBoardMessage = document.createElement('p');
+        userBoardMessage.textContent = "DRAG AND DROP YOUR CARD HERE";
+        userBoard.appendChild(userBoardMessage);
 
-        // Add a key to each card for identification
+        // Generating a deck for computer
+        const cpterDeckDatas = await cardGenerator.cpterDeck();
+
+        // Deep copy to avoid duplicate keys
+        const deepCopyUser = JSON.parse(JSON.stringify(userDeckDatas));
+        const deepCopyCpter = JSON.parse(JSON.stringify(cpterDeckDatas));
+
+        // Assign decks for each player
+
+        userDeck.monsters = deepCopyUser.monsters;
+        userDeck.boosters = deepCopyUser.boosters;
+
+        cpterDeck.monsters = deepCopyCpter.monsters;
+        cpterDeck.boosters = deepCopyCpter.boosters;
+
+
+        // Generating unique key, status and type for each card
         let inc = 0;
-        for(const card of cpterDeck.monsters) {
-            card.key = inc++;
-        }
-
-        for(const card of cpterDeck.boosters) {
-            card.key = inc++;
-        }
+        userDeck.monsters.forEach(card => {card.key = inc++; card.onBoard = false; card.type = 'monster'; card.owner = 'user'});
+        userDeck.boosters.forEach(card => {card.key = inc++; card.onBoard = false; card.type = 'booster'; card.owner = 'user'});
 
         // inc = 0;
-        for(const card of playerDeck.monsters) {
-            card.key = inc++;
-        }
+        cpterDeck.monsters.forEach(card => {card.key = inc++; card.onBoard = false; card.type = 'monster'; card.owner = 'cpter'});
 
-        for(const card of playerDeck.boosters) {
-            card.key = inc++;
-        }
-        console.log(playerDeck)
-        // State to handle real card stats
-        play.state.userDeck = playerDeck;
-        play.state.cpterDeck = cpterDeck;
+        cpterDeck.boosters.forEach(card => {card.key = inc++; card.onBoard = false; card.type = 'booster'; card.owner = 'cpter'});
 
-        // Deep copy of cpter cards to handle visual cards
-        play.state.cpterCardInHand = JSON.parse(JSON.stringify(cpterDeck));
-        
-        // GENERATE PLAYER CARDS ON BOARD
-        const playerCardsContainer = document.querySelector(`div[user="player"]`);
+        // Generating player cards on board
+        const cardsContainer = document.querySelector(`div[player="user"]`);
 
-        for(const card of playerDeck.monsters) {
-            const cardGenerate = cardGenerator.cardGenerator(card, 'monster', 'player');
-            playerCardsContainer.appendChild(cardGenerate);
-        }
+        userDeck.monsters.map((card) => {
+            const monsterCard = cardGenerator.card(card, 'monster', 'user');
+            cardsContainer.appendChild(monsterCard);
+        });
 
-        for(const card of playerDeck.boosters) {
-            const cardGenerate = cardGenerator.cardGenerator(card, 'booster', 'player');
-            playerCardsContainer.appendChild(cardGenerate);
-        }
+        userDeck.boosters.map((card) => {
+            const boosterCard = cardGenerator.card(card, 'booster', 'user');
+            cardsContainer.appendChild(boosterCard);
+        });
 
-        play.game();
+        // Ready to play
+        play.userRound();
     },
 
-    game: function() {
+    userRound: function() {
 
-        const cancel = document.querySelector('.cancel')
-        if(cancel){
-            cancel.remove();
-        }
+        round++;
 
-        console.log('round: ', play.state.round);
-        console.log('playerCardsOnboard: ', play.state.playerCardsOnboard);
-        console.log('cpterCardsOnBoard: ', play.state.cpterCardsOnBoard);
-        const infosField = document.querySelector('.infosField');
-
-        if(play.state.playerRound) {
-            play.state.round++;
-            infosField.innerHTML = 'A vous de jouer !';
-            play.playerRound();
-
+        // Display informations to user
+        if(round === 1) {
+            infosField.innerHTML = `Welcome ! <br><br> Please drag and drop your first card on the board.`;
         } else {
-            infosField.innerHTML = 'L\'ordinateur joue!';
-            play.cpterRound();
+            infosField.innerHTML = 'Add a card on the board or play a card from the board to attack computer';
         }
 
-    },
-
-    cpterRound: function() {
-
-        play.state.amountPlayerCardsOnBoard += 1;
-        play.state.playerRound = false;
-
-        // IF COMPUTER PUT A CARD ON BOARD
-        const round = play.state.round;
-        if((round == 1 || round == 3 || round == 6 || round == 7 || round == 10 || round == 11 || round == 13) && ((play.state.cpterCardInHand.monsters.length > 0) || (play.state.cpterCardInHand.boosters.length > 0))) {
-
-
-            // Getting 1 random card in cpter deck
-            const cpterCardInHand = play.state.cpterCardInHand.monsters;
-            const cpterCardsOnBoard = play.state.cpterCardsOnBoard;
-
-            if(cpterCardInHand.length > 0) {
-
-                let monster = [cpterCardInHand[Math.floor(Math.random()*cpterCardInHand.length)]];
-
-                // Generating card on board
-                const cpterCardsContainer = document.querySelector(`div[user="cpter"]`);
-                const cpterCardGenerate = cardGenerator.cardGenerator(monster[0], 'monster', 'cpter')
-                cpterCardsContainer.appendChild(cpterCardGenerate);
-
-                // Find index of selected card
-                let indexMonster = null;
+        // Handle cards
+        const userCardsDom = document.getElementsByClassName('playerCard');
     
-                for(var i = 0; i < cpterCardInHand.length; i++) {
-                    if(cpterCardInHand[i].id === monster[0].id) {
-                        indexMonster = i;
-                    }
-                }
-                // remove from state cardInHand and add cardOnBoard
-                cpterCardInHand.splice(indexMonster, 1);
-                cpterCardsOnBoard.push(monster)
-                play.state.playerRound = true;
-                play.game();
-            }
+        for (const userCardDom of userCardsDom) {
 
-        } else {
+            // Initialisation of drag and drop
+            dragAndDrop.init(userCardDom);
 
-        // IF COMPUTER PLAY A CARD
+            // Listening drop
+            userCardDom.addEventListener('dragend', function () {
 
-            // Choose one random computer card on state
-            const cpterCardsOnBoard = play.state.cpterCardsOnBoard;
-            let randomCpterCard = cpterCardsOnBoard[Math.floor(Math.random()*cpterCardsOnBoard.length)];
-            // same on board
-            const cpterCard = document.querySelector(`div[data-key="${randomCpterCard[0].key}"]`);
-
-            // Choose one random player card on state
-            const playerCardsOnboard = play.state.playerCardsOnboard;
-            let randomPlayerCard = playerCardsOnboard[Math.floor(Math.random()*playerCardsOnboard.length)];
-
-            // same on board
-            const key = randomPlayerCard.getAttribute('data-key');
-            const playerCard = document.querySelector(`div[data-key="${key}"]`);
-            console.log(playerCard)
-            // Launch cpter move
-            play.fightMoveCpter(cpterCard, playerCard);
-
-        }
-
-    },
-
-    fightMoveCpter: function(cpterCard, playerCard) {
-
-
-        const positionPlayerCard = utils.getPosition(playerCard);
-        const positionCpterCard = utils.getPosition(cpterCard);
-
-
-        // console.log('playerCard', positionPlayerCard.top, positionPlayerCard.left);
-
-        cpterCard.style.position = 'fixed';
-
-        cpterCard.animate([{
-            top: positionCpterCard.top+'px',
-            left: positionCpterCard.left+'px'
-        },
-        {
-            top: positionPlayerCard.top+'px',
-            left: positionPlayerCard.left+'px'
-        }
-    ], {
-        duration: 1000,
-    });
-
-
-    setTimeout(function(){ 
-        play.fight(cpterCard, playerCard, 'cpterCardsOnBoard', 'playerCardsOnBoard')
-        cpterCard.style.position = 'relative';
-        }, 1000);
-
-
-    },
-
-    fight: function(attacker, defenser, attackerBoard, defenserBoard) {
-        console.log(attacker.getAttribute('data-player'))
-        const boardArea = document.querySelector('.boardArea');
-        const fightArea = document.createElement('div');
-        fightArea.classList.add('fightArea');
-
-        // cogwheel 
-        const cogWheel = document.createElement('div');
-        cogWheel.classList.add('cogwheel')
-        cogWheel.classList.add('rotate')
-        cogWheel.textContent = '⚙'
-
-        // Components in DOM
-        boardArea.appendChild(fightArea);
-        boardArea.appendChild(cogWheel);
-
-
-        // Algorithm
-
-            // find card in the state to avoid false value write by user in dom
-            const attackerKey = attacker.getAttribute('data-key');
-            const defenserKey = defenser.getAttribute('data-key');
-
-            const attackerName = attacker.getAttribute('data-player');
-            const defenserName = defenser.getAttribute('data-player');
-            console.log('key attack', attackerKey, 'key defense', defenserKey, 'attacker name', attackerName, 'defenser name', defenserName);
-            // console.log('state cards computer', play.state.cpterDeck);
-            // console.log('state cards user', play.state.userDeck);
-            const attackerCards = play.state[attackerName];
-
-            const attackerCard = attackerCards.monsters.find(element => element.key == attackerKey);
-    
-            const defenserCards = play.state[defenserName];
-
-            const defenserCard = defenserCards.monsters.find(element => element.key == defenserKey);
-
-            const coefficient = attackerCard.attack - defenserCard.defense;
-
-            let damageToDefenser = null;
-            if(coefficient <= 0) {
-                damageToDefenser = Math.floor(Math.random()*2)+1;
-            } else {
-                damageToDefenser = Math.floor(Math.random()*3)+coefficient;
-            }
-
-            let damageToAttacker = null;
-            if(damageToDefenser == 1) {
-                damageToAttacker = 0;
-            } else {
-                damageToAttacker = damageToDefenser - 1;
-            }
-
-            attackerCard.hit_point = attackerCard.hit_point - damageToAttacker;
-            defenserCard.hit_point = defenserCard.hit_point - damageToDefenser;
-
-
-        // Animation
-
-        attacker.classList.add('blink_me');
-        defenser.classList.add('blink_me');
-        setTimeout(function(){ 
-            attacker.classList.remove('blink_me');
-            defenser.classList.remove('blink_me');
-
-            attacker.classList.add('shake');
-            defenser.classList.add('shake');
-            fightArea.remove();
-            cogWheel.remove();
-
-            attacker.querySelector('.hitpoint').textContent = attackerCard.hit_point;
-            defenser.querySelector('.hitpoint').textContent = defenserCard.hit_point;
-
-            setTimeout(function(){ 
-
-            // IF HIT-POINTS ARE NEGATIVES, DELETE CARD FROM BOARD
-            if(attackerCard.hit_point <= 0) {
-                // delete card on board
-                attacker.remove();
-                // delete card in state
-                attackerCards.monsters.splice(attackerCard.key, 1);
-                // delete carOnBoard
-                play.state[attackerBoard].splice(attackerCard.key, 1);
-            }
-            
-            if(defenserCard.hit_point <= 0) {
-                // delete card on board
-                defenser.remove();
-                // delete card in state
-                defenserCards.monsters.splice(defenserCard.key, 1);
-                // delete carOnBoard
-                play.state[defenserBoard].splice(defenserCard.key, 1);
-
-            }
-
-            // FAIRE UN TOGGLE SUR PLAYERROUND : AMELIORER !!!!
-            if(play.state.playerRound === true) { play.state.playerRound = false} else {play.state.playerRound = true};
-            console.log('state apres un combat', play.state.playerRound);
-            attacker.classList.remove('shake');
-            defenser.classList.remove('shake');
-            play.game();
-            }, 1000);
-        }, 2000);
-
-
-        // => return value puis dans game modifier la valeur hit point de la carte qui défend.
-
-
-
-    },
-
-    // ============= //
-    // DRAG AND DROP //
-    // ============= //
-
-
-    playerRound: function() {
-
-        const infosField = document.querySelector('.infosField');
-        infosField.innerHTML = 'Posez une carte sur le plateau ou attaquez une carte ennemie';
-    
-    
-        const cards = document.getElementsByClassName('playerCard');
-    
-        for (const card of cards) {
-            dragAndDrop.init(card);
-            
-            card.addEventListener('dragend', function () {
-    
-            var x = event.clientX, y = event.clientY,
-            elementMouseIsOver = document.elementFromPoint(x, y);
-    
-
-            // Handle where user can drop cards
-            if((elementMouseIsOver.className === 'sideArea') || (elementMouseIsOver.className === 'cpterCards') || (elementMouseIsOver.className === 'playerCard')) {
-                alert('pas ici malheureux !')
-            } else {
+                var x = event.clientX, y = event.clientY,
+                eltFlewOver = document.elementFromPoint(x, y);
 
                 // player put card on board
-                if((elementMouseIsOver.className === 'drop-area') || (elementMouseIsOver.className === 'playerCards')) {
-                    elementMouseIsOver.appendChild(card);
+                if ((eltFlewOver.className === 'drop-area') || (eltFlewOver.className === 'drop-area show')) {
+                    
+                    if(round == 1) {
+                    eltFlewOver.className = 'drop-area';
+                    eltFlewOver.innerHTML = '';
+                    }
+                    eltFlewOver.appendChild(userCardDom);
 
-                    // card.setAttribute('data-status', 'onBoard');
+                    // Disable draggable
+                    const playerCards = document.querySelectorAll(`div[data-player="userDeck"]`);
 
-                    play.state.currentPlayedCard = card;
-                    console.log(card)
+                    for(const card of playerCards) { card.draggable = false; }
+
+                    // Display message
+                    infosField.textContent = 'Click "end of round" or "cancel"';
+                    endOfRoundButton.classList.remove('inactive');
 
                     // Cancel action
                     const cancel = document.createElement('button');
@@ -835,77 +690,336 @@ const play = {
                     cancel.textContent = 'CANCEL'
 
                     document.querySelector('.sideArea').appendChild(cancel);
-                    cancel.addEventListener("click", function() {
-                        card.remove();
-                        cancel.remove();
-                        document.querySelector('.playerCards').appendChild(card);
 
+                    cancel.addEventListener("click", function() {
+                        userCardDom.remove();
+                        cancel.remove();
+                        document.querySelector('.playerCards').appendChild(userCardDom);
+
+                        // reset draggable
                         const cardsOnHand = document.querySelector('.playerCards').childNodes;
-                        console.log(cardsOnHand)
-        
-                        for(const card of cardsOnHand) {
-                            card.draggable = true;
-                        }
+                        for(const card of cardsOnHand) { card.draggable = true; }
 
                         const infosField = document.querySelector('.infosField');
-                        infosField.innerHTML = 'Posez une carte sur le plateau ou attaquez une carte ennemie';
+                        infosField.innerHTML = 'Add a card on the board or play a card from the board to attack computer';
                     })
 
-                    const infosField = document.querySelector('.infosField');
-                    infosField.innerHTML = '';
-    
-                    const endOfRoundButton = document.querySelector('.endOfRound');
-  
-                        infosField.textContent = 'Cliquez sur "end of round" pour valider votre carte';
-                        endOfRoundButton.classList.remove('inactive');
-        
-                        // SELECT ALL PLAYER CARDS AND DISABLE DRAGGABLE
-                        // const playerCards = document.querySelector('.playerCards').childNodes;
-                        const playerCards = document.querySelectorAll(`div[data-player="userDeck"]`);
+                    // Handle end of round
+                    const handleEndOfRound = () => {
+                        endOfRoundButton.classList.add('inactive');
+                        endOfRoundButton.removeEventListener("click", handleEndOfRound);
+                        
+                        // Find card in state to set onBoard = true
+                        const cardKey = userCardDom.getAttribute('data-key');
+                        const cardInState = userDeck.monsters.find(monster => monster.key == cardKey);
 
-                        for(const card of playerCards) {
-                            card.draggable = false;
-                        }
- 
-                        const handleEndOfRound = () => {
-                            endOfRoundButton.classList.add('inactive');
-                            endOfRoundButton.removeEventListener("click", handleEndOfRound);
-                            play.state.playerCardsOnboard.push(card);
-                            play.state.playerRound = false;
-                            play.game()
-                        }
+                        cardInState.onBoard = true;
+
+                        document.querySelector('.cancel').remove();
+
+                        play.cpterRound();
+                    }
 
                         endOfRoundButton.addEventListener('click', handleEndOfRound);
 
-                // player attack
-                } else if((elementMouseIsOver.parentNode.dataset.player === 'cpterDeck') || (elementMouseIsOver.className === 'card-picture cpter'))  {
-                    const cpterCard = elementMouseIsOver.closest('.cardComponent');
-                    console.log('il attaque')
-                    if(card.classList.contains("booster")) {
-                        alert('vous ne pouvez pas combattre avec une carte booster')
+                } else if ((eltFlewOver.parentNode.dataset.player === 'cpterDeck') || (eltFlewOver.className === 'card-picture cpter'))  {
+                    
+                    // Player attack a computer card
+                    const cpterCardDom = eltFlewOver.closest('.cardComponent');
+
+                    if(userCardDom.classList.contains("booster")) {
+                        alert('You can\'t attack with a booster');
                     } else {
-                        play.fight(card, cpterCard, 'playerCardsOnBoard', 'cpterCardsOnBoard');
+
+                        // Select user and player cards in state
+                        let cardAttack = userDeck.monsters.find(card => card.key == userCardDom.getAttribute('data-key'))
+                        let cardDefense = cpterDeck.monsters.find(card => card.key == cpterCardDom.getAttribute('data-key'))
+
+                        play.fight(cardAttack, cardDefense);
                     }
-
                 }
-
-            }
-    
-        });
-    
+            });
         }
     },
- 
-    
-        listenDrop: function() {
 
-        },
+    cpterRound: function() {
 
+        // console.log('cpter round / user Cards :', userDeck)
+        // console.log('cpter round / cpter Cards :', cpterDeck)
+        
+        if(cpterDeck.monsters.length == 0) {
+            console.log("YOU WIN !!")
+        }
+
+        let cards = cpterDeck.monsters.concat(cpterDeck.boosters);
+        let cardsOnBoard = cards.filter(card => card.onBoard);
+        let cardsOnHand = cards.filter(card => !card.onBoard);
+
+         if((round == 2 || round == 4 || round == 5 || round == 8 || round == 9 || round == 12 || round > 13) && (cardsOnBoard.length > 0)) {
+
+            play.cpterAttack(cardsOnBoard, cardsOnHand);
+
+         } else {
+
+            // If round 1, add a monster on board
+            if(round == 1) {
+
+                infosField.textContent = "...Computer is playing..."
+
+                setTimeout(function(){ 
+
+                // Get random monster
+                let cardFirstRound = cpterDeck.monsters[Math.floor(Math.random()*cpterDeck.monsters.length)];
+
+                // Generating card on board
+                const cardsContainer = document.querySelector(`div[player="cpter"]`);
+                const domCard = cardGenerator.card(cardFirstRound, 'monster', 'cpter')
+                cardsContainer.appendChild(domCard);
+
+                // Update status cardOnboard = true
+                cpterDeck.monsters.forEach((monster, index) => {
+                    if(monster.key === cardFirstRound.key) {
+                        cpterDeck.monsters[index].onBoard = true;
+                    }
+                });
+
+                play.userRound();
+                }, 1500);
+
+            // Else if, get random card
+            } else if(cards.length > 0) {
+
+                play.cpterAddCard(cardsOnBoard, cardsOnHand);
+
+            } else {
+                play.cpterAttack(cardsOnBoard, cardsOnHand);
+            }
+         }
+
+    },
+
+
+    fight: function(cardAttack, cardDefense) {
+
+        console.log("carte attaque : ", cardAttack)
+        console.log("carte defense : ", cardDefense)
+        // Algorithm for damage
+
+        const coefficient = cardAttack.attack - cardDefense.defense;
+
+        let damageToDefenser = null;
+        if(coefficient <= 0) {
+            damageToDefenser = Math.floor(Math.random()*2)+1;
+        } else {
+            damageToDefenser = Math.floor(Math.random()*3)+coefficient;
+        }
+
+        let damageToAttacker = null;
+        if(damageToDefenser == 1) {
+            damageToAttacker = 0;
+        } else {
+            damageToAttacker = damageToDefenser - 1;
+        }
+
+        const initialAttackHp = cardAttack.hit_point;
+        const initialDefenseHp = cardDefense.hit_point;
+
+        cardAttack.hit_point = cardAttack.hit_point - damageToAttacker;
+        cardDefense.hit_point = cardDefense.hit_point - damageToDefenser;
+
+        // Getting cards in dom
+        const cardAttackDom = document.querySelector(`div[data-key="${cardAttack.key}"]`);
+        const cardDefenseDom = document.querySelector(`div[data-key="${cardDefense.key}"]`);
+
+        // Animation
+        if(cardAttack.owner === 'cpter') {
+            animation.moveCards(cardAttackDom, cardDefenseDom)
+        } else {
+            animation.blink(cardAttackDom, cardDefenseDom)
+        }
+
+
+        setTimeout(function(){ 
+
+            // Update values in dom
+            if(cardAttack.hit_point != initialAttackHp) {
+                let attackerHp = cardAttackDom.querySelector('.hitpoint');
+                attackerHp.textContent = cardAttack.hit_point;
+
+                attackerHp.classList.add('blink_hit-point');
+                setTimeout(function(){ 
+                    attackerHp.classList.remove('blink_hit-point');
+                }, 1000);
+            }
+
+            if(cardDefense.hit_point != initialDefenseHp) {
+                let defenserHp = cardDefenseDom.querySelector('.hitpoint');
+                defenserHp.textContent = cardDefense.hit_point;
+
+                defenserHp.classList.add('blink_hit-point');
+                setTimeout(function(){ 
+                    defenserHp.classList.remove('blink_hit-point');
+                }, 1000);
+            }
+
+            // Handle fight result
+            if(cardAttack.hit_point <= 0) {
+                setTimeout(function(){ 
+                // delete card on board
+                cardAttackDom.remove();
+                // delete card in state
+                if(cardAttack.owner === 'cpter') {
+                    let index = cpterDeck.monsters.indexOf(cardAttack);
+                    console.log("la carte du cpter qui sera supprimée à l'index", index);
+                    console.log("state cpter AVANT suppression", cpterDeck.monsters)
+                    cpterDeck.monsters.splice(index, 1);
+                    console.log("state cpter apres suppression", cpterDeck.monsters)
+                } else {
+                    let index = userDeck.monsters.indexOf(cardAttack);
+                    console.log("la carte du user qui sera supprimée à l'index", index);
+                    console.log("state user AVANT suppression", userDeck.monsters)
+                    userDeck.monsters.splice(index, 1);
+                    console.log("state user apres suppression", userDeck.monsters)
+                }
+
+                }, 1000);
+            }
+
+            if(cardDefense.hit_point <= 0) {
+                setTimeout(function(){ 
+                // delete card on board
+                cardDefenseDom.remove();
+                // delete card in state
+                if(cardDefense.owner === 'cpter') {
+                    let index = cpterDeck.monsters.indexOf(cardDefense);
+                    console.log("la carte du cpter qui sera supprimée à l'index", index);
+                    console.log("state cpter AVANT suppression", cpterDeck.monsters)
+                    cpterDeck.monsters.splice(index, 1);
+                    console.log("state cpter apres suppression", cpterDeck.monsters)
+                } else {
+                    let index = userDeck.monsters.indexOf(cardDefense);
+                    console.log("la carte du user qui sera supprimée à l'index", index);
+                    console.log("state user AVANT suppression", userDeck.monsters)
+                    userDeck.monsters.splice(index, 1);
+                    console.log("state user apres suppression", userDeck.monsters)
+                }
+                }, 1000);
+            }
+
+            // TOGGLE PLAYER ROUND
+            if(cardAttack.owner === 'cpter') {
+                play.userRound() ;
+            } else {
+                setTimeout(function(){ 
+                    play.cpterRound();
+                }, 1000);
+            }
+            }, 3000);
+
+    },
+
+    cpterAddCard: function(cardsOnBoard, cardsOnHand) {
+
+        let card = null;
+                
+        // if there is a card on board, get random on monster & booster. Else get random monster
+        if(cardsOnBoard.length > 0) {
+            card = cardsOnHand[Math.floor(Math.random()*cardsOnHand.length)];
+        } else {
+            let cardsMonster = cardsOnHand.filter(card => card.type === 'monster');
+            card = cardsMonster[Math.floor(Math.random()*cardsMonster.length)];
+        }
+
+        console.log("cpter want to add :", card)
+
+        // Handle booster cards
+        if(card.type === 'booster') {
+
+            // Get random monster card from board to apply boost
+            const monsterCards= cpterDeck.monsters.filter(card => card.onBoard == true);
+            let monsterCard = monsterCards[Math.floor(Math.random()*monsterCards.length)];
+
+            // Generating booster card on board
+            const cardsContainer = document.querySelector(`div[player="cpter"]`);
+            const cardBooster = cardGenerator.card(card, 'booster', 'cpter')
+            cardsContainer.appendChild(cardBooster);
+
+            // Select monster card on board
+            let cardMonsterDom = document.querySelector(`div[data-key="${monsterCard.key}"]`);
+            let cardBoosterDom = document.querySelector(`div[data-key="${card.key}"]`);
+
+            console.log(cardBoosterDom, cardMonsterDom)
+            animation.moveCards(cardBoosterDom, cardMonsterDom);
+
+            setTimeout(function(){ 
+
+                const typeBooster = card.special_effect_text;
+
+                const bonus = card.special_effect_value + monsterCard[typeBooster];
+
+                // update monster card value in dom
+                let textBonus = document.getElementById(`${typeBooster}`);
+                textBonus.textContent = bonus;
+
+                // update monster card value
+                // let monsterInDeck = cpterDeck.monster.find(card => card.key = monsterCard.key)
+                monsterCard[typeBooster] = bonus;
+
+                cardBoosterDom.remove();
+
+                play.userRound();
+                }, 2000);
+
+        } else {
+
+            // Computer add a card on board
+            const cardsContainer = document.querySelector(`div[player="cpter"]`);
+            const domCard = cardGenerator.card(card, 'monster', 'cpter')
+            cardsContainer.appendChild(domCard);
+
+            // Update status cardOnboard = true
+            cpterDeck.monsters.forEach((monster, index) => {
+                if(monster.key === card.key) {
+                    cpterDeck.monsters[index].onBoard = true;
+                }
+            });
+
+            play.userRound();
+        }
+    },
+
+    cpterAttack: function(cardsOnBoard, cardsOnHand) {
+
+        infosField.textContent = "...Computer is playing..."
+
+        // Getting computer cards on board and select one
+        let cardAttack = cardsOnBoard[Math.floor(Math.random()*cardsOnBoard.length)];
+
+        // Getting user cards on board and select one
+        const userCards = userDeck.monsters.filter(card => card.onBoard == true);
+        let cardDefense = userCards[Math.floor(Math.random()*userCards.length)];
+
+        // Select each card in dom
+        let cardAttackDom = document.querySelector(`div[data-key="${cardAttack.key}"]`);
+        let cardDefenseDom = document.querySelector(`div[data-key="${cardDefense.key}"]`);
+
+        console.log("cpter want to attack with card in state :", cardAttack)
+        console.log("cpter want to attack with card in dom :", cardAttackDom)
+
+        console.log("user will be attack for his card in state :", cardDefense)
+        console.log("user will be attack for his card in dom  :", cardDefenseDom)
+
+        setTimeout(function(){ 
+            animation.moveCards(cardAttackDom, cardDefenseDom)
+            play.fight(cardAttack, cardDefense)
+        }, 1000);
+
+    }
 
 }
 
 module.exports = play;
-},{"./cardGenerator":2,"./dragAndDrop":3,"./utils":8}],6:[function(require,module,exports){
+},{"./animation":1,"./cardGenerator":3,"./dragAndDrop":4,"./utils":9}],7:[function(require,module,exports){
 
 let Store = {
 
@@ -929,7 +1043,7 @@ let Store = {
 }
 
 module.exports = Store;
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 const utils = require('./utils');
 const Store = require('./store');
 
@@ -964,7 +1078,7 @@ const user = {
             
             // Saving datas in store
             Store.user = jsonResponse;
-
+            console.log(jsonResponse)
             utils.showLoggedMenu();
         }
 
@@ -1053,6 +1167,9 @@ const user = {
         userDatas = JSON.stringify(jsonResponse);
         sessionStorage.setItem('userDatas', userDatas);
 
+        // Saving datas in store
+        Store.user = jsonResponse;
+
         // CLEAR DISPLAY
         utils.clearEverything();
 
@@ -1073,7 +1190,7 @@ const user = {
 };
 
 module.exports = user;
-},{"./store":6,"./utils":8}],8:[function(require,module,exports){
+},{"./store":7,"./utils":9}],9:[function(require,module,exports){
 
 const utils = {
 
@@ -1160,10 +1277,6 @@ const utils = {
 
         const borderSideArea = document.createElement('div');
         borderSideArea.classList.add('border-left-side');
-
-          //-- Informations field
-          const infosField = document.createElement('div');
-          infosField.classList.add('infosField');
           
           //-- End of round
           const endOfRound = document.createElement('button');
@@ -1171,9 +1284,19 @@ const utils = {
           endOfRound.classList.add('inactive')
           endOfRound.textContent = 'END OF ROUND'
 
+          //-- Informations field
+          const infosField = document.createElement('div');
+          infosField.classList.add('infosField');
+          const infosFieldBubble = document.createElement('div');
+          infosFieldBubble.classList.add('infosField-bubble');
+
+          // Vault boy
+          const vaultBoy = document.createElement('div');
+          vaultBoy.classList.add('vault-boy');
+
           //-- Big card container
-          const bigCardContainer = document.createElement('div');
-          bigCardContainer.classList.add('bigCardContainer')
+            //   const bigCardContainer = document.createElement('div');
+            //   bigCardContainer.classList.add('bigCardContainer')
 
         // BOARD AREA
         const boardArea = document.createElement('div');
@@ -1182,7 +1305,7 @@ const utils = {
           //-- COMPUTER CARDS AREA
           const cpterCards = document.createElement('div');
           cpterCards.classList.add('cpterCards');
-          cpterCards.setAttribute('user', 'cpter')
+          cpterCards.setAttribute('player', 'cpter')
 
           //-- DROP AREA
           const dropArea = document.createElement('div');
@@ -1201,12 +1324,11 @@ const utils = {
           //-- CARDS
           const playerCards = document.createElement('div');
           playerCards.classList.add('playerCards');
-          playerCards.setAttribute('user', 'player')
+          playerCards.setAttribute('player', 'user')
 
           //-- BORDER BOTTOM
           const borderPlayerAreaBottom = document.createElement('div');
           borderPlayerAreaBottom.classList.add('border-player-area');
-
 
         // ALLOW HORIZONTAL SCROLL WITH WHEEL
         window.addEventListener('wheel', function(e) {
@@ -1226,9 +1348,10 @@ const utils = {
         sideAndDrop.appendChild(borderSideArea);
         sideAndDrop.appendChild(boardArea);
 
-        sideArea.appendChild(bigCardContainer);
-        sideArea.appendChild(infosField);
         sideArea.appendChild(endOfRound);
+        sideArea.appendChild(infosField);
+        sideArea.appendChild(infosFieldBubble);
+        sideArea.appendChild(vaultBoy);
 
         boardArea.appendChild(cpterCards);
         boardArea.appendChild(dropArea);
@@ -1262,9 +1385,9 @@ const utils = {
         scrollLeft = window.pageXOffset || document.documentElement.scrollLeft,
         scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         return { top: rect.top + scrollTop, left: rect.left + scrollLeft }
-    }
+    },
 
 };
 
 module.exports = utils;
-},{}]},{},[1]);
+},{}]},{},[2]);
