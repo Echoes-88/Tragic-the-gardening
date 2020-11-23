@@ -7,9 +7,11 @@
  - Ajouter le système des boosters : on pose la carte sur un monstre pour booster les competences
  - enlever option draggable pour cartes computer
  - Remplacer le cardGenerator par un template dans le index.html
+ - Quand cpter boost l'attaque d'une carte, il l'a joue le tour d'après // Faire qu'il joue TOUJOURS la carte avec l'attaque la plus haute
 
 # V2.0
 
+ - 
  - Ajouter un système de points d'actions.
 - => Chaque joueur de niveau 1 à 7 points d'actions
   => Poser une carte coute 3 points, jouer une carte 4

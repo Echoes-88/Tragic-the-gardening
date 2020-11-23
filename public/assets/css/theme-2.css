@@ -14,9 +14,9 @@ body {
 }
    
    p {
-       color: greenyellow;
-       font-size: 2em;
-       font-family: "AdobeDia";
+       color: #ffffff;
+       font-size: 1.3em;
+       font-family: 'Staatliches';
    }
 
    img {
@@ -37,6 +37,12 @@ body {
        background-position: center;
        background-repeat: no-repeat;
        background-size: contain;
+   }
+
+   .flex {
+       display: flex;
+       justify-content: center;
+       align-items: center;
    }
 
    .logo {
@@ -178,12 +184,8 @@ body {
         white-space: nowrap;
     }
    
-   .deckContainer {
-       display: flex;
-       flex-wrap: wrap;
-       flex-direction: row;
-       align-items: center;
-       justify-content: center;
+   .deck-container {
+        text-align: center;
    }
    
    .card-deck {
@@ -191,7 +193,6 @@ body {
        width: 200px;
        background-size: 100%;
        margin: auto;
-       margin:2rem;
        background-image: url(../img/Deck.png);
    }
 
@@ -256,7 +257,7 @@ body {
 
     }
 
-    .hitpoint {
+    .hit_point {
         margin-top:5%;
         margin-left:13%;
         left: -2%;
@@ -300,7 +301,8 @@ body {
             background-image: url(../img/board/bckgrd-Infos.jpg);
             background-repeat: repeat;
             width: 20%;
-            max-width: 260px;
+            max-width: 250px;
+            min-width: 250px;
             height: 100%;
             position: relative;
         }
@@ -314,25 +316,16 @@ body {
         }
 
         .exemple-card {
-            background-image: url(../img/exempleCard.png);
-            width: 14%;
-            height: 35%;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
             position: fixed;
-            /* margin: auto; */
-            left: 50%;
+            left: 40%;
             top: 18%;
             z-index: 11;
         }
 
         .close-button {
-            width: 4%;
-            height: 4%;
             position: fixed;
-            left: 64%;
-            top: 14%;
+            left: 58%;
+            top: 12%;
             z-index: 11;
         }
 
@@ -416,11 +409,11 @@ body {
             white-space: nowrap;
         }
 
-        .show {
+        .show-message {
             background-color: rgba(255, 255, 255, 0.4);
         }
 
-        .show p {
+        .show-message p {
             color: #616161;
             text-shadow: 2px 2px 2px #CEC1B4;
             font-family: 'Staatliches';

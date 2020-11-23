@@ -1,6 +1,1068 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+const Store = require('../Store');
 
-const utils = require('./utils');
+const PlayGame = require('./PlayGame');
+
+// Middleware request
+const MiddlewareDeck = require('../Middleware/Deck');
+
+// Render
+// const DeckGeneratorScreen = require('../DomRender/ManageDeck');
+const DomRenderDeck = require('../DomRender/Deck');
+
+const InitGame = {
+
+    init: () => {
+
+        event.preventDefault();
+        console.log(Store)
+
+        const mainContainer = document.querySelector('.container');
+        mainContainer.classList.add('flex');
+
+        // Check if user has decks. Yes => show all decks. No => create one
+        if(Store.user.decks.length > 0) {
+
+                mainContainer.innerHTML = DomRenderDeck.showDeck(Store.user.decks);
+
+                const manageDeck = document.getElementsByClassName('manage-deck');
+                const playDeck = document.getElementsByClassName('play-deck');
+
+                for(const deck of manageDeck) {
+                    deck.addEventListener('click', function(){
+                        event.preventDefault();
+                        mainContainer.innerHTML = DomRenderDeck.render(deck.id);
+                    });
+                }
+
+                for(const deck of playDeck) {
+                    deck.addEventListener('click', function(){
+                        event.preventDefault();
+                        mainContainer.classList.remove('flex');
+                        mainContainer.classList.add('board-game');
+                       
+                        // Start game;
+                        PlayGame.init(deck.id)
+                    });
+                }
+
+
+        } else {
+            console.log("ça passe car il n a pas de deck")
+            mainContainer.innerHTML = DomRenderDeck.createDeck();
+
+            const form = document.getElementById('create-deck');
+            form.addEventListener('submit', function(data){ 
+                event.preventDefault();
+                // Create deck in database
+                const response = MiddlewareDeck.createOne(data);
+                if(response) {
+                    console.log("le deck est bien créé")
+                }
+                // Reload
+            });
+        }
+            
+    }
+}
+
+module.exports = InitGame;
+},{"../DomRender/Deck":7,"../Middleware/Deck":11,"../Store":13,"./PlayGame":3}],2:[function(require,module,exports){
+const DomRenderCreateAccount = require('../DomRender/CreateAccount');
+const DomRenderLogin = require('../DomRender/Login');
+const DomRenderMenu = require('../DomRender/Menu');
+
+const MiddlewareLog = require('../Middleware/Log');
+const InitGame = require('./InitGame');
+
+const Store = require('../Store');
+
+const Menu = {
+
+    unLogged: () => {
+
+        const mainContainer = document.querySelector('.container');
+        mainContainer.innerHTML = DomRenderMenu.render('unLogged');
+
+        // LOGIN
+        const login = document.querySelector('li[set-menu="login"] a');
+        
+        login.addEventListener('click', ()=> {
+            event.preventDefault();
+
+            // Create Dom elements
+            mainContainer.innerHTML = DomRenderLogin.render();
+
+            // Listen login form submit
+            const loginForm = document.querySelector('form[id="login"]');
+            loginForm.addEventListener('submit', async (datas) => {
+
+                const response = await MiddlewareLog.handleLogin(datas);
+                (response ? Menu.logged() : console.log("T qui ?"));
+            });
+
+            // Listen back to menu
+            const backToMenu = document.querySelector('.go-back');
+            backToMenu.addEventListener('click', () => {
+                event.preventDefault();
+                Menu.unLogged();
+            });
+        });
+
+        // CREATE ACCOUNT
+        const createAccount = document.querySelector('li[set-menu="createAccount"] a');
+
+        createAccount.addEventListener('click', ()=> {
+            event.preventDefault();
+
+            // Create Dom elements
+            const mainContainer = document.querySelector('.container');
+            mainContainer.innerHTML = DomRenderCreateAccount.render();
+
+            // Listen Create Account form submit
+            const createAccountForm = document.querySelector('form[id="createAccount"]');
+            createAccountForm.addEventListener('submit', async(datas) => {
+                
+                const response = MiddlewareLog.handleCreateAccount(datas);
+                if(response) {
+                    Menu.logged();
+                }
+
+            });
+
+            // Listen back to menu
+            const backToMenu = document.querySelector('.go-back');
+            backToMenu.addEventListener('click', () => {
+                event.preventDefault();
+                Menu.unLogged();
+            });
+        });
+
+    },
+
+    logged: () => {
+
+        console.log(Store)
+        const mainContainer = document.querySelector('.container');
+        mainContainer.innerHTML = DomRenderMenu.render('logged');
+
+        // Listen play button event
+        const play = document.querySelector('li[set-menu="play"] a');
+        play.addEventListener('click', InitGame.init);
+    }
+}
+
+module.exports = Menu;
+},{"../DomRender/CreateAccount":6,"../DomRender/Login":8,"../DomRender/Menu":9,"../Middleware/Log":12,"../Store":13,"./InitGame":1}],3:[function(require,module,exports){
+const Store = require('../Store');
+
+// Render
+const DomRenderBoardGame= require('../DomRender/BoardGame');
+const DomRenderTutorial = require('../DomRender/Tutorial');
+const DomRenderCard= require('../DomRender/Card');
+
+// Middleware
+const MiddlewareDeck = require('../Middleware/Deck');
+
+// Utils
+const dragAndDrop = require('../Utils/DragAndDrop');
+const animation = require('../Utils/Animation');
+
+let round = 0;
+
+let userDeck = {
+    monsters: [],
+    boosters: [],
+};
+
+let cpterDeck = {
+    monsters: [],
+    boosters: [],
+};
+
+const PlayGame = {
+
+    init: async(deckId) => {
+
+        // Create deck for computer
+        MiddlewareDeck.cpterDeck();
+
+        // Tutorial
+        const mainContainer = document.querySelector('.container');
+        mainContainer.innerHTML = DomRenderTutorial.card();
+
+        const close = document.querySelector(".close-button");
+        close.addEventListener('click', function() {
+            event.preventDefault();
+            mainContainer.innerHTML = DomRenderBoardGame.render();
+
+            const dropArea = document.querySelector('.drop-area');
+            dropArea.classList.add('show-message');
+            dropArea.innerHTML = `<p>DRAG AND DROP YOUR CARD HERE</p>`;
+
+            // Render cards in DOM & add deck in store
+            let deck = Store.user.decks.find(deck => deck.id == deckId);
+
+            const playerArea = document.querySelector('.playerCards');
+
+            let inc = 0;
+
+            deck.monsters.map(card => {
+                for(let i=0;i<card.recurrence.quantity;i++) {
+                    userDeck.monsters.push(card);
+                }
+            })
+
+            // Deep copy to avoid duplicate key
+            userDeck.monsters = JSON.parse(JSON.stringify(userDeck.monsters));
+
+            userDeck.monsters.map(card => {
+                card.key = inc++; 
+                card.onBoard = false; 
+                card.type = 'monster'; 
+                card.owner = 'user';
+                playerArea.innerHTML += DomRenderCard.monster(card, "user");
+            });
+
+            deck.boosters.map(card => {
+                for(let i=0;i<card.recurrence.quantity;i++) {
+                    userDeck.boosters.push(card);
+                }
+            })
+
+            // Deep copy to avoid duplicate key
+            userDeck.boosters = JSON.parse(JSON.stringify(userDeck.boosters));
+
+            userDeck.boosters.map(card => {
+                card.key = inc++; 
+                card.onBoard = false; 
+                card.type = 'booster'; 
+                card.owner = 'user';   
+                playerArea.innerHTML += DomRenderCard.booster(card, "user")
+            });
+
+            // Save cpter Deck  
+            cpterDeck = Store.cpter.deck
+            cpterDeck.monsters.forEach(card => {card.key = inc++; card.onBoard = false; card.type = 'monster'; card.owner = 'cpter'});
+            cpterDeck.boosters.forEach(card => {card.key = inc++; card.onBoard = false; card.type = 'booster'; card.owner = 'cpter'});
+
+         
+            // launch game
+            PlayGame.userRound();
+            console.log(userDeck.monsters)
+        })
+    },
+
+
+    userRound: function() {
+
+        round++;
+
+        // Display informations to user
+        const infosField = document.querySelector('.infosField');
+
+        if(round === 1) {
+            infosField.innerHTML = `Welcome ! <br><br> Please drag and drop your first card on the board.`;
+        } else {
+            infosField.innerHTML = 'Add a card on the board or play a card from the board to attack computer';
+        }
+
+        // Handle cards
+        const userCardsDom = document.getElementsByClassName('userCard');
+    
+        for (const userCardDom of userCardsDom) {
+
+            // Initialisation of drag and drop
+            dragAndDrop.init(userCardDom);
+
+            // Listening drop
+            userCardDom.addEventListener('dragend', function () {
+
+                var x = event.clientX, y = event.clientY,
+                eltFlewOver = document.elementFromPoint(x, y);
+
+
+                if(userCardDom.classList.contains("booster")) {
+
+                    if(eltFlewOver.classList.contains("user")) {
+
+                        // Detect monster card selected
+                        const monsterCardDom = eltFlewOver.closest('.cardComponent');
+                        console.log('il veut poser la carte booster sur', monsterCardDom)
+
+                        // Get booster informations
+                        const cardKeyBooster = userCardDom.getAttribute('data-key');
+                        const booster = userDeck.boosters.find(booster => booster.key == cardKeyBooster);
+
+                        // Get monster informations
+                        const cardKeyMonster = monsterCardDom.getAttribute('data-key');
+                        const monster = userDeck.monsters.find(monster => monster.key == cardKeyMonster);
+
+                        // Detect type of booster
+                        const typeBooster = booster.special_effect_text;
+
+                        const bonus = booster.special_effect_value + monster[typeBooster];
+
+                        // update monster card value in dom
+                        let textBonus = monsterCardDom.querySelector(`.${typeBooster}`);
+                        textBonus.textContent = bonus;
+        
+                        // update monster card value
+                        // let monsterInDeck = cpterDeck.monster.find(card => card.key = monsterCard.key)
+                        monster[typeBooster] = bonus;
+        
+                        userCardDom.remove();
+
+                        console.log(booster)
+                    }
+
+                } else {
+
+                // player put card on board
+                if ((eltFlewOver.className === 'drop-area') || (eltFlewOver.className === 'drop-area show-message')) {
+
+                    
+                    if(round == 1) {
+                    eltFlewOver.className = 'drop-area';
+                    eltFlewOver.innerHTML = '';
+                    }
+
+                    eltFlewOver.appendChild(userCardDom);
+
+                    // Disable draggable
+                    const playerCards = document.querySelectorAll('.userCard');
+
+                    for(const card of playerCards) { card.draggable = false; }
+
+                    // Display message
+                    const infosField = document.querySelector('.infosField');
+                    infosField.textContent = 'Click "end of round" or "cancel"';
+                    endOfRoundButton = document.querySelector('.endOfRound');
+                    endOfRoundButton.classList.remove('inactive');
+
+                    // Cancel action
+                    const cancel = document.createElement('button');
+                    cancel.classList.add('cancel')
+                    cancel.textContent = 'CANCEL'
+
+                    document.querySelector('.sideArea').appendChild(cancel);
+
+                    cancel.addEventListener("click", function() {
+                        userCardDom.remove();
+                        cancel.remove();
+                        document.querySelector('.playerCards').appendChild(userCardDom);
+
+                        // reset draggable
+                        const cardsOnHand = document.querySelector('.playerCards').childNodes;
+                        for(const card of cardsOnHand) { card.draggable = true; }
+
+                        const infosField = document.querySelector('.infosField');
+                        infosField.innerHTML = 'Add a card on the board or play a card from the board to attack computer';
+                    })
+
+                    // Handle end of round
+                    const handleEndOfRound = () => {
+                        endOfRoundButton.classList.add('inactive');
+                        endOfRoundButton.removeEventListener("click", handleEndOfRound);
+                        
+                        // Find card in state to set onBoard = true
+                        const cardKey = userCardDom.getAttribute('data-key');
+                        const cardInState = userDeck.monsters.find(monster => monster.key == cardKey);
+                        console.log("key", cardKey, "state", userDeck)
+                        cardInState.onBoard = true;
+
+                        document.querySelector('.cancel').remove();
+
+                        PlayGame.cpterRound();
+                    }
+
+                        endOfRoundButton.addEventListener('click', handleEndOfRound);
+                    
+                } else if ((eltFlewOver.parentNode.className === 'cpterCards') || (eltFlewOver.className === 'card-picture cpter'))  {
+                    
+                    // Player attack a computer card
+                    const cpterCardDom = eltFlewOver.closest('.cardComponent');
+
+                    if(userCardDom.classList.contains("booster")) {
+                        alert('You can\'t attack with a booster');
+                    } else {
+
+                        // Select user and player cards in state
+                        let cardAttack = userDeck.monsters.find(card => card.key == userCardDom.getAttribute('data-key'))
+                        let cardDefense = cpterDeck.monsters.find(card => card.key == cpterCardDom.getAttribute('data-key'))
+
+                        PlayGame.fight(cardAttack, cardDefense);
+                    }
+                }
+                
+                }
+            });
+        }
+    },
+
+    cpterRound: function() {
+
+        // console.log('cpter round / user Cards :', userDeck)
+        // console.log('cpter round / cpter Cards :', cpterDeck)
+        
+        if(cpterDeck.monsters.length == 0) {
+            console.log("YOU WIN !!")
+        }
+
+        let cards = cpterDeck.monsters.concat(cpterDeck.boosters);
+        let cardsOnBoard = cards.filter(card => card.onBoard);
+        let cardsOnHand = cards.filter(card => !card.onBoard);
+
+         if((round == 2 || round == 4 || round == 5 || round == 8 || round == 9 || round == 12 || round > 13) && (cardsOnBoard.length > 0)) {
+
+            PlayGame.cpterAttack(cardsOnBoard, cardsOnHand);
+
+         } else {
+
+            // If round 1, add a monster on board
+            if(round == 1) {
+                const infosField = document.querySelector('.infosField');
+                infosField.textContent = "...Computer is playing..."
+
+                setTimeout(function(){ 
+
+                // Get random monster
+                let cardFirstRound = cpterDeck.monsters[Math.floor(Math.random()*cpterDeck.monsters.length)];
+
+                // Generating card on board
+                const cardsContainer = document.querySelector('.cpterCards');
+                cardsContainer.innerHTML += DomRenderCard.monster(cardFirstRound, 'cpter')
+
+                // Update status cardOnboard = true
+                cpterDeck.monsters.forEach((monster, index) => {
+                    if(monster.key === cardFirstRound.key) {
+                        cpterDeck.monsters[index].onBoard = true;
+                    }
+                });
+
+                PlayGame.userRound();
+                }, 1500);
+
+            // Else if, get random card
+            } else if(cards.length > 0) {
+
+                PlayGame.cpterAddCard(cardsOnBoard, cardsOnHand);
+
+            } else {
+                PlayGame.cpterAttack(cardsOnBoard, cardsOnHand);
+            }
+         }
+
+    },
+
+
+    fight: function(cardAttack, cardDefense) {
+
+        console.log("carte attaque : ", cardAttack)
+        console.log("carte defense : ", cardDefense)
+        // Algorithm for damage
+
+        const coefficient = cardAttack.attack - cardDefense.defense;
+
+        let damageToDefenser = null;
+        if(coefficient <= 0) {
+            damageToDefenser = Math.floor(Math.random()*2)+1;
+        } else {
+            damageToDefenser = Math.floor(Math.random()*3)+coefficient;
+        }
+
+        let damageToAttacker = null;
+        if(damageToDefenser == 1) {
+            damageToAttacker = 0;
+        } else {
+            damageToAttacker = damageToDefenser - 1;
+        }
+
+        const initialAttackHp = cardAttack.hit_point;
+        const initialDefenseHp = cardDefense.hit_point;
+
+        cardAttack.hit_point = cardAttack.hit_point - damageToAttacker;
+        cardDefense.hit_point = cardDefense.hit_point - damageToDefenser;
+
+        // Getting cards in dom
+        const cardAttackDom = document.querySelector(`div[data-key="${cardAttack.key}"]`);
+        const cardDefenseDom = document.querySelector(`div[data-key="${cardDefense.key}"]`);
+
+        // Animation
+        if(cardAttack.owner === 'cpter') {
+            animation.moveCards(cardAttackDom, cardDefenseDom)
+        } else {
+            animation.blink(cardAttackDom, cardDefenseDom)
+        }
+
+
+        setTimeout(function(){ 
+
+            // Update values in dom
+            if(cardAttack.hit_point != initialAttackHp) {
+                let attackerHp = cardAttackDom.querySelector('.hit_point');
+                attackerHp.textContent = cardAttack.hit_point;
+
+                attackerHp.classList.add('blink_hit-point');
+                setTimeout(function(){ 
+                    attackerHp.classList.remove('blink_hit-point');
+                }, 1000);
+            }
+
+            if(cardDefense.hit_point != initialDefenseHp) {
+                let defenserHp = cardDefenseDom.querySelector('.hit_point');
+                defenserHp.textContent = cardDefense.hit_point;
+
+                defenserHp.classList.add('blink_hit-point');
+                setTimeout(function(){ 
+                    defenserHp.classList.remove('blink_hit-point');
+                }, 1000);
+            }
+
+            // Handle fight result
+            if(cardAttack.hit_point <= 0) {
+                setTimeout(function(){ 
+                // delete card on board
+                cardAttackDom.remove();
+                // delete card in state
+                if(cardAttack.owner === 'cpter') {
+                    let index = cpterDeck.monsters.indexOf(cardAttack);
+                    cpterDeck.monsters.splice(index, 1);
+
+                } else {
+                    let index = userDeck.monsters.indexOf(cardAttack);
+                    userDeck.monsters.splice(index, 1);
+                }
+
+                }, 1000);
+            }
+
+            if(cardDefense.hit_point <= 0) {
+                setTimeout(function(){ 
+                // delete card on board
+                cardDefenseDom.remove();
+                // delete card in state
+                if(cardDefense.owner === 'cpter') {
+                    let index = cpterDeck.monsters.indexOf(cardDefense);
+                    cpterDeck.monsters.splice(index, 1);
+
+                } else {
+                    let index = userDeck.monsters.indexOf(cardDefense);
+                    userDeck.monsters.splice(index, 1);
+                }
+                }, 1000);
+            }
+
+            // TOGGLE PLAYER ROUND
+            if(cardAttack.owner === 'cpter') {
+                PlayGame.userRound() ;
+            } else {
+                setTimeout(function(){ 
+                    PlayGame.cpterRound();
+                }, 1000);
+            }
+            }, 3000);
+
+    },
+
+    cpterAddCard: function(cardsOnBoard, cardsOnHand) {
+
+        let card = null;
+                
+        // if there is a card on board, get random on monster & booster. Else get random monster
+        if(cardsOnBoard.length > 0) {
+            card = cardsOnHand[Math.floor(Math.random()*cardsOnHand.length)];
+        } else {
+            let cardsMonster = cardsOnHand.filter(card => card.type === 'monster');
+            card = cardsMonster[Math.floor(Math.random()*cardsMonster.length)];
+        }
+
+        console.log("cpter want to add :", card)
+
+        // Handle booster cards
+        if(card.type === 'booster') {
+
+            // Get random monster card from board to apply boost
+            const monsterCards= cpterDeck.monsters.filter(card => card.onBoard == true);
+            let monsterCard = monsterCards[Math.floor(Math.random()*monsterCards.length)];
+
+            // Generating booster card on board
+            const cardsContainer = document.querySelector('.cpterCards');
+            cardsContainer.innerHTML += DomRenderCard.booster(card, 'cpter')
+
+
+            // Select monster card on board
+            let cardMonsterDom = document.querySelector(`div[data-key="${monsterCard.key}"]`);
+            let cardBoosterDom = document.querySelector(`div[data-key="${card.key}"]`);
+
+            animation.moveCards(cardBoosterDom, cardMonsterDom);
+
+            setTimeout(function(){ 
+
+                const typeBooster = card.special_effect_text;
+                console.log('type de booster', typeBooster)
+                const bonus = card.special_effect_value + monsterCard[typeBooster];
+                console.log('bonus', bonus)
+                // update monster card value in dom
+                let textBonus = cardMonsterDom.querySelector(`.${typeBooster}`);
+                textBonus.textContent = bonus;
+
+                // update monster card value
+                // let monsterInDeck = cpterDeck.monster.find(card => card.key = monsterCard.key)
+                monsterCard[typeBooster] = bonus;
+
+                cardBoosterDom.remove();
+
+                // Delete card in state
+                let index = cpterDeck.boosters.indexOf(card);
+                cpterDeck.boosters.splice(index, 1);
+
+                PlayGame.userRound();
+                }, 2000);
+
+        } else {
+
+            // Computer add a card on board
+            const cardsContainer = document.querySelector('.cpterCards');
+            cardsContainer.innerHTML += DomRenderCard.monster(card, 'cpter')
+
+
+            // Update status cardOnboard = true
+            cpterDeck.monsters.forEach((monster, index) => {
+                if(monster.key === card.key) {
+                    cpterDeck.monsters[index].onBoard = true;
+                }
+            });
+
+            PlayGame.userRound();
+        }
+    },
+
+    cpterAttack: function(cardsOnBoard, cardsOnHand) {
+        
+        const infosField = document.querySelector('.infosField');
+        infosField.textContent = "...Computer is playing..."
+
+        // Getting computer cards on board and select one
+        let cardAttack = cardsOnBoard[Math.floor(Math.random()*cardsOnBoard.length)];
+
+        // Getting user cards on board and select one
+        const userCards = userDeck.monsters.filter(card => card.onBoard == true);
+        let cardDefense = userCards[Math.floor(Math.random()*userCards.length)];
+
+        // Select each card in dom
+        let cardAttackDom = document.querySelector(`div[data-key="${cardAttack.key}"]`);
+        let cardDefenseDom = document.querySelector(`div[data-key="${cardDefense.key}"]`);
+
+        setTimeout(function(){ 
+            animation.moveCards(cardAttackDom, cardDefenseDom)
+            PlayGame.fight(cardAttack, cardDefense)
+        }, 1000);
+
+    }
+}
+
+module.exports = PlayGame;
+},{"../DomRender/BoardGame":4,"../DomRender/Card":5,"../DomRender/Tutorial":10,"../Middleware/Deck":11,"../Store":13,"../Utils/Animation":14,"../Utils/DragAndDrop":15}],4:[function(require,module,exports){
+const BoardGame = {
+    render: () => {
+        
+        return `
+            <div class="side-and-drop">
+                <div class="sideArea">
+                    <button class ="endOfRound inactive">END OF ROUND</button>
+                    <div class="infosField"></div>
+                    <div class="infosField-bubble"></div>
+                    <div class="vault-boy"></div>
+                </div>
+                <div class="boardArea">
+                    <div class="cpterCards"></div>
+                    <div class="drop-area"></div>
+                </div>
+            </div>
+            <div class="playerArea">
+                <div class="border-player-area"></div>
+                <div class="playerCards"></div>
+                <div class="border-player-area"></div>
+            </div>
+        `
+    }
+}
+
+module.exports = BoardGame;
+},{}],5:[function(require,module,exports){
+const Card = {
+
+    monster: (card, user) => {
+        return `
+        <div class="cardComponent ${user}Card monster" data-key="${card.key}">
+            <p class="card-name">${card.title}</p>
+            <div class="card-picture-container">
+            <img class="card-picture ${user}" src="./assets/img/monster/${card.id}.png">
+            </div>
+            <img class="card-background" src="./assets/img/monster.png">
+            <p class="card-value attack" id="attack">${card.attack}</p>
+            <p class="card-value defense" id="defense">${card.defense}</p>
+            <p class="card-value hit_point" id="hit_point">${card.hit_point}</p>
+      </div>
+        `
+    },
+    
+    booster: (card, user) => {
+        return `
+        <div class="cardComponent ${user}Card booster" data-key="${card.key}">
+            <p class="card-name">${card.title}</p>
+            <div class="card-picture-container">
+            <img class="card-picture ${user}" src="./assets/img/booster/${card.id}.png">
+            </div>
+            <img class="card-background" src="./assets/img/booster.png">
+            <p class="card-value boost" id="boost">${card.special_effect_value}</p>
+      </div>
+        `
+    },
+}
+
+module.exports = Card;
+},{}],6:[function(require,module,exports){
+const CreateAccount = {
+    render: () => {
+        
+        return `
+        <img src="assets/img/Logo.png" class="logo">
+        <form action="" class="form" id="createAccount">
+
+          <div class="form-label-group">
+            <label for="lastname">Lastname</label>
+              <input type="lastname" class="form-control" id="lastname" name="lastname" aria-describedby="lastnameHelp" placeholder="Votre nom" value="">
+          </div>
+
+          <div class="form-label-group">
+            <label for="firstname">Firstname</label>
+              <input type="firstname" class="form-control" id="firstname" name="firstname" aria-describedby="firstnameHelp" placeholder="Votre prénom" value="">
+          </div>
+
+          <div class="form-label-group">
+            <label for="pseudo">Nickname</label>
+              <input type="pseudo" class="form-control" id="pseudo" name="pseudo" aria-describedby="pseudoHelp" placeholder="Votre pseudo" value="">
+          </div>
+
+          <div class="form-label-group">
+            <label for="email">Email</label>
+              <input type="email" class="form-control" id="emailCreate" name="email" aria-describedby="emailHelp" placeholder="Votre courriel" autocomplete="username" value="">
+          </div>
+
+          <div class="form-label-group">
+            <label for="password">Password</label>
+              <input type="password" class="form-control" id="passwordCreate" name="password" placeholder="Votre mot de mot de passe" autocomplete="on">
+          </div>
+
+          <div class="form-label-group">
+            <label for="passwordConfirm">Confirm password</label>
+              <input type="password" class="form-control" id="passwordConfirm" name="passwordConfirm" placeholder="Confirmez votre mot de passe" autocomplete="new-password">
+          </div>
+
+              <button type="submit" class="">Submit</button>
+      </form>
+      <button class="go-back">GO BACK</button>
+        `
+    }
+}
+
+module.exports = CreateAccount;
+},{}],7:[function(require,module,exports){
+const Deck = {
+    showDeck: (decks) => {
+        return `
+            ${decks.map(deck => 
+                `
+                <div class="deck-container">
+                <p>Deck : "${deck.title}"</p>
+                <div class="card-deck"></div>
+                <button class="play-deck" id="${deck.id}">Play with this deck</button>
+                <button class="manage-deck" id="${deck.id}">Manage deck</button>
+                </div>
+                `
+            )}
+        `
+    },
+
+    createDeck: () => {
+        return `
+            <p>Create your first deck to play !</p>
+            <form action="" class="form" id="create-deck">
+                <input name="title" placeholder="name"></input>
+                <button type="submit">Create a deck</button>
+            </form>
+        `
+    }
+}
+
+module.exports = Deck;
+},{}],8:[function(require,module,exports){
+const Login = {
+    render: () => {
+
+        return `
+            <img src="assets/img/Logo.png" class="logo">
+            <form action="" class="form" id="login">
+                <div class="form-label-group">
+                <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Votre courriel">
+                </div>
+            
+                <div class="form-label-group">
+                <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password"
+                        placeholder="Votre mot de passe" autocomplete="on">
+        
+                </div>
+            
+                <div class="checkbox mb-3">
+                    <label>
+                        <input type="checkbox" name="remember" value="remember-me"> Se souvenir de moi
+                    </label>
+                </div>
+                <div>
+                <button class="" type="submit">Se connecter</button>
+                </div>
+            </form>
+            <button class="go-back">GO BACK</button>
+        `
+    }
+}
+
+module.exports = Login;
+},{}],9:[function(require,module,exports){
+const Menu = {
+    render: (logged) => {
+
+        if(logged === 'logged') {
+            return `
+            <img src="assets/img/Logo.png" class="logo">
+            <nav class="menu">
+            <ul>
+            <li class="menu-list" set-menu="play"><a href="">PLAY</a></li>
+            <li class="menu-list" set-menu="account"><a href="">MON COMPTE</a></li>
+            </ul>
+        </nav>
+        `
+        } else {
+            return `
+            <img src="assets/img/Logo.png" class="logo">
+            <nav class="menu">
+            <ul>
+            <li class="menu-list" set-menu="login"><a href="">LOGIN</a></li>
+            <li class="menu-list" set-menu="createAccount"><a href="">CREER UN COMPTE</a></li>
+            </ul>
+        </nav>
+        `
+        }
+    }
+}
+
+module.exports = Menu;
+},{}],10:[function(require,module,exports){
+const Tutorial = {
+    card: () => {
+
+            return `
+            <div class="black-filter"></div>
+            <div class="exemple-card">
+                <img src="assets/img/exempleCard.png">
+            </div>
+            <button class="close-button">Close</button>
+        `
+    }
+}
+
+module.exports = Tutorial;
+},{}],11:[function(require,module,exports){
+const Store = require('../Store');
+
+const axios = require('axios');
+
+const MiddlewareDeck = {
+
+    baseUrl: 'http://localhost:5000',
+
+    createOne: async (data) => {
+
+        event.preventDefault();
+
+        let form_data = new FormData();
+        form_data.append("title", data.target.title.value);
+        form_data.append("id", Store.user.id);
+
+        const requestConfig = {
+            method: 'POST',
+            body: form_data,
+        };
+
+        const response = await fetch(`${MiddlewareDeck.baseUrl}/crud/deck`, requestConfig);
+
+        const jsonResponse = await response.json();
+
+        if(response.status === 404) {
+
+            return false;
+
+        } else {
+            // Saving json response in local session
+            userDeck = JSON.stringify(jsonResponse);
+            sessionStorage.setItem('userDatas', userDeck);
+
+            // Saving datas in store
+            Store.user.decks = jsonResponse;
+
+            return true;
+        }
+
+    },
+
+    cpterDeck: async() => {
+
+        const monsters = await axios(`${MiddlewareDeck.baseUrl}/crud/monster`);
+        const boosters = await axios(`${MiddlewareDeck.baseUrl}/crud/booster`);
+
+        let monstersArray = [];
+        let boostersArray = [];
+
+        // Choosing 5 random monsters and adding in arrays
+        for (var i = 0; i < 5; i++) {
+            let monster = monsters.data[Math.floor(Math.random()*monsters.data.length)];
+            monstersArray.push(monster)       
+        }
+
+        // Choosing 3 random booster and adding in arrays
+        for (var i = 0; i < 2; i++) {
+            let booster = boosters.data[Math.floor(Math.random()*boosters.data.length)];
+            boostersArray.push(booster)       
+        }
+
+        const deck = {monsters: monstersArray, boosters: boostersArray};
+
+        // Saving datas in store
+        Store.cpter.deck = deck;
+    }
+  
+}
+
+module.exports = MiddlewareDeck;
+},{"../Store":13,"axios":17}],12:[function(require,module,exports){
+const Store = require('../Store');
+
+const MiddlewareLog = {
+
+    baseUrl: 'http://localhost:5000',
+
+    handleLogin: async (data) => {
+
+        event.preventDefault();
+
+        let dataForm = new FormData(data.target);
+
+        const requestConfig = {
+            method: 'POST',
+            body: dataForm
+        };
+
+        const response = await fetch(`${MiddlewareLog.baseUrl}/login`, requestConfig);
+		const jsonResponse = await response.json();
+
+        if(response.status === 404) {
+
+            return false;
+
+        } else {
+
+            // Saving datas in local session
+            userDatas = JSON.stringify(jsonResponse);
+            sessionStorage.setItem('userDatas', userDatas);
+
+            // Saving datas in store
+            Store.user = jsonResponse;
+            return true;
+        }
+   
+    },
+        
+    handleCreateAccount: async (data) => {
+
+        event.preventDefault();
+        console.log(data)
+        let dataForm = new FormData(data.target);
+
+        const requestConfig = {
+            method: 'POST',
+            body: dataForm
+        }
+
+        const response = await fetch(`${MiddlewareLog.baseUrl}/signup`, requestConfig);
+
+        const jsonResponse = await response.json();
+
+        const form = document.querySelector('form[id="createAccount"]');
+        const paragraph = document.createElement('p');
+
+        if(response.status === 404) {
+
+            paragraph.textContent = `Erreur 404`
+            form.appendChild(paragraph);
+
+        } else if (jsonResponse.error === 'userExist') {
+            
+            paragraph.textContent = `l'utilisateur existe déjà`
+            form.appendChild(paragraph);
+            
+        } else if (jsonResponse.error === 'wrongConfirm') {
+
+            paragraph.textContent = `Erreur de confirmation de mot de passe`
+            form.appendChild(paragraph);
+
+        } else {
+
+            // Saving json response in local session
+            userDatas = JSON.stringify(jsonResponse);
+            sessionStorage.setItem('userDatas', userDatas);
+
+            // Saving datas in store
+            Store.user = jsonResponse;
+            
+            return true;
+        }
+    }
+}
+
+module.exports = MiddlewareLog;
+},{"../Store":13}],13:[function(require,module,exports){
+const Store = {
+
+    user: {
+        id: null,
+        firstname: null,
+        lastname: null,
+        pseudo: null,
+        email: null,
+        victory: null,
+        defeat: null,
+        level: null,
+        role: null,
+        decks: null,
+        currentDeck: {
+            monsters: [],
+            boosters: [],
+        }
+    },
+
+    cpter: {
+        deck: null,
+    }
+};
+
+module.exports = Store;
+},{}],14:[function(require,module,exports){
+
+const dragAndDrop = require('./DragAndDrop');
 
 var animation = {
   
@@ -19,8 +1081,8 @@ var animation = {
 
     moveCards: function(cpterCard, playerCard) {
 
-        const positionPlayerCard = utils.getPosition(playerCard);
-        const positionCpterCard = utils.getPosition(cpterCard);
+        const positionPlayerCard = dragAndDrop.getPosition(playerCard);
+        const positionCpterCard = dragAndDrop.getPosition(cpterCard);
 
         cpterCard.style.position = 'fixed';
 
@@ -56,225 +1118,7 @@ var animation = {
 }
 
 module.exports = animation;
-},{"./utils":9}],2:[function(require,module,exports){
-const utils = require('./utils');
-const user = require('./user');
-const game = require('./game');
-// const dragAndDrop = require('./dragAndDrop');
-var app = {
-
-eventListener: function() {
-
-    // SHOW LOGIN FORM
-    const menuLogin = document.querySelector('li[set-menu="login"] a');      
-    menuLogin.addEventListener('click', utils.showLoginForm);
-
-    // LOGIN SUBMIT
-    const loginForm = document.querySelector('form[id="login"]')
-    loginForm.addEventListener('submit', user.handleLoginForm);
-
-    // PLAY BUTTON
-    const menuPlay = document.querySelector('li[set-menu="play"] a');
-    menuPlay.addEventListener('click', game.play);
-
-    // ACCOUNT BUTTON
-    const menuAccount = document.querySelector('li[set-menu="account"] a');
-    menuAccount.addEventListener('click', user.account);
-
-    // SHOW CREATE ACCOUNT FORM
-    const menuCreateAccount = document.querySelector('li[set-menu="createAccount"] a');
-    menuCreateAccount.addEventListener('click', utils.showCreateAccountForm);
-
-    // CREATE ACCOUNT SUBMIT
-    const createAccountForm = document.querySelector('form[id="createAccount"]');
-    createAccountForm.addEventListener('submit', user.handleCreateAccountForm);
-    
-},
-
-init: function () {
-    utils.clearEverything();
-    utils.showMainMenu();
-    app.eventListener();
-    utils.reloadCss();
-    // dragAndDrop.init();
-},
-};
-
-document.addEventListener('DOMContentLoaded', app.init);
-},{"./game":5,"./user":8,"./utils":9}],3:[function(require,module,exports){
-const game = require('./game');
-const utils = require('./utils');
-
-var cardGenerator = {
-
-    baseUrl: 'http://localhost:5000',
-
-    deck: function(deckDatas) {
-
-        // Creating div for the deck with deck picture, title and buttons (deck manager / play with deck)
-        const deckContainer = document.createElement('div');
-        deckContainer.classList.add('deck-container');
-        const deckTitle = document.createElement('p');
-        deckTitle.textContent = deckDatas.title;
-        const deckImage = document.createElement('div');
-        deckImage.classList.add('card-deck');
-
-        const article = document.querySelector('article');
-
-        deckContainer.setAttribute('set-id', deckDatas.id);
-
-        article.appendChild(deckContainer);
-        deckContainer.appendChild(deckTitle)
-        deckContainer.appendChild(deckImage);
-
-        const seeThisDeck = document.createElement('button');
-        seeThisDeck.classList.add('see-deck');
-        const playThisDeck = document.createElement('button');
-        playThisDeck.classList.add('play-deck');
-        seeThisDeck.textContent = 'Manage deck'
-        playThisDeck.textContent = 'Play with this deck'
-
-        deckContainer.appendChild(seeThisDeck)
-        deckContainer.appendChild(playThisDeck);
-
-    },
-
-    getAllCards: async function() {
-
-        const requestConfig = {
-            method: 'GET'
-        };
-
-        const getMonsters = await fetch(`${cardGenerator.baseUrl}/crud/monster`, requestConfig);
-        const monsters = await getMonsters.json();
-
-        const getBoosters = await fetch(`${cardGenerator.baseUrl}/crud/booster`, requestConfig);
-        const boosters = await getBoosters.json();
-
-        const cards = {monsters: monsters, boosters: boosters};
-
-        return cards;
-
-    },
-
-    firstUserDeck: async function(data) {
-
-        event.preventDefault();
-
-        const cards = await cardGenerator.getAllCards();
-
-        const monsters = cards.monsters
-        const boosters = cards.boosters
-
-        // Init monster and booster arrays
-        let monstersArray = [];
-        let boostersArray = [];
-
-        // Choosing 5 random monsters and adding in arrays
-        for (var i = 0; i < 4; i++) {
-            let monster = monsters[Math.floor(Math.random()*monsters.length)];
-            monstersArray.push(monster.id)       
-        }
-
-        // Choosing 2 random booster and adding in arrays
-        for (var i = 0; i < 2; i++) {
-            let booster = boosters[Math.floor(Math.random()*boosters.length)];
-            boostersArray.push(booster.id)       
-        }
-
-        const datasToSend = {id: data.target.id.value, title: data.target.title.value, monsters: monstersArray, boosters: boostersArray};
-
-        var form_data = new FormData();
-
-        for ( var key in datasToSend ) {
-            form_data.append(key, datasToSend[key]);
-        }
-
-        const requestConfig = {
-            method: 'POST',
-            body: form_data
-        };
-
-        await fetch(`${cardGenerator.baseUrl}/crud/deck`, requestConfig);
-
-    },
-
-    cpterDeck: async function() {
-
-        const cards = await cardGenerator.getAllCards();
-
-        const monsters = cards.monsters
-        const boosters = cards.boosters
-
-        let monstersArray = [];
-        let boostersArray = [];
-
-        // Choosing 5 random monsters and adding in arrays
-        for (var i = 0; i < 4; i++) {
-            let monster = monsters[Math.floor(Math.random()*monsters.length)];
-            monster.key = null;
-            monstersArray.push(monster)       
-        }
-
-        // Choosing 3 random booster and adding in arrays
-        for (var i = 0; i < 2; i++) {
-            let booster = boosters[Math.floor(Math.random()*boosters.length)];
-            boostersArray.push(booster)       
-        }
-
-
-        const deck = {monsters: monstersArray, boosters: boostersArray};
-        return deck;
-
-    },
-
-    card: function(card, type, user) {
-
-        var template = document.querySelector('#template-card');
-        var clone = document.importNode(template.content, true);
-
-        // ATTRIBUTE
-        const container = clone.querySelector('.cardComponent');
-        container.setAttribute('data-key', card.key);
-
-        if(user != 'cpter') {
-            container.classList.add('playerCard');
-            container.setAttribute('data-player', 'userDeck');
-            container.setAttribute("draggable", true);
-            container.setAttribute('data-status', 'onHand');
-        }
-
-        if(user === 'cpter') {
-            container.setAttribute('data-player', 'cpterDeck');
-            clone.querySelector('.card-picture').classList.add('cpter');
-        }
-
-        // TITLE
-        clone.querySelector('.card-name').textContent = card.title;
-
-        // PICTURE
-        clone.querySelector('.card-picture').src =  `./assets/img/${type}/${card.id}.png`;
-
-        // STATISTICS & BACKGROUND
-        if(type === 'monster') {
-            clone.querySelector('.card-background').src =  `./assets/img/Monster.png`;
-
-            clone.querySelector('.attack').textContent = card.attack;
-            clone.querySelector('.defense').textContent = card.defense;
-            clone.querySelector('.hitpoint').textContent = card.hit_point;
-        } else {
-            clone.querySelector('.card-background').src =  `./assets/img/Booster.png`;
-            clone.querySelector('.boost').textContent = card.special_effect_value;
-        }
-
-        return clone;
-    },
-
-}
-
-
-module.exports = cardGenerator;
-},{"./game":5,"./utils":9}],4:[function(require,module,exports){
+},{"./DragAndDrop":15}],15:[function(require,module,exports){
 
 const dragAndDrop = {
 
@@ -399,986 +1243,6 @@ const dragAndDrop = {
 
     },
 
-};
-
-module.exports = dragAndDrop;
-},{}],5:[function(require,module,exports){
-const utils = require('./utils');
-const play = require('./play');
-const cardGenerator = require('./cardGenerator');
-const Store = require('./store');
-
-const game = {
-
-    baseUrl: 'http://localhost:5000',
-
-    play: async function(event) {
-        event.preventDefault();
-        console.log(Store.user)
-        // CLEAR DISPLAY
-        utils.clearEverything();
-
-        const logo = document.querySelector('.logo')
-        logo.classList.add('is-hidden');
-
-        const container = document.querySelector('.container');
-        container.style.justifyContent = 'center';
-
-        // const article = document.querySelector('article');
-        // if(article) { document.querySelector('article').innerHTML = ''; }
-        
-        // Creating main elements in dom
-        const mainArea = document.querySelector('main');
-        const article = document.createElement('article');
-        mainArea.appendChild(article);
-
-        // Checking if user has decks
-
-        if(Store.user.decks) {
-
-            for(const deck of Store.user.decks) {
-
-                cardGenerator.deck(deck);
-
-                const seeThisDeck = document.querySelector('.see-deck');
-                const playThisDeck = document.querySelector('.play-deck');
-
-                seeThisDeck.addEventListener('click', function(){ game.showDeck(deck);});
-                playThisDeck.addEventListener('click', function(){ play.launchGame(deck)});
-            }
-
-        } else {
-            
-            // Generating a deck for new user
-            console.log('on passe par la creation de deck')
-            const textNewDeck = document.createElement('p');
-            textNewDeck.textContent = 'Create your first deck to play !'
-
-            const form = document.createElement('form');
-            form.classList.add('form');
-            article.appendChild(textNewDeck);
-            article.appendChild(form);
-
-            const deckName = document.createElement('input');
-            deckName.placeholder = 'name';
-            deckName.name = 'title';
-            form.appendChild(deckName);
-
-            const userId = document.createElement('input');
-            userId.name = 'id';
-            userId.value = Store.user.id;
-            userId.style.display = 'none';
-            form.appendChild(userId);
-
-            const createDeckButton = document.createElement('button');
-            createDeckButton.type = 'submit';
-            createDeckButton.textContent = 'Create a deck';
-            form.appendChild(createDeckButton);
-
-            form.addEventListener('submit', cardGenerator.firstUserDeck);
-        }
-
-        // ADDING "BACK TO MAIN MENU"
-        const backMenu = document.createElement('button');
-        backMenu.classList.add('nav-button');
-        backMenu.textContent = "GO BACK"
-        article.appendChild(backMenu);
-
-        // EVENTLISTENER "BACK TO MAIN MENU"
-        backMenu.addEventListener('click', utils.showLoggedMenu);
-
-    },
-    
-    showDeck: function(deck) {
-
-        // CLEAR DISPLAY
-        utils.clearEverything();
-
-        // SHOW ARTICLE AREA 
-        const article = document.querySelector('article');
-        article.innerHTML = '';
-        article.classList.remove('is-hidden');
-
-        article.classList.add('deckManager')
-
-
-        const monsters = deck.monsters;
-        const boosters = deck.boosters;
-
-        monsters.map((card) => {
-            const monsterCard = cardGenerator.card(card, 'monster', 'user');
-            article.appendChild(monsterCard);
-        });
-
-        boosters.map((card) => {
-            const boosterCard = cardGenerator.card(card, 'booster', 'user');
-            article.appendChild(boosterCard);
-        });
-
-        // "BACK TO CHOOSE DECK MENU"
-        const backMenu = document.createElement('button');
-        backMenu.classList.add('nav-button');
-        backMenu.textContent = "GO BACK"
-        article.appendChild(backMenu);
-
-        // EVENTLISTENER "BACK TO CHOOSE DECK MENU"
-        console.log(game)
-        backMenu.addEventListener('click', game.play);
-    },
-
-}
-
-module.exports = game;
-},{"./cardGenerator":3,"./play":6,"./store":7,"./utils":9}],6:[function(require,module,exports){
-const utils = require('./utils');
-const cardGenerator = require('./cardGenerator');
-const dragAndDrop = require('./dragAndDrop');
-const animation = require('./animation');
-
-
-
-
-// Regular variable used for dom selection
-let infosField = null;
-let endOfRoundButton = null;
-// Game
-
-let round = 0;
-
-let userDeck = {
-    monsters: [],
-    boosters: [],
-};
-
-let cpterDeck = {
-    monsters: [],
-    boosters: [],
-};
-
-const play = {
-
-    launchGame: async function(userDeckDatas) {
-
-        // Change flex direction
-        const container = document.querySelector('.container');
-        container.style.flexDirection = 'row';
-
-        // Clear display and create board
-        utils.clearEverything();
-
-        // Show exemple card
-        const body = document.querySelector('body');
-        const blackFilter = document.createElement('div');
-        const exempleCard = document.createElement('div');
-        const close = document.createElement('button');
-        close.textContent = 'close';
-
-        blackFilter.classList.add('black-filter');
-        exempleCard.classList.add('exemple-card');
-        close.classList.add('close-button');
-
-        body.insertBefore(blackFilter, body.firstChild);
-        container.appendChild(close)
-        container.appendChild(exempleCard)
-        close.addEventListener('click', function() {
-            blackFilter.remove();
-            exempleCard.remove();
-            close.remove();
-        })
-
-        // Create board game and assign frequent called dom elements
-        utils.createBoardGame();
-        infosField = document.querySelector('.infosField');
-        endOfRoundButton = document.querySelector('.endOfRound');
-
-        // Show user board area
-        const userBoard = document.querySelector('.drop-area');
-        userBoard.classList.add('show');
-        const userBoardMessage = document.createElement('p');
-        userBoardMessage.textContent = "DRAG AND DROP YOUR CARD HERE";
-        userBoard.appendChild(userBoardMessage);
-
-        // Generating a deck for computer
-        const cpterDeckDatas = await cardGenerator.cpterDeck();
-
-        // Deep copy to avoid duplicate keys
-        const deepCopyUser = JSON.parse(JSON.stringify(userDeckDatas));
-        const deepCopyCpter = JSON.parse(JSON.stringify(cpterDeckDatas));
-
-        // Assign decks for each player
-
-        userDeck.monsters = deepCopyUser.monsters;
-        userDeck.boosters = deepCopyUser.boosters;
-
-        cpterDeck.monsters = deepCopyCpter.monsters;
-        cpterDeck.boosters = deepCopyCpter.boosters;
-
-
-        // Generating unique key, status and type for each card
-        let inc = 0;
-        userDeck.monsters.forEach(card => {card.key = inc++; card.onBoard = false; card.type = 'monster'; card.owner = 'user'});
-        userDeck.boosters.forEach(card => {card.key = inc++; card.onBoard = false; card.type = 'booster'; card.owner = 'user'});
-
-        // inc = 0;
-        cpterDeck.monsters.forEach(card => {card.key = inc++; card.onBoard = false; card.type = 'monster'; card.owner = 'cpter'});
-
-        cpterDeck.boosters.forEach(card => {card.key = inc++; card.onBoard = false; card.type = 'booster'; card.owner = 'cpter'});
-
-        // Generating player cards on board
-        const cardsContainer = document.querySelector(`div[player="user"]`);
-
-        userDeck.monsters.map((card) => {
-            const monsterCard = cardGenerator.card(card, 'monster', 'user');
-            cardsContainer.appendChild(monsterCard);
-        });
-
-        userDeck.boosters.map((card) => {
-            const boosterCard = cardGenerator.card(card, 'booster', 'user');
-            cardsContainer.appendChild(boosterCard);
-        });
-
-        // Ready to play
-        play.userRound();
-    },
-
-    userRound: function() {
-
-        round++;
-
-        // Display informations to user
-        if(round === 1) {
-            infosField.innerHTML = `Welcome ! <br><br> Please drag and drop your first card on the board.`;
-        } else {
-            infosField.innerHTML = 'Add a card on the board or play a card from the board to attack computer';
-        }
-
-        // Handle cards
-        const userCardsDom = document.getElementsByClassName('playerCard');
-    
-        for (const userCardDom of userCardsDom) {
-
-            // Initialisation of drag and drop
-            dragAndDrop.init(userCardDom);
-
-            // Listening drop
-            userCardDom.addEventListener('dragend', function () {
-
-                var x = event.clientX, y = event.clientY,
-                eltFlewOver = document.elementFromPoint(x, y);
-
-                // player put card on board
-                if ((eltFlewOver.className === 'drop-area') || (eltFlewOver.className === 'drop-area show')) {
-                    
-                    if(round == 1) {
-                    eltFlewOver.className = 'drop-area';
-                    eltFlewOver.innerHTML = '';
-                    }
-                    eltFlewOver.appendChild(userCardDom);
-
-                    // Disable draggable
-                    const playerCards = document.querySelectorAll(`div[data-player="userDeck"]`);
-
-                    for(const card of playerCards) { card.draggable = false; }
-
-                    // Display message
-                    infosField.textContent = 'Click "end of round" or "cancel"';
-                    endOfRoundButton.classList.remove('inactive');
-
-                    // Cancel action
-                    const cancel = document.createElement('button');
-                    cancel.classList.add('cancel')
-                    cancel.textContent = 'CANCEL'
-
-                    document.querySelector('.sideArea').appendChild(cancel);
-
-                    cancel.addEventListener("click", function() {
-                        userCardDom.remove();
-                        cancel.remove();
-                        document.querySelector('.playerCards').appendChild(userCardDom);
-
-                        // reset draggable
-                        const cardsOnHand = document.querySelector('.playerCards').childNodes;
-                        for(const card of cardsOnHand) { card.draggable = true; }
-
-                        const infosField = document.querySelector('.infosField');
-                        infosField.innerHTML = 'Add a card on the board or play a card from the board to attack computer';
-                    })
-
-                    // Handle end of round
-                    const handleEndOfRound = () => {
-                        endOfRoundButton.classList.add('inactive');
-                        endOfRoundButton.removeEventListener("click", handleEndOfRound);
-                        
-                        // Find card in state to set onBoard = true
-                        const cardKey = userCardDom.getAttribute('data-key');
-                        const cardInState = userDeck.monsters.find(monster => monster.key == cardKey);
-
-                        cardInState.onBoard = true;
-
-                        document.querySelector('.cancel').remove();
-
-                        play.cpterRound();
-                    }
-
-                        endOfRoundButton.addEventListener('click', handleEndOfRound);
-
-                } else if ((eltFlewOver.parentNode.dataset.player === 'cpterDeck') || (eltFlewOver.className === 'card-picture cpter'))  {
-                    
-                    // Player attack a computer card
-                    const cpterCardDom = eltFlewOver.closest('.cardComponent');
-
-                    if(userCardDom.classList.contains("booster")) {
-                        alert('You can\'t attack with a booster');
-                    } else {
-
-                        // Select user and player cards in state
-                        let cardAttack = userDeck.monsters.find(card => card.key == userCardDom.getAttribute('data-key'))
-                        let cardDefense = cpterDeck.monsters.find(card => card.key == cpterCardDom.getAttribute('data-key'))
-
-                        play.fight(cardAttack, cardDefense);
-                    }
-                }
-            });
-        }
-    },
-
-    cpterRound: function() {
-
-        // console.log('cpter round / user Cards :', userDeck)
-        // console.log('cpter round / cpter Cards :', cpterDeck)
-        
-        if(cpterDeck.monsters.length == 0) {
-            console.log("YOU WIN !!")
-        }
-
-        let cards = cpterDeck.monsters.concat(cpterDeck.boosters);
-        let cardsOnBoard = cards.filter(card => card.onBoard);
-        let cardsOnHand = cards.filter(card => !card.onBoard);
-
-         if((round == 2 || round == 4 || round == 5 || round == 8 || round == 9 || round == 12 || round > 13) && (cardsOnBoard.length > 0)) {
-
-            play.cpterAttack(cardsOnBoard, cardsOnHand);
-
-         } else {
-
-            // If round 1, add a monster on board
-            if(round == 1) {
-
-                infosField.textContent = "...Computer is playing..."
-
-                setTimeout(function(){ 
-
-                // Get random monster
-                let cardFirstRound = cpterDeck.monsters[Math.floor(Math.random()*cpterDeck.monsters.length)];
-
-                // Generating card on board
-                const cardsContainer = document.querySelector(`div[player="cpter"]`);
-                const domCard = cardGenerator.card(cardFirstRound, 'monster', 'cpter')
-                cardsContainer.appendChild(domCard);
-
-                // Update status cardOnboard = true
-                cpterDeck.monsters.forEach((monster, index) => {
-                    if(monster.key === cardFirstRound.key) {
-                        cpterDeck.monsters[index].onBoard = true;
-                    }
-                });
-
-                play.userRound();
-                }, 1500);
-
-            // Else if, get random card
-            } else if(cards.length > 0) {
-
-                play.cpterAddCard(cardsOnBoard, cardsOnHand);
-
-            } else {
-                play.cpterAttack(cardsOnBoard, cardsOnHand);
-            }
-         }
-
-    },
-
-
-    fight: function(cardAttack, cardDefense) {
-
-        console.log("carte attaque : ", cardAttack)
-        console.log("carte defense : ", cardDefense)
-        // Algorithm for damage
-
-        const coefficient = cardAttack.attack - cardDefense.defense;
-
-        let damageToDefenser = null;
-        if(coefficient <= 0) {
-            damageToDefenser = Math.floor(Math.random()*2)+1;
-        } else {
-            damageToDefenser = Math.floor(Math.random()*3)+coefficient;
-        }
-
-        let damageToAttacker = null;
-        if(damageToDefenser == 1) {
-            damageToAttacker = 0;
-        } else {
-            damageToAttacker = damageToDefenser - 1;
-        }
-
-        const initialAttackHp = cardAttack.hit_point;
-        const initialDefenseHp = cardDefense.hit_point;
-
-        cardAttack.hit_point = cardAttack.hit_point - damageToAttacker;
-        cardDefense.hit_point = cardDefense.hit_point - damageToDefenser;
-
-        // Getting cards in dom
-        const cardAttackDom = document.querySelector(`div[data-key="${cardAttack.key}"]`);
-        const cardDefenseDom = document.querySelector(`div[data-key="${cardDefense.key}"]`);
-
-        // Animation
-        if(cardAttack.owner === 'cpter') {
-            animation.moveCards(cardAttackDom, cardDefenseDom)
-        } else {
-            animation.blink(cardAttackDom, cardDefenseDom)
-        }
-
-
-        setTimeout(function(){ 
-
-            // Update values in dom
-            if(cardAttack.hit_point != initialAttackHp) {
-                let attackerHp = cardAttackDom.querySelector('.hitpoint');
-                attackerHp.textContent = cardAttack.hit_point;
-
-                attackerHp.classList.add('blink_hit-point');
-                setTimeout(function(){ 
-                    attackerHp.classList.remove('blink_hit-point');
-                }, 1000);
-            }
-
-            if(cardDefense.hit_point != initialDefenseHp) {
-                let defenserHp = cardDefenseDom.querySelector('.hitpoint');
-                defenserHp.textContent = cardDefense.hit_point;
-
-                defenserHp.classList.add('blink_hit-point');
-                setTimeout(function(){ 
-                    defenserHp.classList.remove('blink_hit-point');
-                }, 1000);
-            }
-
-            // Handle fight result
-            if(cardAttack.hit_point <= 0) {
-                setTimeout(function(){ 
-                // delete card on board
-                cardAttackDom.remove();
-                // delete card in state
-                if(cardAttack.owner === 'cpter') {
-                    let index = cpterDeck.monsters.indexOf(cardAttack);
-                    console.log("la carte du cpter qui sera supprimée à l'index", index);
-                    console.log("state cpter AVANT suppression", cpterDeck.monsters)
-                    cpterDeck.monsters.splice(index, 1);
-                    console.log("state cpter apres suppression", cpterDeck.monsters)
-                } else {
-                    let index = userDeck.monsters.indexOf(cardAttack);
-                    console.log("la carte du user qui sera supprimée à l'index", index);
-                    console.log("state user AVANT suppression", userDeck.monsters)
-                    userDeck.monsters.splice(index, 1);
-                    console.log("state user apres suppression", userDeck.monsters)
-                }
-
-                }, 1000);
-            }
-
-            if(cardDefense.hit_point <= 0) {
-                setTimeout(function(){ 
-                // delete card on board
-                cardDefenseDom.remove();
-                // delete card in state
-                if(cardDefense.owner === 'cpter') {
-                    let index = cpterDeck.monsters.indexOf(cardDefense);
-                    console.log("la carte du cpter qui sera supprimée à l'index", index);
-                    console.log("state cpter AVANT suppression", cpterDeck.monsters)
-                    cpterDeck.monsters.splice(index, 1);
-                    console.log("state cpter apres suppression", cpterDeck.monsters)
-                } else {
-                    let index = userDeck.monsters.indexOf(cardDefense);
-                    console.log("la carte du user qui sera supprimée à l'index", index);
-                    console.log("state user AVANT suppression", userDeck.monsters)
-                    userDeck.monsters.splice(index, 1);
-                    console.log("state user apres suppression", userDeck.monsters)
-                }
-                }, 1000);
-            }
-
-            // TOGGLE PLAYER ROUND
-            if(cardAttack.owner === 'cpter') {
-                play.userRound() ;
-            } else {
-                setTimeout(function(){ 
-                    play.cpterRound();
-                }, 1000);
-            }
-            }, 3000);
-
-    },
-
-    cpterAddCard: function(cardsOnBoard, cardsOnHand) {
-
-        let card = null;
-                
-        // if there is a card on board, get random on monster & booster. Else get random monster
-        if(cardsOnBoard.length > 0) {
-            card = cardsOnHand[Math.floor(Math.random()*cardsOnHand.length)];
-        } else {
-            let cardsMonster = cardsOnHand.filter(card => card.type === 'monster');
-            card = cardsMonster[Math.floor(Math.random()*cardsMonster.length)];
-        }
-
-        console.log("cpter want to add :", card)
-
-        // Handle booster cards
-        if(card.type === 'booster') {
-
-            // Get random monster card from board to apply boost
-            const monsterCards= cpterDeck.monsters.filter(card => card.onBoard == true);
-            let monsterCard = monsterCards[Math.floor(Math.random()*monsterCards.length)];
-
-            // Generating booster card on board
-            const cardsContainer = document.querySelector(`div[player="cpter"]`);
-            const cardBooster = cardGenerator.card(card, 'booster', 'cpter')
-            cardsContainer.appendChild(cardBooster);
-
-            // Select monster card on board
-            let cardMonsterDom = document.querySelector(`div[data-key="${monsterCard.key}"]`);
-            let cardBoosterDom = document.querySelector(`div[data-key="${card.key}"]`);
-
-            console.log(cardBoosterDom, cardMonsterDom)
-            animation.moveCards(cardBoosterDom, cardMonsterDom);
-
-            setTimeout(function(){ 
-
-                const typeBooster = card.special_effect_text;
-
-                const bonus = card.special_effect_value + monsterCard[typeBooster];
-
-                // update monster card value in dom
-                let textBonus = document.getElementById(`${typeBooster}`);
-                textBonus.textContent = bonus;
-
-                // update monster card value
-                // let monsterInDeck = cpterDeck.monster.find(card => card.key = monsterCard.key)
-                monsterCard[typeBooster] = bonus;
-
-                cardBoosterDom.remove();
-
-                play.userRound();
-                }, 2000);
-
-        } else {
-
-            // Computer add a card on board
-            const cardsContainer = document.querySelector(`div[player="cpter"]`);
-            const domCard = cardGenerator.card(card, 'monster', 'cpter')
-            cardsContainer.appendChild(domCard);
-
-            // Update status cardOnboard = true
-            cpterDeck.monsters.forEach((monster, index) => {
-                if(monster.key === card.key) {
-                    cpterDeck.monsters[index].onBoard = true;
-                }
-            });
-
-            play.userRound();
-        }
-    },
-
-    cpterAttack: function(cardsOnBoard, cardsOnHand) {
-
-        infosField.textContent = "...Computer is playing..."
-
-        // Getting computer cards on board and select one
-        let cardAttack = cardsOnBoard[Math.floor(Math.random()*cardsOnBoard.length)];
-
-        // Getting user cards on board and select one
-        const userCards = userDeck.monsters.filter(card => card.onBoard == true);
-        let cardDefense = userCards[Math.floor(Math.random()*userCards.length)];
-
-        // Select each card in dom
-        let cardAttackDom = document.querySelector(`div[data-key="${cardAttack.key}"]`);
-        let cardDefenseDom = document.querySelector(`div[data-key="${cardDefense.key}"]`);
-
-        console.log("cpter want to attack with card in state :", cardAttack)
-        console.log("cpter want to attack with card in dom :", cardAttackDom)
-
-        console.log("user will be attack for his card in state :", cardDefense)
-        console.log("user will be attack for his card in dom  :", cardDefenseDom)
-
-        setTimeout(function(){ 
-            animation.moveCards(cardAttackDom, cardDefenseDom)
-            play.fight(cardAttack, cardDefense)
-        }, 1000);
-
-    }
-
-}
-
-module.exports = play;
-},{"./animation":1,"./cardGenerator":3,"./dragAndDrop":4,"./utils":9}],7:[function(require,module,exports){
-
-let Store = {
-
-    cards: {
-        allCards: [],
-        computerCards: [],
-        userCards: []
-    },
-        
-    user: {
-        id: null,
-        pseudo: null,
-        firstname: null,
-        lastname: null,
-        email: null,
-        victory: null,
-        defeat: null,
-        level: null,
-        decks: null
-    }
-}
-
-module.exports = Store;
-},{}],8:[function(require,module,exports){
-const utils = require('./utils');
-const Store = require('./store');
-
-const user = {
-
-    baseUrl: 'http://localhost:5000',
-
-
-    handleLoginForm: async function(data) {
-
-        event.preventDefault();
-
-        let dataForm = new FormData(data.target);
-
-        const requestConfig = {
-            method: 'POST',
-            body: dataForm
-        };
-
-        const response = await fetch(`${user.baseUrl}/login`, requestConfig);
-		const jsonResponse = await response.json();
-
-        if(response.status === 404) {
-            // Debugger
-            // console.log(jsonResponse)
-
-        } else {
-
-            // Saving datas in local session
-            userDatas = JSON.stringify(jsonResponse);
-            sessionStorage.setItem('userDatas', userDatas);
-            
-            // Saving datas in store
-            Store.user = jsonResponse;
-            console.log(jsonResponse)
-            utils.showLoggedMenu();
-        }
-
-    },
-
-    account: function(event) {
-
-        event.preventDefault();
-
-        // CLEAR DISPLAY
-        utils.clearEverything();
-
-        // SHOW MENU
-        const menu = document.querySelector('.menu')
-        menu.classList.remove('is-hidden');
-
-        // GET DATAS FROM SESSION STORAGE
-        const userDatas = sessionStorage.getItem('userDatas');
-        const user = JSON.parse(userDatas);
-
-        // CREATING DOM
-        const dom = document.querySelector('main');
-
-        const article = document.createElement('article');
-        dom.appendChild(article);
-
-        // GENERATING USER INFORMATIONS IN DOM
-        for(const elt of Object.entries(user)) {
-
-            console.log(elt)
-            const paragraph = document.createElement('p');
-            paragraph.classList.add('account-key');
-            paragraph.textContent = elt[0] + ' : ' + elt[1];
-            article.appendChild(paragraph);
-        }
-
-        // ADDING "BACK TO MAIN MENU"
-        const backMenu = document.createElement('button');
-        backMenu.classList.add('nav-button');
-        backMenu.textContent = "GO BACK"
-        article.appendChild(backMenu);
-
-        // EVENTLISTENER "BACK TO MAIN MENU"
-        backMenu.addEventListener('click', utils.showLoggedMenu);
-    },
-
-    handleCreateAccountForm: async function(data) {
-
-        event.preventDefault();
-
-        let dataForm = new FormData(data.target);
-
-        const requestConfig = {
-            method: 'POST',
-            body: dataForm
-        }
-
-        const response = await fetch(`${user.baseUrl}/signup`, requestConfig);
-
-        const jsonResponse = await response.json();
-
-        const form = document.querySelector('form[id="createAccount"]');
-        const paragraph = document.createElement('p');
-
-        // responseString = JSON.stringify(jsonResponse);
-        console.log(jsonResponse.error);
-
-        if(response.status === 404) {
-
-            paragraph.textContent = `Erreur 404`
-            form.appendChild(paragraph);
-
-        } else if (jsonResponse.error === 'userExist') {
-            
-            paragraph.textContent = `l'utilisateur existe déjà`
-            form.appendChild(paragraph);
-            
-        } else if (jsonResponse.error === 'wrongConfirm') {
-
-            paragraph.textContent = `Erreur de confirmation de mot de passe`
-            form.appendChild(paragraph);
-
-        } else {
-
-        // Saving json response in local session
-        userDatas = JSON.stringify(jsonResponse);
-        sessionStorage.setItem('userDatas', userDatas);
-
-        // Saving datas in store
-        Store.user = jsonResponse;
-
-        // CLEAR DISPLAY
-        utils.clearEverything();
-
-        // ADDING "BACK TO MAIN MENU"
-        const main = document.querySelector('main');
-        const backMenu = document.createElement('button');
-        backMenu.classList.add('nav-button');
-        backMenu.textContent = "GO BACK"
-        main.appendChild(backMenu);
-
-        // EVENTLISTENER "BACK TO MAIN MENU"
-        backMenu.addEventListener('click', utils.showLoggedMenu);
-        }
-
-
-    }
-
-};
-
-module.exports = user;
-},{"./store":7,"./utils":9}],9:[function(require,module,exports){
-
-const utils = {
-
-    showMainMenu: function() {
-
-        // SHOW MENU
-        const menu = document.querySelector('.menu')
-        menu.classList.remove('is-hidden');
-
-        // SHOW LOGIN, CREATE ACCOUNT, RULES
-        const playButton = document.querySelector('li[set-menu="login"]');
-        playButton.classList.remove('is-hidden');
-
-        const createAccountButton = document.querySelector('li[set-menu="createAccount"]');
-        createAccountButton.classList.remove('is-hidden');
-        
-        const rulesButton = document.querySelector('li[set-menu="rules"]');
-        rulesButton.classList.remove('is-hidden');
-    },
-
-    showLoggedMenu: function() {
-
-        // CLEAR DISPLAY
-        utils.clearEverything();
-
-        // SHOW MENU
-        const menu = document.querySelector('.menu')
-        menu.classList.remove('is-hidden');
-
-        const playButton = document.querySelector('li[set-menu="play"]');
-        playButton.classList.remove('is-hidden');
-        const accountButton = document.querySelector('li[set-menu="account"]');
-        accountButton.classList.remove('is-hidden');
-        const rulesButton = document.querySelector('li[set-menu="rules"]');
-        rulesButton.classList.remove('is-hidden');
-
-    },
-
-    clearEverything: function() {
-        const activeElements = document.querySelectorAll('nav, form, article, li');
-
-        for(let activElt of activeElements) {
-            activElt.classList.add('is-hidden');
-        }
-    },
-
-
-    showLoginForm: function(event) {
-
-        event.preventDefault();
-
-        // CLEAR DISPLAY
-        utils.clearEverything();
-
-        // SHOW LOGIN FORM
-        const loginForm = document.querySelector('form[id="login"]')
-        loginForm.classList.remove('is-hidden');
-    },
-
-    showCreateAccountForm: function(event) {
-        event.preventDefault();
-
-        // CLEAR DISPLAY
-        utils.clearEverything();
-
-        // SHOW CREATE ACCOUNT FORM
-        const createAccountForm = document.querySelector('form[id="createAccount"]');
-        createAccountForm.classList.remove('is-hidden');
-    },
-
-    createBoardGame: function() {
-
-        // THE ALL BOARD GAME
-        const main = document.querySelector('main');
-        main.classList.add('board-game');
-
-        // SIDE LEFT + DROP AREA
-        const sideAndDrop = document.createElement('div');
-        sideAndDrop.classList.add('side-and-drop');
-
-        // SIDE AREA.
-        const sideArea = document.createElement('div');
-        sideArea.classList.add('sideArea');
-
-        const borderSideArea = document.createElement('div');
-        borderSideArea.classList.add('border-left-side');
-          
-          //-- End of round
-          const endOfRound = document.createElement('button');
-          endOfRound.classList.add('endOfRound')
-          endOfRound.classList.add('inactive')
-          endOfRound.textContent = 'END OF ROUND'
-
-          //-- Informations field
-          const infosField = document.createElement('div');
-          infosField.classList.add('infosField');
-          const infosFieldBubble = document.createElement('div');
-          infosFieldBubble.classList.add('infosField-bubble');
-
-          // Vault boy
-          const vaultBoy = document.createElement('div');
-          vaultBoy.classList.add('vault-boy');
-
-          //-- Big card container
-            //   const bigCardContainer = document.createElement('div');
-            //   bigCardContainer.classList.add('bigCardContainer')
-
-        // BOARD AREA
-        const boardArea = document.createElement('div');
-        boardArea.classList.add('boardArea');
-
-          //-- COMPUTER CARDS AREA
-          const cpterCards = document.createElement('div');
-          cpterCards.classList.add('cpterCards');
-          cpterCards.setAttribute('player', 'cpter')
-
-          //-- DROP AREA
-          const dropArea = document.createElement('div');
-          dropArea.classList.add('drop-area');
-        //   dropArea.setAttribute('draggable', true);
-
-        // PLAYER CARDS AREA
-        const playerArea = document.createElement('div');
-        playerArea.classList.add('playerArea');
-
-
-          //-- BORDER TOP
-          const borderPlayerAreaTop = document.createElement('div');
-          borderPlayerAreaTop.classList.add('border-player-area');
-
-          //-- CARDS
-          const playerCards = document.createElement('div');
-          playerCards.classList.add('playerCards');
-          playerCards.setAttribute('player', 'user')
-
-          //-- BORDER BOTTOM
-          const borderPlayerAreaBottom = document.createElement('div');
-          borderPlayerAreaBottom.classList.add('border-player-area');
-
-        // ALLOW HORIZONTAL SCROLL WITH WHEEL
-        window.addEventListener('wheel', function(e) {
-
-        if (e.deltaY > 0) playerArea.scrollLeft += 40;
-        else playerArea.scrollLeft -= 40;
-        });
-
-
-        // ADD ELEMENTS IN DOM
-        // MAIN
-        main.appendChild(sideAndDrop);
-        main.appendChild(playerArea);
-
-        // SIDE AND DROP
-        sideAndDrop.appendChild(sideArea);
-        sideAndDrop.appendChild(borderSideArea);
-        sideAndDrop.appendChild(boardArea);
-
-        sideArea.appendChild(endOfRound);
-        sideArea.appendChild(infosField);
-        sideArea.appendChild(infosFieldBubble);
-        sideArea.appendChild(vaultBoy);
-
-        boardArea.appendChild(cpterCards);
-        boardArea.appendChild(dropArea);
-        
-        // PLAYER AREA
-        playerArea.appendChild(borderPlayerAreaTop);
-        playerArea.appendChild(playerCards);
-        playerArea.appendChild(borderPlayerAreaBottom);
-
-
-    },
-
-    // Reload du css au changement de la taille de la fenetre pour eviter bug d'affichage sur les cartes joueur
-    reloadCss: function() {
-
-    var links = document.getElementsByTagName("link");
-
-    window.onresize = function(){
-
-        for (var cl in links) {
-            var link = links[cl];
-            if (link.rel === "stylesheet")
-                link.href += "";
-        }
-     }
-    },
-
     getPosition: function(elt) {
 
         var rect = elt.getBoundingClientRect(),
@@ -1389,5 +1253,1786 @@ const utils = {
 
 };
 
-module.exports = utils;
-},{}]},{},[2]);
+module.exports = dragAndDrop;
+},{}],16:[function(require,module,exports){
+// const utils = require('./Utils/ReloadCss');
+
+const Menu = require('./Components/Menu');
+
+
+
+
+var app = {
+
+init: function () {
+
+    Menu.unLogged();
+    // utils.reloadCss();
+    // dragAndDrop.init();
+},
+};
+
+document.addEventListener('DOMContentLoaded', app.init);
+},{"./Components/Menu":2}],17:[function(require,module,exports){
+module.exports = require('./lib/axios');
+},{"./lib/axios":19}],18:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+var settle = require('./../core/settle');
+var cookies = require('./../helpers/cookies');
+var buildURL = require('./../helpers/buildURL');
+var buildFullPath = require('../core/buildFullPath');
+var parseHeaders = require('./../helpers/parseHeaders');
+var isURLSameOrigin = require('./../helpers/isURLSameOrigin');
+var createError = require('../core/createError');
+
+module.exports = function xhrAdapter(config) {
+  return new Promise(function dispatchXhrRequest(resolve, reject) {
+    var requestData = config.data;
+    var requestHeaders = config.headers;
+
+    if (utils.isFormData(requestData)) {
+      delete requestHeaders['Content-Type']; // Let the browser set it
+    }
+
+    var request = new XMLHttpRequest();
+
+    // HTTP basic authentication
+    if (config.auth) {
+      var username = config.auth.username || '';
+      var password = config.auth.password ? unescape(encodeURIComponent(config.auth.password)) : '';
+      requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
+    }
+
+    var fullPath = buildFullPath(config.baseURL, config.url);
+    request.open(config.method.toUpperCase(), buildURL(fullPath, config.params, config.paramsSerializer), true);
+
+    // Set the request timeout in MS
+    request.timeout = config.timeout;
+
+    // Listen for ready state
+    request.onreadystatechange = function handleLoad() {
+      if (!request || request.readyState !== 4) {
+        return;
+      }
+
+      // The request errored out and we didn't get a response, this will be
+      // handled by onerror instead
+      // With one exception: request that using file: protocol, most browsers
+      // will return status as 0 even though it's a successful request
+      if (request.status === 0 && !(request.responseURL && request.responseURL.indexOf('file:') === 0)) {
+        return;
+      }
+
+      // Prepare the response
+      var responseHeaders = 'getAllResponseHeaders' in request ? parseHeaders(request.getAllResponseHeaders()) : null;
+      var responseData = !config.responseType || config.responseType === 'text' ? request.responseText : request.response;
+      var response = {
+        data: responseData,
+        status: request.status,
+        statusText: request.statusText,
+        headers: responseHeaders,
+        config: config,
+        request: request
+      };
+
+      settle(resolve, reject, response);
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle browser request cancellation (as opposed to a manual cancellation)
+    request.onabort = function handleAbort() {
+      if (!request) {
+        return;
+      }
+
+      reject(createError('Request aborted', config, 'ECONNABORTED', request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle low level network errors
+    request.onerror = function handleError() {
+      // Real errors are hidden from us by the browser
+      // onerror should only fire if it's a network error
+      reject(createError('Network Error', config, null, request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Handle timeout
+    request.ontimeout = function handleTimeout() {
+      var timeoutErrorMessage = 'timeout of ' + config.timeout + 'ms exceeded';
+      if (config.timeoutErrorMessage) {
+        timeoutErrorMessage = config.timeoutErrorMessage;
+      }
+      reject(createError(timeoutErrorMessage, config, 'ECONNABORTED',
+        request));
+
+      // Clean up request
+      request = null;
+    };
+
+    // Add xsrf header
+    // This is only done if running in a standard browser environment.
+    // Specifically not if we're in a web worker, or react-native.
+    if (utils.isStandardBrowserEnv()) {
+      // Add xsrf header
+      var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
+        cookies.read(config.xsrfCookieName) :
+        undefined;
+
+      if (xsrfValue) {
+        requestHeaders[config.xsrfHeaderName] = xsrfValue;
+      }
+    }
+
+    // Add headers to the request
+    if ('setRequestHeader' in request) {
+      utils.forEach(requestHeaders, function setRequestHeader(val, key) {
+        if (typeof requestData === 'undefined' && key.toLowerCase() === 'content-type') {
+          // Remove Content-Type if data is undefined
+          delete requestHeaders[key];
+        } else {
+          // Otherwise add header to the request
+          request.setRequestHeader(key, val);
+        }
+      });
+    }
+
+    // Add withCredentials to request if needed
+    if (!utils.isUndefined(config.withCredentials)) {
+      request.withCredentials = !!config.withCredentials;
+    }
+
+    // Add responseType to request if needed
+    if (config.responseType) {
+      try {
+        request.responseType = config.responseType;
+      } catch (e) {
+        // Expected DOMException thrown by browsers not compatible XMLHttpRequest Level 2.
+        // But, this can be suppressed for 'json' type as it can be parsed by default 'transformResponse' function.
+        if (config.responseType !== 'json') {
+          throw e;
+        }
+      }
+    }
+
+    // Handle progress if needed
+    if (typeof config.onDownloadProgress === 'function') {
+      request.addEventListener('progress', config.onDownloadProgress);
+    }
+
+    // Not all browsers support upload events
+    if (typeof config.onUploadProgress === 'function' && request.upload) {
+      request.upload.addEventListener('progress', config.onUploadProgress);
+    }
+
+    if (config.cancelToken) {
+      // Handle cancellation
+      config.cancelToken.promise.then(function onCanceled(cancel) {
+        if (!request) {
+          return;
+        }
+
+        request.abort();
+        reject(cancel);
+        // Clean up request
+        request = null;
+      });
+    }
+
+    if (!requestData) {
+      requestData = null;
+    }
+
+    // Send the request
+    request.send(requestData);
+  });
+};
+
+},{"../core/buildFullPath":25,"../core/createError":26,"./../core/settle":30,"./../helpers/buildURL":34,"./../helpers/cookies":36,"./../helpers/isURLSameOrigin":38,"./../helpers/parseHeaders":40,"./../utils":42}],19:[function(require,module,exports){
+'use strict';
+
+var utils = require('./utils');
+var bind = require('./helpers/bind');
+var Axios = require('./core/Axios');
+var mergeConfig = require('./core/mergeConfig');
+var defaults = require('./defaults');
+
+/**
+ * Create an instance of Axios
+ *
+ * @param {Object} defaultConfig The default config for the instance
+ * @return {Axios} A new instance of Axios
+ */
+function createInstance(defaultConfig) {
+  var context = new Axios(defaultConfig);
+  var instance = bind(Axios.prototype.request, context);
+
+  // Copy axios.prototype to instance
+  utils.extend(instance, Axios.prototype, context);
+
+  // Copy context to instance
+  utils.extend(instance, context);
+
+  return instance;
+}
+
+// Create the default instance to be exported
+var axios = createInstance(defaults);
+
+// Expose Axios class to allow class inheritance
+axios.Axios = Axios;
+
+// Factory for creating new instances
+axios.create = function create(instanceConfig) {
+  return createInstance(mergeConfig(axios.defaults, instanceConfig));
+};
+
+// Expose Cancel & CancelToken
+axios.Cancel = require('./cancel/Cancel');
+axios.CancelToken = require('./cancel/CancelToken');
+axios.isCancel = require('./cancel/isCancel');
+
+// Expose all/spread
+axios.all = function all(promises) {
+  return Promise.all(promises);
+};
+axios.spread = require('./helpers/spread');
+
+module.exports = axios;
+
+// Allow use of default import syntax in TypeScript
+module.exports.default = axios;
+
+},{"./cancel/Cancel":20,"./cancel/CancelToken":21,"./cancel/isCancel":22,"./core/Axios":23,"./core/mergeConfig":29,"./defaults":32,"./helpers/bind":33,"./helpers/spread":41,"./utils":42}],20:[function(require,module,exports){
+'use strict';
+
+/**
+ * A `Cancel` is an object that is thrown when an operation is canceled.
+ *
+ * @class
+ * @param {string=} message The message.
+ */
+function Cancel(message) {
+  this.message = message;
+}
+
+Cancel.prototype.toString = function toString() {
+  return 'Cancel' + (this.message ? ': ' + this.message : '');
+};
+
+Cancel.prototype.__CANCEL__ = true;
+
+module.exports = Cancel;
+
+},{}],21:[function(require,module,exports){
+'use strict';
+
+var Cancel = require('./Cancel');
+
+/**
+ * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ *
+ * @class
+ * @param {Function} executor The executor function.
+ */
+function CancelToken(executor) {
+  if (typeof executor !== 'function') {
+    throw new TypeError('executor must be a function.');
+  }
+
+  var resolvePromise;
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+
+  var token = this;
+  executor(function cancel(message) {
+    if (token.reason) {
+      // Cancellation has already been requested
+      return;
+    }
+
+    token.reason = new Cancel(message);
+    resolvePromise(token.reason);
+  });
+}
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+  if (this.reason) {
+    throw this.reason;
+  }
+};
+
+/**
+ * Returns an object that contains a new `CancelToken` and a function that, when called,
+ * cancels the `CancelToken`.
+ */
+CancelToken.source = function source() {
+  var cancel;
+  var token = new CancelToken(function executor(c) {
+    cancel = c;
+  });
+  return {
+    token: token,
+    cancel: cancel
+  };
+};
+
+module.exports = CancelToken;
+
+},{"./Cancel":20}],22:[function(require,module,exports){
+'use strict';
+
+module.exports = function isCancel(value) {
+  return !!(value && value.__CANCEL__);
+};
+
+},{}],23:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+var buildURL = require('../helpers/buildURL');
+var InterceptorManager = require('./InterceptorManager');
+var dispatchRequest = require('./dispatchRequest');
+var mergeConfig = require('./mergeConfig');
+
+/**
+ * Create a new instance of Axios
+ *
+ * @param {Object} instanceConfig The default config for the instance
+ */
+function Axios(instanceConfig) {
+  this.defaults = instanceConfig;
+  this.interceptors = {
+    request: new InterceptorManager(),
+    response: new InterceptorManager()
+  };
+}
+
+/**
+ * Dispatch a request
+ *
+ * @param {Object} config The config specific for this request (merged with this.defaults)
+ */
+Axios.prototype.request = function request(config) {
+  /*eslint no-param-reassign:0*/
+  // Allow for axios('example/url'[, config]) a la fetch API
+  if (typeof config === 'string') {
+    config = arguments[1] || {};
+    config.url = arguments[0];
+  } else {
+    config = config || {};
+  }
+
+  config = mergeConfig(this.defaults, config);
+
+  // Set config.method
+  if (config.method) {
+    config.method = config.method.toLowerCase();
+  } else if (this.defaults.method) {
+    config.method = this.defaults.method.toLowerCase();
+  } else {
+    config.method = 'get';
+  }
+
+  // Hook up interceptors middleware
+  var chain = [dispatchRequest, undefined];
+  var promise = Promise.resolve(config);
+
+  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+    chain.unshift(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+    chain.push(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  while (chain.length) {
+    promise = promise.then(chain.shift(), chain.shift());
+  }
+
+  return promise;
+};
+
+Axios.prototype.getUri = function getUri(config) {
+  config = mergeConfig(this.defaults, config);
+  return buildURL(config.url, config.params, config.paramsSerializer).replace(/^\?/, '');
+};
+
+// Provide aliases for supported request methods
+utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, config) {
+    return this.request(mergeConfig(config || {}, {
+      method: method,
+      url: url,
+      data: (config || {}).data
+    }));
+  };
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, data, config) {
+    return this.request(mergeConfig(config || {}, {
+      method: method,
+      url: url,
+      data: data
+    }));
+  };
+});
+
+module.exports = Axios;
+
+},{"../helpers/buildURL":34,"./../utils":42,"./InterceptorManager":24,"./dispatchRequest":27,"./mergeConfig":29}],24:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+
+function InterceptorManager() {
+  this.handlers = [];
+}
+
+/**
+ * Add a new interceptor to the stack
+ *
+ * @param {Function} fulfilled The function to handle `then` for a `Promise`
+ * @param {Function} rejected The function to handle `reject` for a `Promise`
+ *
+ * @return {Number} An ID used to remove interceptor later
+ */
+InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+  this.handlers.push({
+    fulfilled: fulfilled,
+    rejected: rejected
+  });
+  return this.handlers.length - 1;
+};
+
+/**
+ * Remove an interceptor from the stack
+ *
+ * @param {Number} id The ID that was returned by `use`
+ */
+InterceptorManager.prototype.eject = function eject(id) {
+  if (this.handlers[id]) {
+    this.handlers[id] = null;
+  }
+};
+
+/**
+ * Iterate over all the registered interceptors
+ *
+ * This method is particularly useful for skipping over any
+ * interceptors that may have become `null` calling `eject`.
+ *
+ * @param {Function} fn The function to call for each interceptor
+ */
+InterceptorManager.prototype.forEach = function forEach(fn) {
+  utils.forEach(this.handlers, function forEachHandler(h) {
+    if (h !== null) {
+      fn(h);
+    }
+  });
+};
+
+module.exports = InterceptorManager;
+
+},{"./../utils":42}],25:[function(require,module,exports){
+'use strict';
+
+var isAbsoluteURL = require('../helpers/isAbsoluteURL');
+var combineURLs = require('../helpers/combineURLs');
+
+/**
+ * Creates a new URL by combining the baseURL with the requestedURL,
+ * only when the requestedURL is not already an absolute URL.
+ * If the requestURL is absolute, this function returns the requestedURL untouched.
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} requestedURL Absolute or relative URL to combine
+ * @returns {string} The combined full path
+ */
+module.exports = function buildFullPath(baseURL, requestedURL) {
+  if (baseURL && !isAbsoluteURL(requestedURL)) {
+    return combineURLs(baseURL, requestedURL);
+  }
+  return requestedURL;
+};
+
+},{"../helpers/combineURLs":35,"../helpers/isAbsoluteURL":37}],26:[function(require,module,exports){
+'use strict';
+
+var enhanceError = require('./enhanceError');
+
+/**
+ * Create an Error with the specified message, config, error code, request and response.
+ *
+ * @param {string} message The error message.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The created error.
+ */
+module.exports = function createError(message, config, code, request, response) {
+  var error = new Error(message);
+  return enhanceError(error, config, code, request, response);
+};
+
+},{"./enhanceError":28}],27:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+var transformData = require('./transformData');
+var isCancel = require('../cancel/isCancel');
+var defaults = require('../defaults');
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+function throwIfCancellationRequested(config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested();
+  }
+}
+
+/**
+ * Dispatch a request to the server using the configured adapter.
+ *
+ * @param {object} config The config that is to be used for the request
+ * @returns {Promise} The Promise to be fulfilled
+ */
+module.exports = function dispatchRequest(config) {
+  throwIfCancellationRequested(config);
+
+  // Ensure headers exist
+  config.headers = config.headers || {};
+
+  // Transform request data
+  config.data = transformData(
+    config.data,
+    config.headers,
+    config.transformRequest
+  );
+
+  // Flatten headers
+  config.headers = utils.merge(
+    config.headers.common || {},
+    config.headers[config.method] || {},
+    config.headers
+  );
+
+  utils.forEach(
+    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+    function cleanHeaderConfig(method) {
+      delete config.headers[method];
+    }
+  );
+
+  var adapter = config.adapter || defaults.adapter;
+
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+
+    // Transform response data
+    response.data = transformData(
+      response.data,
+      response.headers,
+      config.transformResponse
+    );
+
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+
+      // Transform response data
+      if (reason && reason.response) {
+        reason.response.data = transformData(
+          reason.response.data,
+          reason.response.headers,
+          config.transformResponse
+        );
+      }
+    }
+
+    return Promise.reject(reason);
+  });
+};
+
+},{"../cancel/isCancel":22,"../defaults":32,"./../utils":42,"./transformData":31}],28:[function(require,module,exports){
+'use strict';
+
+/**
+ * Update an Error with the specified config, error code, and response.
+ *
+ * @param {Error} error The error to update.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The error.
+ */
+module.exports = function enhanceError(error, config, code, request, response) {
+  error.config = config;
+  if (code) {
+    error.code = code;
+  }
+
+  error.request = request;
+  error.response = response;
+  error.isAxiosError = true;
+
+  error.toJSON = function toJSON() {
+    return {
+      // Standard
+      message: this.message,
+      name: this.name,
+      // Microsoft
+      description: this.description,
+      number: this.number,
+      // Mozilla
+      fileName: this.fileName,
+      lineNumber: this.lineNumber,
+      columnNumber: this.columnNumber,
+      stack: this.stack,
+      // Axios
+      config: this.config,
+      code: this.code
+    };
+  };
+  return error;
+};
+
+},{}],29:[function(require,module,exports){
+'use strict';
+
+var utils = require('../utils');
+
+/**
+ * Config-specific merge-function which creates a new config-object
+ * by merging two configuration objects together.
+ *
+ * @param {Object} config1
+ * @param {Object} config2
+ * @returns {Object} New object resulting from merging config2 to config1
+ */
+module.exports = function mergeConfig(config1, config2) {
+  // eslint-disable-next-line no-param-reassign
+  config2 = config2 || {};
+  var config = {};
+
+  var valueFromConfig2Keys = ['url', 'method', 'data'];
+  var mergeDeepPropertiesKeys = ['headers', 'auth', 'proxy', 'params'];
+  var defaultToConfig2Keys = [
+    'baseURL', 'transformRequest', 'transformResponse', 'paramsSerializer',
+    'timeout', 'timeoutMessage', 'withCredentials', 'adapter', 'responseType', 'xsrfCookieName',
+    'xsrfHeaderName', 'onUploadProgress', 'onDownloadProgress', 'decompress',
+    'maxContentLength', 'maxBodyLength', 'maxRedirects', 'transport', 'httpAgent',
+    'httpsAgent', 'cancelToken', 'socketPath', 'responseEncoding'
+  ];
+  var directMergeKeys = ['validateStatus'];
+
+  function getMergedValue(target, source) {
+    if (utils.isPlainObject(target) && utils.isPlainObject(source)) {
+      return utils.merge(target, source);
+    } else if (utils.isPlainObject(source)) {
+      return utils.merge({}, source);
+    } else if (utils.isArray(source)) {
+      return source.slice();
+    }
+    return source;
+  }
+
+  function mergeDeepProperties(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(config1[prop], config2[prop]);
+    } else if (!utils.isUndefined(config1[prop])) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  }
+
+  utils.forEach(valueFromConfig2Keys, function valueFromConfig2(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(undefined, config2[prop]);
+    }
+  });
+
+  utils.forEach(mergeDeepPropertiesKeys, mergeDeepProperties);
+
+  utils.forEach(defaultToConfig2Keys, function defaultToConfig2(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(undefined, config2[prop]);
+    } else if (!utils.isUndefined(config1[prop])) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  });
+
+  utils.forEach(directMergeKeys, function merge(prop) {
+    if (prop in config2) {
+      config[prop] = getMergedValue(config1[prop], config2[prop]);
+    } else if (prop in config1) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  });
+
+  var axiosKeys = valueFromConfig2Keys
+    .concat(mergeDeepPropertiesKeys)
+    .concat(defaultToConfig2Keys)
+    .concat(directMergeKeys);
+
+  var otherKeys = Object
+    .keys(config1)
+    .concat(Object.keys(config2))
+    .filter(function filterAxiosKeys(key) {
+      return axiosKeys.indexOf(key) === -1;
+    });
+
+  utils.forEach(otherKeys, mergeDeepProperties);
+
+  return config;
+};
+
+},{"../utils":42}],30:[function(require,module,exports){
+'use strict';
+
+var createError = require('./createError');
+
+/**
+ * Resolve or reject a Promise based on response status.
+ *
+ * @param {Function} resolve A function that resolves the promise.
+ * @param {Function} reject A function that rejects the promise.
+ * @param {object} response The response.
+ */
+module.exports = function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  if (!response.status || !validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+
+},{"./createError":26}],31:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+
+/**
+ * Transform the data for a request or a response
+ *
+ * @param {Object|String} data The data to be transformed
+ * @param {Array} headers The headers for the request or response
+ * @param {Array|Function} fns A single function or Array of functions
+ * @returns {*} The resulting transformed data
+ */
+module.exports = function transformData(data, headers, fns) {
+  /*eslint no-param-reassign:0*/
+  utils.forEach(fns, function transform(fn) {
+    data = fn(data, headers);
+  });
+
+  return data;
+};
+
+},{"./../utils":42}],32:[function(require,module,exports){
+(function (process){(function (){
+'use strict';
+
+var utils = require('./utils');
+var normalizeHeaderName = require('./helpers/normalizeHeaderName');
+
+var DEFAULT_CONTENT_TYPE = {
+  'Content-Type': 'application/x-www-form-urlencoded'
+};
+
+function setContentTypeIfUnset(headers, value) {
+  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
+    headers['Content-Type'] = value;
+  }
+}
+
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = require('./adapters/xhr');
+  } else if (typeof process !== 'undefined' && Object.prototype.toString.call(process) === '[object process]') {
+    // For node use HTTP adapter
+    adapter = require('./adapters/http');
+  }
+  return adapter;
+}
+
+var defaults = {
+  adapter: getDefaultAdapter(),
+
+  transformRequest: [function transformRequest(data, headers) {
+    normalizeHeaderName(headers, 'Accept');
+    normalizeHeaderName(headers, 'Content-Type');
+    if (utils.isFormData(data) ||
+      utils.isArrayBuffer(data) ||
+      utils.isBuffer(data) ||
+      utils.isStream(data) ||
+      utils.isFile(data) ||
+      utils.isBlob(data)
+    ) {
+      return data;
+    }
+    if (utils.isArrayBufferView(data)) {
+      return data.buffer;
+    }
+    if (utils.isURLSearchParams(data)) {
+      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+      return data.toString();
+    }
+    if (utils.isObject(data)) {
+      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+      return JSON.stringify(data);
+    }
+    return data;
+  }],
+
+  transformResponse: [function transformResponse(data) {
+    /*eslint no-param-reassign:0*/
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) { /* Ignore */ }
+    }
+    return data;
+  }],
+
+  /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */
+  timeout: 0,
+
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+
+  maxContentLength: -1,
+  maxBodyLength: -1,
+
+  validateStatus: function validateStatus(status) {
+    return status >= 200 && status < 300;
+  }
+};
+
+defaults.headers = {
+  common: {
+    'Accept': 'application/json, text/plain, */*'
+  }
+};
+
+utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+  defaults.headers[method] = {};
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+});
+
+module.exports = defaults;
+
+}).call(this)}).call(this,require('_process'))
+},{"./adapters/http":18,"./adapters/xhr":18,"./helpers/normalizeHeaderName":39,"./utils":42,"_process":43}],33:[function(require,module,exports){
+'use strict';
+
+module.exports = function bind(fn, thisArg) {
+  return function wrap() {
+    var args = new Array(arguments.length);
+    for (var i = 0; i < args.length; i++) {
+      args[i] = arguments[i];
+    }
+    return fn.apply(thisArg, args);
+  };
+};
+
+},{}],34:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+
+function encode(val) {
+  return encodeURIComponent(val).
+    replace(/%3A/gi, ':').
+    replace(/%24/g, '$').
+    replace(/%2C/gi, ',').
+    replace(/%20/g, '+').
+    replace(/%5B/gi, '[').
+    replace(/%5D/gi, ']');
+}
+
+/**
+ * Build a URL by appending params to the end
+ *
+ * @param {string} url The base of the url (e.g., http://www.google.com)
+ * @param {object} [params] The params to be appended
+ * @returns {string} The formatted url
+ */
+module.exports = function buildURL(url, params, paramsSerializer) {
+  /*eslint no-param-reassign:0*/
+  if (!params) {
+    return url;
+  }
+
+  var serializedParams;
+  if (paramsSerializer) {
+    serializedParams = paramsSerializer(params);
+  } else if (utils.isURLSearchParams(params)) {
+    serializedParams = params.toString();
+  } else {
+    var parts = [];
+
+    utils.forEach(params, function serialize(val, key) {
+      if (val === null || typeof val === 'undefined') {
+        return;
+      }
+
+      if (utils.isArray(val)) {
+        key = key + '[]';
+      } else {
+        val = [val];
+      }
+
+      utils.forEach(val, function parseValue(v) {
+        if (utils.isDate(v)) {
+          v = v.toISOString();
+        } else if (utils.isObject(v)) {
+          v = JSON.stringify(v);
+        }
+        parts.push(encode(key) + '=' + encode(v));
+      });
+    });
+
+    serializedParams = parts.join('&');
+  }
+
+  if (serializedParams) {
+    var hashmarkIndex = url.indexOf('#');
+    if (hashmarkIndex !== -1) {
+      url = url.slice(0, hashmarkIndex);
+    }
+
+    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
+  }
+
+  return url;
+};
+
+},{"./../utils":42}],35:[function(require,module,exports){
+'use strict';
+
+/**
+ * Creates a new URL by combining the specified URLs
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} relativeURL The relative URL
+ * @returns {string} The combined URL
+ */
+module.exports = function combineURLs(baseURL, relativeURL) {
+  return relativeURL
+    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+};
+
+},{}],36:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs support document.cookie
+    (function standardBrowserEnv() {
+      return {
+        write: function write(name, value, expires, path, domain, secure) {
+          var cookie = [];
+          cookie.push(name + '=' + encodeURIComponent(value));
+
+          if (utils.isNumber(expires)) {
+            cookie.push('expires=' + new Date(expires).toGMTString());
+          }
+
+          if (utils.isString(path)) {
+            cookie.push('path=' + path);
+          }
+
+          if (utils.isString(domain)) {
+            cookie.push('domain=' + domain);
+          }
+
+          if (secure === true) {
+            cookie.push('secure');
+          }
+
+          document.cookie = cookie.join('; ');
+        },
+
+        read: function read(name) {
+          var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+          return (match ? decodeURIComponent(match[3]) : null);
+        },
+
+        remove: function remove(name) {
+          this.write(name, '', Date.now() - 86400000);
+        }
+      };
+    })() :
+
+  // Non standard browser env (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return {
+        write: function write() {},
+        read: function read() { return null; },
+        remove: function remove() {}
+      };
+    })()
+);
+
+},{"./../utils":42}],37:[function(require,module,exports){
+'use strict';
+
+/**
+ * Determines whether the specified URL is absolute
+ *
+ * @param {string} url The URL to test
+ * @returns {boolean} True if the specified URL is absolute, otherwise false
+ */
+module.exports = function isAbsoluteURL(url) {
+  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+  // by any combination of letters, digits, plus, period, or hyphen.
+  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+};
+
+},{}],38:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs have full support of the APIs needed to test
+  // whether the request URL is of the same origin as current location.
+    (function standardBrowserEnv() {
+      var msie = /(msie|trident)/i.test(navigator.userAgent);
+      var urlParsingNode = document.createElement('a');
+      var originURL;
+
+      /**
+    * Parse a URL to discover it's components
+    *
+    * @param {String} url The URL to be parsed
+    * @returns {Object}
+    */
+      function resolveURL(url) {
+        var href = url;
+
+        if (msie) {
+        // IE needs attribute set twice to normalize properties
+          urlParsingNode.setAttribute('href', href);
+          href = urlParsingNode.href;
+        }
+
+        urlParsingNode.setAttribute('href', href);
+
+        // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+        return {
+          href: urlParsingNode.href,
+          protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+          host: urlParsingNode.host,
+          search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+          hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+          hostname: urlParsingNode.hostname,
+          port: urlParsingNode.port,
+          pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
+            urlParsingNode.pathname :
+            '/' + urlParsingNode.pathname
+        };
+      }
+
+      originURL = resolveURL(window.location.href);
+
+      /**
+    * Determine if a URL shares the same origin as the current location
+    *
+    * @param {String} requestURL The URL to test
+    * @returns {boolean} True if URL shares the same origin, otherwise false
+    */
+      return function isURLSameOrigin(requestURL) {
+        var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
+        return (parsed.protocol === originURL.protocol &&
+            parsed.host === originURL.host);
+      };
+    })() :
+
+  // Non standard browser envs (web workers, react-native) lack needed support.
+    (function nonStandardBrowserEnv() {
+      return function isURLSameOrigin() {
+        return true;
+      };
+    })()
+);
+
+},{"./../utils":42}],39:[function(require,module,exports){
+'use strict';
+
+var utils = require('../utils');
+
+module.exports = function normalizeHeaderName(headers, normalizedName) {
+  utils.forEach(headers, function processHeader(value, name) {
+    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
+      headers[normalizedName] = value;
+      delete headers[name];
+    }
+  });
+};
+
+},{"../utils":42}],40:[function(require,module,exports){
+'use strict';
+
+var utils = require('./../utils');
+
+// Headers whose duplicates are ignored by node
+// c.f. https://nodejs.org/api/http.html#http_message_headers
+var ignoreDuplicateOf = [
+  'age', 'authorization', 'content-length', 'content-type', 'etag',
+  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+  'referer', 'retry-after', 'user-agent'
+];
+
+/**
+ * Parse headers into an object
+ *
+ * ```
+ * Date: Wed, 27 Aug 2014 08:58:49 GMT
+ * Content-Type: application/json
+ * Connection: keep-alive
+ * Transfer-Encoding: chunked
+ * ```
+ *
+ * @param {String} headers Headers needing to be parsed
+ * @returns {Object} Headers parsed into an object
+ */
+module.exports = function parseHeaders(headers) {
+  var parsed = {};
+  var key;
+  var val;
+  var i;
+
+  if (!headers) { return parsed; }
+
+  utils.forEach(headers.split('\n'), function parser(line) {
+    i = line.indexOf(':');
+    key = utils.trim(line.substr(0, i)).toLowerCase();
+    val = utils.trim(line.substr(i + 1));
+
+    if (key) {
+      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
+        return;
+      }
+      if (key === 'set-cookie') {
+        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
+      } else {
+        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+      }
+    }
+  });
+
+  return parsed;
+};
+
+},{"./../utils":42}],41:[function(require,module,exports){
+'use strict';
+
+/**
+ * Syntactic sugar for invoking a function and expanding an array for arguments.
+ *
+ * Common use case would be to use `Function.prototype.apply`.
+ *
+ *  ```js
+ *  function f(x, y, z) {}
+ *  var args = [1, 2, 3];
+ *  f.apply(null, args);
+ *  ```
+ *
+ * With `spread` this example can be re-written.
+ *
+ *  ```js
+ *  spread(function(x, y, z) {})([1, 2, 3]);
+ *  ```
+ *
+ * @param {Function} callback
+ * @returns {Function}
+ */
+module.exports = function spread(callback) {
+  return function wrap(arr) {
+    return callback.apply(null, arr);
+  };
+};
+
+},{}],42:[function(require,module,exports){
+'use strict';
+
+var bind = require('./helpers/bind');
+
+/*global toString:true*/
+
+// utils is a library of generic helper functions non-specific to axios
+
+var toString = Object.prototype.toString;
+
+/**
+ * Determine if a value is an Array
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Array, otherwise false
+ */
+function isArray(val) {
+  return toString.call(val) === '[object Array]';
+}
+
+/**
+ * Determine if a value is undefined
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if the value is undefined, otherwise false
+ */
+function isUndefined(val) {
+  return typeof val === 'undefined';
+}
+
+/**
+ * Determine if a value is a Buffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Buffer, otherwise false
+ */
+function isBuffer(val) {
+  return val !== null && !isUndefined(val) && val.constructor !== null && !isUndefined(val.constructor)
+    && typeof val.constructor.isBuffer === 'function' && val.constructor.isBuffer(val);
+}
+
+/**
+ * Determine if a value is an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an ArrayBuffer, otherwise false
+ */
+function isArrayBuffer(val) {
+  return toString.call(val) === '[object ArrayBuffer]';
+}
+
+/**
+ * Determine if a value is a FormData
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an FormData, otherwise false
+ */
+function isFormData(val) {
+  return (typeof FormData !== 'undefined') && (val instanceof FormData);
+}
+
+/**
+ * Determine if a value is a view on an ArrayBuffer
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a view on an ArrayBuffer, otherwise false
+ */
+function isArrayBufferView(val) {
+  var result;
+  if ((typeof ArrayBuffer !== 'undefined') && (ArrayBuffer.isView)) {
+    result = ArrayBuffer.isView(val);
+  } else {
+    result = (val) && (val.buffer) && (val.buffer instanceof ArrayBuffer);
+  }
+  return result;
+}
+
+/**
+ * Determine if a value is a String
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a String, otherwise false
+ */
+function isString(val) {
+  return typeof val === 'string';
+}
+
+/**
+ * Determine if a value is a Number
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Number, otherwise false
+ */
+function isNumber(val) {
+  return typeof val === 'number';
+}
+
+/**
+ * Determine if a value is an Object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is an Object, otherwise false
+ */
+function isObject(val) {
+  return val !== null && typeof val === 'object';
+}
+
+/**
+ * Determine if a value is a plain Object
+ *
+ * @param {Object} val The value to test
+ * @return {boolean} True if value is a plain Object, otherwise false
+ */
+function isPlainObject(val) {
+  if (toString.call(val) !== '[object Object]') {
+    return false;
+  }
+
+  var prototype = Object.getPrototypeOf(val);
+  return prototype === null || prototype === Object.prototype;
+}
+
+/**
+ * Determine if a value is a Date
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Date, otherwise false
+ */
+function isDate(val) {
+  return toString.call(val) === '[object Date]';
+}
+
+/**
+ * Determine if a value is a File
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a File, otherwise false
+ */
+function isFile(val) {
+  return toString.call(val) === '[object File]';
+}
+
+/**
+ * Determine if a value is a Blob
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Blob, otherwise false
+ */
+function isBlob(val) {
+  return toString.call(val) === '[object Blob]';
+}
+
+/**
+ * Determine if a value is a Function
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Function, otherwise false
+ */
+function isFunction(val) {
+  return toString.call(val) === '[object Function]';
+}
+
+/**
+ * Determine if a value is a Stream
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a Stream, otherwise false
+ */
+function isStream(val) {
+  return isObject(val) && isFunction(val.pipe);
+}
+
+/**
+ * Determine if a value is a URLSearchParams object
+ *
+ * @param {Object} val The value to test
+ * @returns {boolean} True if value is a URLSearchParams object, otherwise false
+ */
+function isURLSearchParams(val) {
+  return typeof URLSearchParams !== 'undefined' && val instanceof URLSearchParams;
+}
+
+/**
+ * Trim excess whitespace off the beginning and end of a string
+ *
+ * @param {String} str The String to trim
+ * @returns {String} The String freed of excess whitespace
+ */
+function trim(str) {
+  return str.replace(/^\s*/, '').replace(/\s*$/, '');
+}
+
+/**
+ * Determine if we're running in a standard browser environment
+ *
+ * This allows axios to run in a web worker, and react-native.
+ * Both environments support XMLHttpRequest, but not fully standard globals.
+ *
+ * web workers:
+ *  typeof window -> undefined
+ *  typeof document -> undefined
+ *
+ * react-native:
+ *  navigator.product -> 'ReactNative'
+ * nativescript
+ *  navigator.product -> 'NativeScript' or 'NS'
+ */
+function isStandardBrowserEnv() {
+  if (typeof navigator !== 'undefined' && (navigator.product === 'ReactNative' ||
+                                           navigator.product === 'NativeScript' ||
+                                           navigator.product === 'NS')) {
+    return false;
+  }
+  return (
+    typeof window !== 'undefined' &&
+    typeof document !== 'undefined'
+  );
+}
+
+/**
+ * Iterate over an Array or an Object invoking a function for each item.
+ *
+ * If `obj` is an Array callback will be called passing
+ * the value, index, and complete array for each item.
+ *
+ * If 'obj' is an Object callback will be called passing
+ * the value, key, and complete object for each property.
+ *
+ * @param {Object|Array} obj The object to iterate
+ * @param {Function} fn The callback to invoke for each item
+ */
+function forEach(obj, fn) {
+  // Don't bother if no value provided
+  if (obj === null || typeof obj === 'undefined') {
+    return;
+  }
+
+  // Force an array if not already something iterable
+  if (typeof obj !== 'object') {
+    /*eslint no-param-reassign:0*/
+    obj = [obj];
+  }
+
+  if (isArray(obj)) {
+    // Iterate over array values
+    for (var i = 0, l = obj.length; i < l; i++) {
+      fn.call(null, obj[i], i, obj);
+    }
+  } else {
+    // Iterate over object keys
+    for (var key in obj) {
+      if (Object.prototype.hasOwnProperty.call(obj, key)) {
+        fn.call(null, obj[key], key, obj);
+      }
+    }
+  }
+}
+
+/**
+ * Accepts varargs expecting each argument to be an object, then
+ * immutably merges the properties of each object and returns result.
+ *
+ * When multiple objects contain the same key the later object in
+ * the arguments list will take precedence.
+ *
+ * Example:
+ *
+ * ```js
+ * var result = merge({foo: 123}, {foo: 456});
+ * console.log(result.foo); // outputs 456
+ * ```
+ *
+ * @param {Object} obj1 Object to merge
+ * @returns {Object} Result of all merge properties
+ */
+function merge(/* obj1, obj2, obj3, ... */) {
+  var result = {};
+  function assignValue(val, key) {
+    if (isPlainObject(result[key]) && isPlainObject(val)) {
+      result[key] = merge(result[key], val);
+    } else if (isPlainObject(val)) {
+      result[key] = merge({}, val);
+    } else if (isArray(val)) {
+      result[key] = val.slice();
+    } else {
+      result[key] = val;
+    }
+  }
+
+  for (var i = 0, l = arguments.length; i < l; i++) {
+    forEach(arguments[i], assignValue);
+  }
+  return result;
+}
+
+/**
+ * Extends object a by mutably adding to it the properties of object b.
+ *
+ * @param {Object} a The object to be extended
+ * @param {Object} b The object to copy properties from
+ * @param {Object} thisArg The object to bind function to
+ * @return {Object} The resulting value of object a
+ */
+function extend(a, b, thisArg) {
+  forEach(b, function assignValue(val, key) {
+    if (thisArg && typeof val === 'function') {
+      a[key] = bind(val, thisArg);
+    } else {
+      a[key] = val;
+    }
+  });
+  return a;
+}
+
+/**
+ * Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
+ *
+ * @param {string} content with BOM
+ * @return {string} content value without BOM
+ */
+function stripBOM(content) {
+  if (content.charCodeAt(0) === 0xFEFF) {
+    content = content.slice(1);
+  }
+  return content;
+}
+
+module.exports = {
+  isArray: isArray,
+  isArrayBuffer: isArrayBuffer,
+  isBuffer: isBuffer,
+  isFormData: isFormData,
+  isArrayBufferView: isArrayBufferView,
+  isString: isString,
+  isNumber: isNumber,
+  isObject: isObject,
+  isPlainObject: isPlainObject,
+  isUndefined: isUndefined,
+  isDate: isDate,
+  isFile: isFile,
+  isBlob: isBlob,
+  isFunction: isFunction,
+  isStream: isStream,
+  isURLSearchParams: isURLSearchParams,
+  isStandardBrowserEnv: isStandardBrowserEnv,
+  forEach: forEach,
+  merge: merge,
+  extend: extend,
+  trim: trim,
+  stripBOM: stripBOM
+};
+
+},{"./helpers/bind":33}],43:[function(require,module,exports){
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}]},{},[16]);

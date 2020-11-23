@@ -135,7 +135,11 @@ const user = {
         main.appendChild(backMenu);
 
         // EVENTLISTENER "BACK TO MAIN MENU"
-        backMenu.addEventListener('click', utils.showLoggedMenu);
+        backMenu.addEventListener('click', () => {
+            event.preventDefault();
+            const mainContainer = document.querySelector('.container');
+            mainContainer.innerHTML = Menu.render('logged');
+        });
         }
 
 

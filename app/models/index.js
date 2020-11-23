@@ -19,7 +19,7 @@ User.hasMany(Deck, {
 })
 
 // Ajout de la colonne quantité pour l'association deck has Monster
-MonsterQuantity = sequelize.define('deck_has_monster', {
+MonsterQuantity = sequelize.define('recurrence', {
     quantity: Sequelize.INTEGER
   }, {
     // Empêche l'ajout auto du "s" par sequelize à la fin du nom de la table
@@ -37,7 +37,7 @@ Deck.belongsToMany(Monster, {
 
 
 // Ajout de la colonne quantité pour l'association deck has Booster
-BoosterQuantity = sequelize.define('deck_has_booster', {
+BoosterQuantity = sequelize.define('recurrence', {
     quantity: Sequelize.INTEGER
   }, {
     // Empêche l'ajout auto du "s" par sequelize à la fin du nom de la table
@@ -56,7 +56,7 @@ BoosterQuantity = sequelize.define('deck_has_booster', {
 // "Un Deck possède plusieurs booster"
 Deck.belongsToMany(Booster, {
     as: "boosters",
-    through: 'deck_has_booster',
+    through: BoosterQuantity,
     foreignKey: 'deck_id',
     otherKey: 'booster_id',
 });

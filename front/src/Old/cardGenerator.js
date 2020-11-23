@@ -118,7 +118,6 @@ var cardGenerator = {
             boostersArray.push(booster)       
         }
 
-
         const deck = {monsters: monstersArray, boosters: boostersArray};
         return deck;
 

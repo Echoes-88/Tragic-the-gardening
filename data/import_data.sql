@@ -33,11 +33,11 @@ INSERT INTO "monster"("id", "title", "text", "attack", "defense", "hit_point", "
 -- Ajout de données BOOSTER
 -- -----------------------------------------------------
 INSERT INTO "booster"("id", "title", "text", "special_effect_value", "special_effect_text", "special_effect_value_2", "special_effect_text_2", "position") VALUES
-(1, 'Stimpack', 'Lorem ipsum', 3, 'hitpoint', null, null, 0),
-(2, 'Buffout', 'Lorem ipsum', 2, 'attack', 2, 'hitpoint', 0),
+(1, 'Stimpack', 'Lorem ipsum', 3, 'hit_point', null, null, 0),
+(2, 'Buffout', 'Lorem ipsum', 2, 'attack', 2, 'hit_point', 0),
 (3, 'Psycho', 'Lorem ipsum', 3, 'attack', null, null, 0),
 (4, 'Nuka Cola', 'Lorem ipsum', 2, 'defense', 7, 'defense', 0),
-(5, 'Premiers secours', 'Lorem ipsum', 4, 'hitpoint', null, null, 0),
+(5, 'Premiers secours', 'Lorem ipsum', 4, 'hit_point', null, null, 0),
 (6, 'Med-x', 'Lorem ipsum', 3, 'defense', null, null, 0);
 
 -- -----------------------------------------------------
