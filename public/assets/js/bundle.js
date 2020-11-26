@@ -8,13 +8,15 @@ const MiddlewareDeck = require('../Middleware/Deck');
 
 // Render
 // const DeckGeneratorScreen = require('../DomRender/ManageDeck');
-const DomRenderDeck = require('../DomRender/Deck');
+const DomRenderCard = require('../DomRender/Card');
 
 const InitGame = {
 
     init: () => {
+        if(event) {
+            event.preventDefault();
+        }
 
-        event.preventDefault();
         console.log(Store)
 
         const mainContainer = document.querySelector('.container');
@@ -23,17 +25,18 @@ const InitGame = {
         // Check if user has decks. Yes => show all decks. No => create one
         if(Store.user.decks.length > 0) {
 
-                mainContainer.innerHTML = DomRenderDeck.showDeck(Store.user.decks);
+                mainContainer.innerHTML = DomRenderCard.showDeck(Store.user.decks);
 
-                const manageDeck = document.getElementsByClassName('manage-deck');
+                // const manageDeck = document.getElementsByClassName('manage-deck');
+
+                // for(const deck of manageDeck) {
+                //     deck.addEventListener('click', function(){
+                //         event.preventDefault();
+                //         mainContainer.innerHTML = DomRenderCard.showDeck(deck.id);
+                //     });
+                // }
+
                 const playDeck = document.getElementsByClassName('play-deck');
-
-                for(const deck of manageDeck) {
-                    deck.addEventListener('click', function(){
-                        event.preventDefault();
-                        mainContainer.innerHTML = DomRenderDeck.render(deck.id);
-                    });
-                }
 
                 for(const deck of playDeck) {
                     deck.addEventListener('click', function(){
@@ -49,17 +52,20 @@ const InitGame = {
 
         } else {
             console.log("ça passe car il n a pas de deck")
-            mainContainer.innerHTML = DomRenderDeck.createDeck();
+            mainContainer.innerHTML = DomRenderCard.createDeck();
 
             const form = document.getElementById('create-deck');
-            form.addEventListener('submit', function(data){ 
-                event.preventDefault();
+            form.addEventListener('submit', async(data) => { 
+
                 // Create deck in database
-                const response = MiddlewareDeck.createOne(data);
+                const response = await MiddlewareDeck.createOne(data);
+                console.log(response)
                 if(response) {
-                    console.log("le deck est bien créé")
+                    InitGame.init();
                 }
-                // Reload
+
+
+                
             });
         }
             
@@ -67,9 +73,8 @@ const InitGame = {
 }
 
 module.exports = InitGame;
-},{"../DomRender/Deck":7,"../Middleware/Deck":11,"../Store":13,"./PlayGame":3}],2:[function(require,module,exports){
-const DomRenderCreateAccount = require('../DomRender/CreateAccount');
-const DomRenderLogin = require('../DomRender/Login');
+},{"../DomRender/Card":5,"../Middleware/Deck":9,"../Store":11,"./PlayGame":3}],2:[function(require,module,exports){
+const DomRenderForm = require('../DomRender/Form');
 const DomRenderMenu = require('../DomRender/Menu');
 
 const MiddlewareLog = require('../Middleware/Log');
@@ -91,7 +96,7 @@ const Menu = {
             event.preventDefault();
 
             // Create Dom elements
-            mainContainer.innerHTML = DomRenderLogin.render();
+            mainContainer.innerHTML = DomRenderForm.login();
 
             // Listen login form submit
             const loginForm = document.querySelector('form[id="login"]');
@@ -117,7 +122,7 @@ const Menu = {
 
             // Create Dom elements
             const mainContainer = document.querySelector('.container');
-            mainContainer.innerHTML = DomRenderCreateAccount.render();
+            mainContainer.innerHTML = DomRenderForm.createAccount();
 
             // Listen Create Account form submit
             const createAccountForm = document.querySelector('form[id="createAccount"]');
@@ -153,7 +158,7 @@ const Menu = {
 }
 
 module.exports = Menu;
-},{"../DomRender/CreateAccount":6,"../DomRender/Login":8,"../DomRender/Menu":9,"../Middleware/Log":12,"../Store":13,"./InitGame":1}],3:[function(require,module,exports){
+},{"../DomRender/Form":6,"../DomRender/Menu":7,"../Middleware/Log":10,"../Store":11,"./InitGame":1}],3:[function(require,module,exports){
 const Store = require('../Store');
 
 // Render
@@ -189,6 +194,7 @@ const PlayGame = {
 
         // Tutorial
         const mainContainer = document.querySelector('.container');
+        mainContainer.classList.remove('container')
         mainContainer.innerHTML = DomRenderTutorial.card();
 
         const close = document.querySelector(".close-button");
@@ -218,7 +224,6 @@ const PlayGame = {
 
             userDeck.monsters.map(card => {
                 card.key = inc++; 
-                card.onBoard = false; 
                 card.type = 'monster'; 
                 card.owner = 'user';
                 playerArea.innerHTML += DomRenderCard.monster(card, "user");
@@ -235,21 +240,26 @@ const PlayGame = {
 
             userDeck.boosters.map(card => {
                 card.key = inc++; 
-                card.onBoard = false; 
                 card.type = 'booster'; 
                 card.owner = 'user';   
                 playerArea.innerHTML += DomRenderCard.booster(card, "user")
             });
 
+            // Add array to scan cards status
+            userDeck.cardsOnBoard = [];
+
             // Save cpter Deck  
             cpterDeck = Store.cpter.deck
+
+            // Deep copy to avoid duplicate key
+            cpterDeck = JSON.parse(JSON.stringify(cpterDeck));
+
             cpterDeck.monsters.forEach(card => {card.key = inc++; card.onBoard = false; card.type = 'monster'; card.owner = 'cpter'});
             cpterDeck.boosters.forEach(card => {card.key = inc++; card.onBoard = false; card.type = 'booster'; card.owner = 'cpter'});
-
+            cpterDeck.cardsOnBoard = [];
          
             // launch game
             PlayGame.userRound();
-            console.log(userDeck.monsters)
         })
     },
 
@@ -257,6 +267,19 @@ const PlayGame = {
     userRound: function() {
 
         round++;
+
+        console.log('user deck', userDeck, 'cpter deck', cpterDeck)
+
+        if((userDeck.monsters.length <= 0) && (userDeck.cardsOnBoard.length <= 0)) {
+            console.log("YOU LOOSE !!")
+            // const infosField = document.querySelector('.infosField');
+        }
+
+        if((userDeck.monsters.length + userDeck.cardsOnBoard.length) < 3) {
+            // Change picture vault boy
+            let vaultBoy = document.querySelector('.vault-boy');
+            vaultBoy.style.backgroundImage = 'url(assets/img/vault-boy/vault-boy-loosing.png)';
+        }
 
         // Display informations to user
         const infosField = document.querySelector('.infosField');
@@ -268,7 +291,7 @@ const PlayGame = {
         }
 
         // Handle cards
-        const userCardsDom = document.getElementsByClassName('userCard');
+        const userCardsDom = document.querySelectorAll('.userCard');
     
         for (const userCardDom of userCardsDom) {
 
@@ -277,6 +300,13 @@ const PlayGame = {
 
             // Listening drop
             userCardDom.addEventListener('dragend', function () {
+
+                // Change picture vault boy
+                if(userDeck.monsters.length >= 3) {
+                    let vaultBoy = document.querySelector('.vault-boy');
+                    vaultBoy.style.backgroundImage = 'url(assets/img/vault-boy/vault-boy.png)';
+                }
+
 
                 var x = event.clientX, y = event.clientY,
                 eltFlewOver = document.elementFromPoint(x, y);
@@ -288,19 +318,19 @@ const PlayGame = {
 
                         // Detect monster card selected
                         const monsterCardDom = eltFlewOver.closest('.cardComponent');
-                        console.log('il veut poser la carte booster sur', monsterCardDom)
+
+                        // Get monster informations
+                        const cardKeyMonster = monsterCardDom.getAttribute('data-key');
+                        const monster = userDeck.cardsOnBoard.find(card => card.key == cardKeyMonster);
 
                         // Get booster informations
                         const cardKeyBooster = userCardDom.getAttribute('data-key');
                         const booster = userDeck.boosters.find(booster => booster.key == cardKeyBooster);
 
-                        // Get monster informations
-                        const cardKeyMonster = monsterCardDom.getAttribute('data-key');
-                        const monster = userDeck.monsters.find(monster => monster.key == cardKeyMonster);
 
                         // Detect type of booster
                         const typeBooster = booster.special_effect_text;
-
+                        // FAIRE UNE FONCTION PROMESSE OU UNE ANIMATION POUR ATTENDRE LE FIN DE MONSTER
                         const bonus = booster.special_effect_value + monster[typeBooster];
 
                         // update monster card value in dom
@@ -308,12 +338,10 @@ const PlayGame = {
                         textBonus.textContent = bonus;
         
                         // update monster card value
-                        // let monsterInDeck = cpterDeck.monster.find(card => card.key = monsterCard.key)
                         monster[typeBooster] = bonus;
         
                         userCardDom.remove();
 
-                        console.log(booster)
                     }
 
                 } else {
@@ -365,11 +393,15 @@ const PlayGame = {
                         endOfRoundButton.classList.add('inactive');
                         endOfRoundButton.removeEventListener("click", handleEndOfRound);
                         
-                        // Find card in state to set onBoard = true
+                        // Find card in state
                         const cardKey = userCardDom.getAttribute('data-key');
-                        const cardInState = userDeck.monsters.find(monster => monster.key == cardKey);
-                        console.log("key", cardKey, "state", userDeck)
-                        cardInState.onBoard = true;
+                        const monster = userDeck.monsters.find(monster => monster.key == cardKey);
+
+                        userDeck.cardsOnBoard.push(monster);
+
+                        // Delete card in main array
+                        let index = userDeck.monsters.indexOf(monster);
+                        userDeck.monsters.splice(index, 1);
 
                         document.querySelector('.cancel').remove();
 
@@ -388,9 +420,8 @@ const PlayGame = {
                     } else {
 
                         // Select user and player cards in state
-                        let cardAttack = userDeck.monsters.find(card => card.key == userCardDom.getAttribute('data-key'))
-                        let cardDefense = cpterDeck.monsters.find(card => card.key == cpterCardDom.getAttribute('data-key'))
-
+                        let cardAttack = userDeck.cardsOnBoard.find(card => card.key == userCardDom.getAttribute('data-key'))
+                        let cardDefense = cpterDeck.cardsOnBoard.find(card => card.key == cpterCardDom.getAttribute('data-key'))
                         PlayGame.fight(cardAttack, cardDefense);
                     }
                 }
@@ -402,66 +433,54 @@ const PlayGame = {
 
     cpterRound: function() {
 
-        // console.log('cpter round / user Cards :', userDeck)
-        // console.log('cpter round / cpter Cards :', cpterDeck)
-        
-        if(cpterDeck.monsters.length == 0) {
+        // Disable draggable
+        const playerCards = document.querySelectorAll('.userCard');
+        for(const card of playerCards) { card.draggable = false; }
+
+        if(cpterDeck.monsters.length > 0 || cpterDeck.boosters.length > 0) {
+
+            let randomNbr = Math.floor(Math.random()*10)+1;
+
+            // IF RANDOM NUMBER > 7 OR ROUND 1, CPTER ADD A CARD ON BOARD
+            if(randomNbr >= 7 || round == 1 || cpterDeck.cardsOnBoard.length <= 0 || userDeck.cardsOnBoard.length <= 0) {
+
+                // Getting a new random number
+                randomNbr = Math.floor(Math.random()*10)+1;
+
+                    if(cpterDeck.monsters.length > 0) {
+
+                        if((randomNbr > 6) && (cpterDeck.boosters.length > 0) && (cpterDeck.cardsOnBoard.length > 0)) {
+                            PlayGame.cpterAddCard("booster");
+                        } else {
+                            PlayGame.cpterAddCard("monster");
+                        }
+
+                    } else if (cpterDeck.boosters.length > 0) {
+
+                        if((randomNbr > 0 && randomNbr < 7) && (cpterDeck.monsters.length > 0)) {
+                            PlayGame.cpterAddCard("monster");
+                        } else if(cpterDeck.cardsOnBoard.length > 0) {
+                            PlayGame.cpterAddCard("booster");
+                        } else {
+                            PlayGame.cpterAddCard("monster");
+                        }
+                    }
+            } else if(randomNbr > 0 && randomNbr <= 6) {
+                PlayGame.cpterAttack();
+            } 
+
+        } else if((cpterDeck.length <= 0) && (cpterDeck.cardsOnBoard.length > 0)) {
+            PlayGame.cpterAttack();
+        } else {
             console.log("YOU WIN !!")
         }
-
-        let cards = cpterDeck.monsters.concat(cpterDeck.boosters);
-        let cardsOnBoard = cards.filter(card => card.onBoard);
-        let cardsOnHand = cards.filter(card => !card.onBoard);
-
-         if((round == 2 || round == 4 || round == 5 || round == 8 || round == 9 || round == 12 || round > 13) && (cardsOnBoard.length > 0)) {
-
-            PlayGame.cpterAttack(cardsOnBoard, cardsOnHand);
-
-         } else {
-
-            // If round 1, add a monster on board
-            if(round == 1) {
-                const infosField = document.querySelector('.infosField');
-                infosField.textContent = "...Computer is playing..."
-
-                setTimeout(function(){ 
-
-                // Get random monster
-                let cardFirstRound = cpterDeck.monsters[Math.floor(Math.random()*cpterDeck.monsters.length)];
-
-                // Generating card on board
-                const cardsContainer = document.querySelector('.cpterCards');
-                cardsContainer.innerHTML += DomRenderCard.monster(cardFirstRound, 'cpter')
-
-                // Update status cardOnboard = true
-                cpterDeck.monsters.forEach((monster, index) => {
-                    if(monster.key === cardFirstRound.key) {
-                        cpterDeck.monsters[index].onBoard = true;
-                    }
-                });
-
-                PlayGame.userRound();
-                }, 1500);
-
-            // Else if, get random card
-            } else if(cards.length > 0) {
-
-                PlayGame.cpterAddCard(cardsOnBoard, cardsOnHand);
-
-            } else {
-                PlayGame.cpterAttack(cardsOnBoard, cardsOnHand);
-            }
-         }
 
     },
 
 
     fight: function(cardAttack, cardDefense) {
 
-        console.log("carte attaque : ", cardAttack)
-        console.log("carte defense : ", cardDefense)
         // Algorithm for damage
-
         const coefficient = cardAttack.attack - cardDefense.defense;
 
         let damageToDefenser = null;
@@ -495,7 +514,6 @@ const PlayGame = {
             animation.blink(cardAttackDom, cardDefenseDom)
         }
 
-
         setTimeout(function(){ 
 
             // Update values in dom
@@ -526,12 +544,11 @@ const PlayGame = {
                 cardAttackDom.remove();
                 // delete card in state
                 if(cardAttack.owner === 'cpter') {
-                    let index = cpterDeck.monsters.indexOf(cardAttack);
-                    cpterDeck.monsters.splice(index, 1);
-
+                    let index = cpterDeck.cardsOnBoard.indexOf(cardAttack);
+                    cpterDeck.cardsOnBoard.splice(index, 1);
                 } else {
-                    let index = userDeck.monsters.indexOf(cardAttack);
-                    userDeck.monsters.splice(index, 1);
+                    let indexCardsOnBoard = userDeck.cardsOnBoard.indexOf(cardAttack);
+                    userDeck.cardsOnBoard.splice(indexCardsOnBoard, 1);
                 }
 
                 }, 1000);
@@ -543,13 +560,18 @@ const PlayGame = {
                 cardDefenseDom.remove();
                 // delete card in state
                 if(cardDefense.owner === 'cpter') {
-                    let index = cpterDeck.monsters.indexOf(cardDefense);
-                    cpterDeck.monsters.splice(index, 1);
+                    let index = cpterDeck.cardsOnBoard.indexOf(cardDefense);
+                    cpterDeck.cardsOnBoard.splice(index, 1);
 
                 } else {
-                    let index = userDeck.monsters.indexOf(cardDefense);
-                    userDeck.monsters.splice(index, 1);
+                    let indexCardsOnBoard = userDeck.cardsOnBoard.indexOf(cardDefense);
+                    userDeck.cardsOnBoard.splice(indexCardsOnBoard, 1);
+
+                    // Change picture vault boy
+                    let vaultBoy = document.querySelector('.vault-boy');
+                    vaultBoy.style.backgroundImage = 'url(assets/img/vault-boy/vault-boy-angry.png)';
                 }
+
                 }, 1000);
             }
 
@@ -565,56 +587,48 @@ const PlayGame = {
 
     },
 
-    cpterAddCard: function(cardsOnBoard, cardsOnHand) {
+    cpterAddCard: function(cardType) {
 
-        let card = null;
-                
-        // if there is a card on board, get random on monster & booster. Else get random monster
-        if(cardsOnBoard.length > 0) {
-            card = cardsOnHand[Math.floor(Math.random()*cardsOnHand.length)];
-        } else {
-            let cardsMonster = cardsOnHand.filter(card => card.type === 'monster');
-            card = cardsMonster[Math.floor(Math.random()*cardsMonster.length)];
-        }
-
-        console.log("cpter want to add :", card)
+        const infosField = document.querySelector('.infosField');
+        infosField.textContent = "...Computer is playing..."
 
         // Handle booster cards
-        if(card.type === 'booster') {
+        if(cardType === 'booster') {
 
-            // Get random monster card from board to apply boost
-            const monsterCards= cpterDeck.monsters.filter(card => card.onBoard == true);
-            let monsterCard = monsterCards[Math.floor(Math.random()*monsterCards.length)];
+            // Get random booster card
+            const booster = cpterDeck.boosters[Math.floor(Math.random()*cpterDeck.boosters.length)];
 
             // Generating booster card on board
             const cardsContainer = document.querySelector('.cpterCards');
-            cardsContainer.innerHTML += DomRenderCard.booster(card, 'cpter')
+            cardsContainer.innerHTML += DomRenderCard.booster(booster, 'cpter')
 
+            // Get random monster card from board to apply boost
+            const monster = cpterDeck.cardsOnBoard[Math.floor(Math.random()*cpterDeck.cardsOnBoard.length)];
 
-            // Select monster card on board
-            let cardMonsterDom = document.querySelector(`div[data-key="${monsterCard.key}"]`);
-            let cardBoosterDom = document.querySelector(`div[data-key="${card.key}"]`);
+            // Get monster card on board
+            let monsterDom = document.querySelector(`div[data-key="${monster.key}"]`);
+            let boosterDom = document.querySelector(`div[data-key="${booster.key}"]`);
 
-            animation.moveCards(cardBoosterDom, cardMonsterDom);
+            animation.moveCards(boosterDom, monsterDom);
 
             setTimeout(function(){ 
 
-                const typeBooster = card.special_effect_text;
-                console.log('type de booster', typeBooster)
-                const bonus = card.special_effect_value + monsterCard[typeBooster];
-                console.log('bonus', bonus)
+                const typeBooster = booster.special_effect_text;
+
+                const bonus = booster.special_effect_value + monster[typeBooster];
+
                 // update monster card value in dom
-                let textBonus = cardMonsterDom.querySelector(`.${typeBooster}`);
+                let textBonus = monsterDom.querySelector(`.${typeBooster}`);
                 textBonus.textContent = bonus;
 
                 // update monster card value
-                // let monsterInDeck = cpterDeck.monster.find(card => card.key = monsterCard.key)
-                monsterCard[typeBooster] = bonus;
+                monster[typeBooster] = bonus;
 
-                cardBoosterDom.remove();
+                // Delete card in dom
+                boosterDom.remove();
 
                 // Delete card in state
-                let index = cpterDeck.boosters.indexOf(card);
+                let index = cpterDeck.boosters.indexOf(booster);
                 cpterDeck.boosters.splice(index, 1);
 
                 PlayGame.userRound();
@@ -622,33 +636,34 @@ const PlayGame = {
 
         } else {
 
-            // Computer add a card on board
+            // Get random monster card
+            const monster = cpterDeck.monsters[Math.floor(Math.random()*cpterDeck.monsters.length)];
+
+            // Generating monster card on board
             const cardsContainer = document.querySelector('.cpterCards');
-            cardsContainer.innerHTML += DomRenderCard.monster(card, 'cpter')
+            cardsContainer.innerHTML += DomRenderCard.monster(monster, 'cpter')
 
+            // Add card on array "cardsOnBoard"
+            cpterDeck.cardsOnBoard.push(monster);
 
-            // Update status cardOnboard = true
-            cpterDeck.monsters.forEach((monster, index) => {
-                if(monster.key === card.key) {
-                    cpterDeck.monsters[index].onBoard = true;
-                }
-            });
+            // Delete card in main array
+            let index = cpterDeck.monsters.indexOf(monster);
+            cpterDeck.monsters.splice(index, 1);
 
             PlayGame.userRound();
         }
     },
 
-    cpterAttack: function(cardsOnBoard, cardsOnHand) {
-        
+    cpterAttack: function() {
+
         const infosField = document.querySelector('.infosField');
         infosField.textContent = "...Computer is playing..."
 
         // Getting computer cards on board and select one
-        let cardAttack = cardsOnBoard[Math.floor(Math.random()*cardsOnBoard.length)];
+        let cardAttack = cpterDeck.cardsOnBoard[Math.floor(Math.random()*cpterDeck.cardsOnBoard.length)];
 
         // Getting user cards on board and select one
-        const userCards = userDeck.monsters.filter(card => card.onBoard == true);
-        let cardDefense = userCards[Math.floor(Math.random()*userCards.length)];
+        let cardDefense = userDeck.cardsOnBoard[Math.floor(Math.random()*userDeck.cardsOnBoard.length)];
 
         // Select each card in dom
         let cardAttackDom = document.querySelector(`div[data-key="${cardAttack.key}"]`);
@@ -663,7 +678,7 @@ const PlayGame = {
 }
 
 module.exports = PlayGame;
-},{"../DomRender/BoardGame":4,"../DomRender/Card":5,"../DomRender/Tutorial":10,"../Middleware/Deck":11,"../Store":13,"../Utils/Animation":14,"../Utils/DragAndDrop":15}],4:[function(require,module,exports){
+},{"../DomRender/BoardGame":4,"../DomRender/Card":5,"../DomRender/Tutorial":8,"../Middleware/Deck":9,"../Store":11,"../Utils/Animation":12,"../Utils/DragAndDrop":13}],4:[function(require,module,exports){
 const BoardGame = {
     render: () => {
         
@@ -720,12 +735,70 @@ const Card = {
       </div>
         `
     },
+
+    showDeck: (decks) => {
+        return `
+            ${decks.map(deck => 
+                `
+                <div class="deck-container">
+                <p>Deck : "${deck.title}"</p>
+                <div class="card-deck"></div>
+                <button class="play-deck" id="${deck.id}">Play with this deck</button>
+                <!-- <button class="manage-deck" id="${deck.id}">Manage deck</button> -->
+                </div>
+                `
+            )}
+        `
+    },
+
+    createDeck: () => {
+        return `
+            <div class="create-deck-container">
+            <img src="assets/img/vault-boy/vault-boy-letsPlay.png" class="vault-boy-createDeck">
+            <p>Create your first deck to play !</p>
+            <form action="" class="create-deck" id="create-deck">
+                <input name="title" placeholder="name"></input>
+                <button type="submit">Create a deck</button>
+            </form>
+            </div>
+        `
+    }
 }
 
 module.exports = Card;
 },{}],6:[function(require,module,exports){
-const CreateAccount = {
-    render: () => {
+const Form = {
+    login: () => {
+
+        return `
+            <img src="assets/img/Logo.png" class="logo">
+            <form action="" class="form" id="login">
+                <div class="form-label-group">
+                <label for="email">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Votre courriel">
+                </div>
+            
+                <div class="form-label-group">
+                <label for="password">Password</label>
+                    <input type="password" class="form-control" id="password" name="password"
+                        placeholder="Votre mot de passe" autocomplete="on">
+        
+                </div>
+            
+                <div class="checkbox mb-3">
+                    <label>
+                        <input type="checkbox" name="remember" value="remember-me"> Se souvenir de moi
+                    </label>
+                </div>
+                <div>
+                <button class="" type="submit">Se connecter</button>
+                </div>
+            </form>
+            <button class="go-back">GO BACK</button>
+        `
+    },
+
+    createAccount: () => {
         
         return `
         <img src="assets/img/Logo.png" class="logo">
@@ -768,71 +841,8 @@ const CreateAccount = {
     }
 }
 
-module.exports = CreateAccount;
+module.exports = Form;
 },{}],7:[function(require,module,exports){
-const Deck = {
-    showDeck: (decks) => {
-        return `
-            ${decks.map(deck => 
-                `
-                <div class="deck-container">
-                <p>Deck : "${deck.title}"</p>
-                <div class="card-deck"></div>
-                <button class="play-deck" id="${deck.id}">Play with this deck</button>
-                <button class="manage-deck" id="${deck.id}">Manage deck</button>
-                </div>
-                `
-            )}
-        `
-    },
-
-    createDeck: () => {
-        return `
-            <p>Create your first deck to play !</p>
-            <form action="" class="form" id="create-deck">
-                <input name="title" placeholder="name"></input>
-                <button type="submit">Create a deck</button>
-            </form>
-        `
-    }
-}
-
-module.exports = Deck;
-},{}],8:[function(require,module,exports){
-const Login = {
-    render: () => {
-
-        return `
-            <img src="assets/img/Logo.png" class="logo">
-            <form action="" class="form" id="login">
-                <div class="form-label-group">
-                <label for="email">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Votre courriel">
-                </div>
-            
-                <div class="form-label-group">
-                <label for="password">Password</label>
-                    <input type="password" class="form-control" id="password" name="password"
-                        placeholder="Votre mot de passe" autocomplete="on">
-        
-                </div>
-            
-                <div class="checkbox mb-3">
-                    <label>
-                        <input type="checkbox" name="remember" value="remember-me"> Se souvenir de moi
-                    </label>
-                </div>
-                <div>
-                <button class="" type="submit">Se connecter</button>
-                </div>
-            </form>
-            <button class="go-back">GO BACK</button>
-        `
-    }
-}
-
-module.exports = Login;
-},{}],9:[function(require,module,exports){
 const Menu = {
     render: (logged) => {
 
@@ -861,7 +871,7 @@ const Menu = {
 }
 
 module.exports = Menu;
-},{}],10:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 const Tutorial = {
     card: () => {
 
@@ -876,8 +886,9 @@ const Tutorial = {
 }
 
 module.exports = Tutorial;
-},{}],11:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 const Store = require('../Store');
+const InitGame = require('../Components/InitGame');
 
 const axios = require('axios');
 
@@ -899,7 +910,6 @@ const MiddlewareDeck = {
         };
 
         const response = await fetch(`${MiddlewareDeck.baseUrl}/crud/deck`, requestConfig);
-
         const jsonResponse = await response.json();
 
         if(response.status === 404) {
@@ -910,11 +920,11 @@ const MiddlewareDeck = {
             // Saving json response in local session
             userDeck = JSON.stringify(jsonResponse);
             sessionStorage.setItem('userDatas', userDeck);
-
+            console.log("le json response est", jsonResponse)
             // Saving datas in store
-            Store.user.decks = jsonResponse;
-
-            return true;
+            Store.user.decks.push(jsonResponse);
+            console.log(Store)
+            return true
         }
 
     },
@@ -948,7 +958,7 @@ const MiddlewareDeck = {
 }
 
 module.exports = MiddlewareDeck;
-},{"../Store":13,"axios":17}],12:[function(require,module,exports){
+},{"../Components/InitGame":1,"../Store":11,"axios":16}],10:[function(require,module,exports){
 const Store = require('../Store');
 
 const MiddlewareLog = {
@@ -989,7 +999,7 @@ const MiddlewareLog = {
     handleCreateAccount: async (data) => {
 
         event.preventDefault();
-        console.log(data)
+
         let dataForm = new FormData(data.target);
 
         const requestConfig = {
@@ -1027,14 +1037,15 @@ const MiddlewareLog = {
 
             // Saving datas in store
             Store.user = jsonResponse;
-            
+            Store.user.decks = [];
+
             return true;
         }
     }
 }
 
 module.exports = MiddlewareLog;
-},{"../Store":13}],13:[function(require,module,exports){
+},{"../Store":11}],11:[function(require,module,exports){
 const Store = {
 
     user: {
@@ -1060,7 +1071,7 @@ const Store = {
 };
 
 module.exports = Store;
-},{}],14:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 
 const dragAndDrop = require('./DragAndDrop');
 
@@ -1083,7 +1094,8 @@ var animation = {
 
         const positionPlayerCard = dragAndDrop.getPosition(playerCard);
         const positionCpterCard = dragAndDrop.getPosition(cpterCard);
-
+        console.log('position carte player', positionPlayerCard)
+        console.log('position carte cpter', positionCpterCard)
         cpterCard.style.position = 'fixed';
 
         cpterCard.animate([{
@@ -1118,7 +1130,7 @@ var animation = {
 }
 
 module.exports = animation;
-},{"./DragAndDrop":15}],15:[function(require,module,exports){
+},{"./DragAndDrop":13}],13:[function(require,module,exports){
 
 const dragAndDrop = {
 
@@ -1254,11 +1266,28 @@ const dragAndDrop = {
 };
 
 module.exports = dragAndDrop;
-},{}],16:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
+var reloadCss = {
+
+    init: function() {
+
+    var link = document.getElementById("cards");
+
+    window.onresize = function(){
+
+        link.href += "";
+
+
+     }
+    },
+};
+
+module.exports = reloadCss;
+},{}],15:[function(require,module,exports){
 // const utils = require('./Utils/ReloadCss');
 
 const Menu = require('./Components/Menu');
-
+const reloadCss = require('./Utils/ReloadCss');
 
 
 
@@ -1267,15 +1296,16 @@ var app = {
 init: function () {
 
     Menu.unLogged();
+    reloadCss.init();
     // utils.reloadCss();
     // dragAndDrop.init();
 },
 };
 
 document.addEventListener('DOMContentLoaded', app.init);
-},{"./Components/Menu":2}],17:[function(require,module,exports){
+},{"./Components/Menu":2,"./Utils/ReloadCss":14}],16:[function(require,module,exports){
 module.exports = require('./lib/axios');
-},{"./lib/axios":19}],18:[function(require,module,exports){
+},{"./lib/axios":18}],17:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1456,7 +1486,7 @@ module.exports = function xhrAdapter(config) {
   });
 };
 
-},{"../core/buildFullPath":25,"../core/createError":26,"./../core/settle":30,"./../helpers/buildURL":34,"./../helpers/cookies":36,"./../helpers/isURLSameOrigin":38,"./../helpers/parseHeaders":40,"./../utils":42}],19:[function(require,module,exports){
+},{"../core/buildFullPath":24,"../core/createError":25,"./../core/settle":29,"./../helpers/buildURL":33,"./../helpers/cookies":35,"./../helpers/isURLSameOrigin":37,"./../helpers/parseHeaders":39,"./../utils":41}],18:[function(require,module,exports){
 'use strict';
 
 var utils = require('./utils');
@@ -1511,7 +1541,7 @@ module.exports = axios;
 // Allow use of default import syntax in TypeScript
 module.exports.default = axios;
 
-},{"./cancel/Cancel":20,"./cancel/CancelToken":21,"./cancel/isCancel":22,"./core/Axios":23,"./core/mergeConfig":29,"./defaults":32,"./helpers/bind":33,"./helpers/spread":41,"./utils":42}],20:[function(require,module,exports){
+},{"./cancel/Cancel":19,"./cancel/CancelToken":20,"./cancel/isCancel":21,"./core/Axios":22,"./core/mergeConfig":28,"./defaults":31,"./helpers/bind":32,"./helpers/spread":40,"./utils":41}],19:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1532,7 +1562,7 @@ Cancel.prototype.__CANCEL__ = true;
 
 module.exports = Cancel;
 
-},{}],21:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 'use strict';
 
 var Cancel = require('./Cancel');
@@ -1591,14 +1621,14 @@ CancelToken.source = function source() {
 
 module.exports = CancelToken;
 
-},{"./Cancel":20}],22:[function(require,module,exports){
+},{"./Cancel":19}],21:[function(require,module,exports){
 'use strict';
 
 module.exports = function isCancel(value) {
   return !!(value && value.__CANCEL__);
 };
 
-},{}],23:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1695,7 +1725,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = Axios;
 
-},{"../helpers/buildURL":34,"./../utils":42,"./InterceptorManager":24,"./dispatchRequest":27,"./mergeConfig":29}],24:[function(require,module,exports){
+},{"../helpers/buildURL":33,"./../utils":41,"./InterceptorManager":23,"./dispatchRequest":26,"./mergeConfig":28}],23:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1749,7 +1779,7 @@ InterceptorManager.prototype.forEach = function forEach(fn) {
 
 module.exports = InterceptorManager;
 
-},{"./../utils":42}],25:[function(require,module,exports){
+},{"./../utils":41}],24:[function(require,module,exports){
 'use strict';
 
 var isAbsoluteURL = require('../helpers/isAbsoluteURL');
@@ -1771,7 +1801,7 @@ module.exports = function buildFullPath(baseURL, requestedURL) {
   return requestedURL;
 };
 
-},{"../helpers/combineURLs":35,"../helpers/isAbsoluteURL":37}],26:[function(require,module,exports){
+},{"../helpers/combineURLs":34,"../helpers/isAbsoluteURL":36}],25:[function(require,module,exports){
 'use strict';
 
 var enhanceError = require('./enhanceError');
@@ -1791,7 +1821,7 @@ module.exports = function createError(message, config, code, request, response) 
   return enhanceError(error, config, code, request, response);
 };
 
-},{"./enhanceError":28}],27:[function(require,module,exports){
+},{"./enhanceError":27}],26:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -1872,7 +1902,7 @@ module.exports = function dispatchRequest(config) {
   });
 };
 
-},{"../cancel/isCancel":22,"../defaults":32,"./../utils":42,"./transformData":31}],28:[function(require,module,exports){
+},{"../cancel/isCancel":21,"../defaults":31,"./../utils":41,"./transformData":30}],27:[function(require,module,exports){
 'use strict';
 
 /**
@@ -1916,7 +1946,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
   return error;
 };
 
-},{}],29:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -2005,7 +2035,7 @@ module.exports = function mergeConfig(config1, config2) {
   return config;
 };
 
-},{"../utils":42}],30:[function(require,module,exports){
+},{"../utils":41}],29:[function(require,module,exports){
 'use strict';
 
 var createError = require('./createError');
@@ -2032,7 +2062,7 @@ module.exports = function settle(resolve, reject, response) {
   }
 };
 
-},{"./createError":26}],31:[function(require,module,exports){
+},{"./createError":25}],30:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -2054,7 +2084,7 @@ module.exports = function transformData(data, headers, fns) {
   return data;
 };
 
-},{"./../utils":42}],32:[function(require,module,exports){
+},{"./../utils":41}],31:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -2156,7 +2186,7 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 module.exports = defaults;
 
 }).call(this)}).call(this,require('_process'))
-},{"./adapters/http":18,"./adapters/xhr":18,"./helpers/normalizeHeaderName":39,"./utils":42,"_process":43}],33:[function(require,module,exports){
+},{"./adapters/http":17,"./adapters/xhr":17,"./helpers/normalizeHeaderName":38,"./utils":41,"_process":42}],32:[function(require,module,exports){
 'use strict';
 
 module.exports = function bind(fn, thisArg) {
@@ -2169,7 +2199,7 @@ module.exports = function bind(fn, thisArg) {
   };
 };
 
-},{}],34:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -2241,7 +2271,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
   return url;
 };
 
-},{"./../utils":42}],35:[function(require,module,exports){
+},{"./../utils":41}],34:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2257,7 +2287,7 @@ module.exports = function combineURLs(baseURL, relativeURL) {
     : baseURL;
 };
 
-},{}],36:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -2312,7 +2342,7 @@ module.exports = (
     })()
 );
 
-},{"./../utils":42}],37:[function(require,module,exports){
+},{"./../utils":41}],36:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2328,7 +2358,7 @@ module.exports = function isAbsoluteURL(url) {
   return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
 };
 
-},{}],38:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -2398,7 +2428,7 @@ module.exports = (
     })()
 );
 
-},{"./../utils":42}],39:[function(require,module,exports){
+},{"./../utils":41}],38:[function(require,module,exports){
 'use strict';
 
 var utils = require('../utils');
@@ -2412,7 +2442,7 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
   });
 };
 
-},{"../utils":42}],40:[function(require,module,exports){
+},{"../utils":41}],39:[function(require,module,exports){
 'use strict';
 
 var utils = require('./../utils');
@@ -2467,7 +2497,7 @@ module.exports = function parseHeaders(headers) {
   return parsed;
 };
 
-},{"./../utils":42}],41:[function(require,module,exports){
+},{"./../utils":41}],40:[function(require,module,exports){
 'use strict';
 
 /**
@@ -2496,7 +2526,7 @@ module.exports = function spread(callback) {
   };
 };
 
-},{}],42:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 'use strict';
 
 var bind = require('./helpers/bind');
@@ -2849,7 +2879,7 @@ module.exports = {
   stripBOM: stripBOM
 };
 
-},{"./helpers/bind":33}],43:[function(require,module,exports){
+},{"./helpers/bind":32}],42:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -3035,4 +3065,4 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}]},{},[16]);
+},{}]},{},[15]);

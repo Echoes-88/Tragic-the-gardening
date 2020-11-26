@@ -33,6 +33,7 @@ const PlayGame = {
 
         // Tutorial
         const mainContainer = document.querySelector('.container');
+        mainContainer.classList.remove('container')
         mainContainer.innerHTML = DomRenderTutorial.card();
 
         const close = document.querySelector(".close-button");
@@ -62,7 +63,6 @@ const PlayGame = {
 
             userDeck.monsters.map(card => {
                 card.key = inc++; 
-                card.onBoard = false; 
                 card.type = 'monster'; 
                 card.owner = 'user';
                 playerArea.innerHTML += DomRenderCard.monster(card, "user");
@@ -79,21 +79,26 @@ const PlayGame = {
 
             userDeck.boosters.map(card => {
                 card.key = inc++; 
-                card.onBoard = false; 
                 card.type = 'booster'; 
                 card.owner = 'user';   
                 playerArea.innerHTML += DomRenderCard.booster(card, "user")
             });
 
+            // Add array to scan cards status
+            userDeck.cardsOnBoard = [];
+
             // Save cpter Deck  
             cpterDeck = Store.cpter.deck
+
+            // Deep copy to avoid duplicate key
+            cpterDeck = JSON.parse(JSON.stringify(cpterDeck));
+
             cpterDeck.monsters.forEach(card => {card.key = inc++; card.onBoard = false; card.type = 'monster'; card.owner = 'cpter'});
             cpterDeck.boosters.forEach(card => {card.key = inc++; card.onBoard = false; card.type = 'booster'; card.owner = 'cpter'});
-
+            cpterDeck.cardsOnBoard = [];
          
             // launch game
             PlayGame.userRound();
-            console.log(userDeck.monsters)
         })
     },
 
@@ -101,6 +106,19 @@ const PlayGame = {
     userRound: function() {
 
         round++;
+
+        console.log('user deck', userDeck, 'cpter deck', cpterDeck)
+
+        if((userDeck.monsters.length <= 0) && (userDeck.cardsOnBoard.length <= 0)) {
+            console.log("YOU LOOSE !!")
+            // const infosField = document.querySelector('.infosField');
+        }
+
+        if((userDeck.monsters.length + userDeck.cardsOnBoard.length) < 3) {
+            // Change picture vault boy
+            let vaultBoy = document.querySelector('.vault-boy');
+            vaultBoy.style.backgroundImage = 'url(assets/img/vault-boy/vault-boy-loosing.png)';
+        }
 
         // Display informations to user
         const infosField = document.querySelector('.infosField');
@@ -112,7 +130,7 @@ const PlayGame = {
         }
 
         // Handle cards
-        const userCardsDom = document.getElementsByClassName('userCard');
+        const userCardsDom = document.querySelectorAll('.userCard');
     
         for (const userCardDom of userCardsDom) {
 
@@ -121,6 +139,13 @@ const PlayGame = {
 
             // Listening drop
             userCardDom.addEventListener('dragend', function () {
+
+                // Change picture vault boy
+                if(userDeck.monsters.length >= 3) {
+                    let vaultBoy = document.querySelector('.vault-boy');
+                    vaultBoy.style.backgroundImage = 'url(assets/img/vault-boy/vault-boy.png)';
+                }
+
 
                 var x = event.clientX, y = event.clientY,
                 eltFlewOver = document.elementFromPoint(x, y);
@@ -132,19 +157,19 @@ const PlayGame = {
 
                         // Detect monster card selected
                         const monsterCardDom = eltFlewOver.closest('.cardComponent');
-                        console.log('il veut poser la carte booster sur', monsterCardDom)
+
+                        // Get monster informations
+                        const cardKeyMonster = monsterCardDom.getAttribute('data-key');
+                        const monster = userDeck.cardsOnBoard.find(card => card.key == cardKeyMonster);
 
                         // Get booster informations
                         const cardKeyBooster = userCardDom.getAttribute('data-key');
                         const booster = userDeck.boosters.find(booster => booster.key == cardKeyBooster);
 
-                        // Get monster informations
-                        const cardKeyMonster = monsterCardDom.getAttribute('data-key');
-                        const monster = userDeck.monsters.find(monster => monster.key == cardKeyMonster);
 
                         // Detect type of booster
                         const typeBooster = booster.special_effect_text;
-
+                        // FAIRE UNE FONCTION PROMESSE OU UNE ANIMATION POUR ATTENDRE LE FIN DE MONSTER
                         const bonus = booster.special_effect_value + monster[typeBooster];
 
                         // update monster card value in dom
@@ -152,12 +177,10 @@ const PlayGame = {
                         textBonus.textContent = bonus;
         
                         // update monster card value
-                        // let monsterInDeck = cpterDeck.monster.find(card => card.key = monsterCard.key)
                         monster[typeBooster] = bonus;
         
                         userCardDom.remove();
 
-                        console.log(booster)
                     }
 
                 } else {
@@ -209,11 +232,15 @@ const PlayGame = {
                         endOfRoundButton.classList.add('inactive');
                         endOfRoundButton.removeEventListener("click", handleEndOfRound);
                         
-                        // Find card in state to set onBoard = true
+                        // Find card in state
                         const cardKey = userCardDom.getAttribute('data-key');
-                        const cardInState = userDeck.monsters.find(monster => monster.key == cardKey);
-                        console.log("key", cardKey, "state", userDeck)
-                        cardInState.onBoard = true;
+                        const monster = userDeck.monsters.find(monster => monster.key == cardKey);
+
+                        userDeck.cardsOnBoard.push(monster);
+
+                        // Delete card in main array
+                        let index = userDeck.monsters.indexOf(monster);
+                        userDeck.monsters.splice(index, 1);
 
                         document.querySelector('.cancel').remove();
 
@@ -232,9 +259,8 @@ const PlayGame = {
                     } else {
 
                         // Select user and player cards in state
-                        let cardAttack = userDeck.monsters.find(card => card.key == userCardDom.getAttribute('data-key'))
-                        let cardDefense = cpterDeck.monsters.find(card => card.key == cpterCardDom.getAttribute('data-key'))
-
+                        let cardAttack = userDeck.cardsOnBoard.find(card => card.key == userCardDom.getAttribute('data-key'))
+                        let cardDefense = cpterDeck.cardsOnBoard.find(card => card.key == cpterCardDom.getAttribute('data-key'))
                         PlayGame.fight(cardAttack, cardDefense);
                     }
                 }
@@ -246,66 +272,54 @@ const PlayGame = {
 
     cpterRound: function() {
 
-        // console.log('cpter round / user Cards :', userDeck)
-        // console.log('cpter round / cpter Cards :', cpterDeck)
-        
-        if(cpterDeck.monsters.length == 0) {
+        // Disable draggable
+        const playerCards = document.querySelectorAll('.userCard');
+        for(const card of playerCards) { card.draggable = false; }
+
+        if(cpterDeck.monsters.length > 0 || cpterDeck.boosters.length > 0) {
+
+            let randomNbr = Math.floor(Math.random()*10)+1;
+
+            // IF RANDOM NUMBER > 7 OR ROUND 1, CPTER ADD A CARD ON BOARD
+            if(randomNbr >= 7 || round == 1 || cpterDeck.cardsOnBoard.length <= 0 || userDeck.cardsOnBoard.length <= 0) {
+
+                // Getting a new random number
+                randomNbr = Math.floor(Math.random()*10)+1;
+
+                    if(cpterDeck.monsters.length > 0) {
+
+                        if((randomNbr > 6) && (cpterDeck.boosters.length > 0) && (cpterDeck.cardsOnBoard.length > 0)) {
+                            PlayGame.cpterAddCard("booster");
+                        } else {
+                            PlayGame.cpterAddCard("monster");
+                        }
+
+                    } else if (cpterDeck.boosters.length > 0) {
+
+                        if((randomNbr > 0 && randomNbr < 7) && (cpterDeck.monsters.length > 0)) {
+                            PlayGame.cpterAddCard("monster");
+                        } else if(cpterDeck.cardsOnBoard.length > 0) {
+                            PlayGame.cpterAddCard("booster");
+                        } else {
+                            PlayGame.cpterAddCard("monster");
+                        }
+                    }
+            } else if(randomNbr > 0 && randomNbr <= 6) {
+                PlayGame.cpterAttack();
+            } 
+
+        } else if((cpterDeck.length <= 0) && (cpterDeck.cardsOnBoard.length > 0)) {
+            PlayGame.cpterAttack();
+        } else {
             console.log("YOU WIN !!")
         }
-
-        let cards = cpterDeck.monsters.concat(cpterDeck.boosters);
-        let cardsOnBoard = cards.filter(card => card.onBoard);
-        let cardsOnHand = cards.filter(card => !card.onBoard);
-
-         if((round == 2 || round == 4 || round == 5 || round == 8 || round == 9 || round == 12 || round > 13) && (cardsOnBoard.length > 0)) {
-
-            PlayGame.cpterAttack(cardsOnBoard, cardsOnHand);
-
-         } else {
-
-            // If round 1, add a monster on board
-            if(round == 1) {
-                const infosField = document.querySelector('.infosField');
-                infosField.textContent = "...Computer is playing..."
-
-                setTimeout(function(){ 
-
-                // Get random monster
-                let cardFirstRound = cpterDeck.monsters[Math.floor(Math.random()*cpterDeck.monsters.length)];
-
-                // Generating card on board
-                const cardsContainer = document.querySelector('.cpterCards');
-                cardsContainer.innerHTML += DomRenderCard.monster(cardFirstRound, 'cpter')
-
-                // Update status cardOnboard = true
-                cpterDeck.monsters.forEach((monster, index) => {
-                    if(monster.key === cardFirstRound.key) {
-                        cpterDeck.monsters[index].onBoard = true;
-                    }
-                });
-
-                PlayGame.userRound();
-                }, 1500);
-
-            // Else if, get random card
-            } else if(cards.length > 0) {
-
-                PlayGame.cpterAddCard(cardsOnBoard, cardsOnHand);
-
-            } else {
-                PlayGame.cpterAttack(cardsOnBoard, cardsOnHand);
-            }
-         }
 
     },
 
 
     fight: function(cardAttack, cardDefense) {
 
-        console.log("carte attaque : ", cardAttack)
-        console.log("carte defense : ", cardDefense)
         // Algorithm for damage
-
         const coefficient = cardAttack.attack - cardDefense.defense;
 
         let damageToDefenser = null;
@@ -339,7 +353,6 @@ const PlayGame = {
             animation.blink(cardAttackDom, cardDefenseDom)
         }
 
-
         setTimeout(function(){ 
 
             // Update values in dom
@@ -370,12 +383,11 @@ const PlayGame = {
                 cardAttackDom.remove();
                 // delete card in state
                 if(cardAttack.owner === 'cpter') {
-                    let index = cpterDeck.monsters.indexOf(cardAttack);
-                    cpterDeck.monsters.splice(index, 1);
-
+                    let index = cpterDeck.cardsOnBoard.indexOf(cardAttack);
+                    cpterDeck.cardsOnBoard.splice(index, 1);
                 } else {
-                    let index = userDeck.monsters.indexOf(cardAttack);
-                    userDeck.monsters.splice(index, 1);
+                    let indexCardsOnBoard = userDeck.cardsOnBoard.indexOf(cardAttack);
+                    userDeck.cardsOnBoard.splice(indexCardsOnBoard, 1);
                 }
 
                 }, 1000);
@@ -387,13 +399,18 @@ const PlayGame = {
                 cardDefenseDom.remove();
                 // delete card in state
                 if(cardDefense.owner === 'cpter') {
-                    let index = cpterDeck.monsters.indexOf(cardDefense);
-                    cpterDeck.monsters.splice(index, 1);
+                    let index = cpterDeck.cardsOnBoard.indexOf(cardDefense);
+                    cpterDeck.cardsOnBoard.splice(index, 1);
 
                 } else {
-                    let index = userDeck.monsters.indexOf(cardDefense);
-                    userDeck.monsters.splice(index, 1);
+                    let indexCardsOnBoard = userDeck.cardsOnBoard.indexOf(cardDefense);
+                    userDeck.cardsOnBoard.splice(indexCardsOnBoard, 1);
+
+                    // Change picture vault boy
+                    let vaultBoy = document.querySelector('.vault-boy');
+                    vaultBoy.style.backgroundImage = 'url(assets/img/vault-boy/vault-boy-angry.png)';
                 }
+
                 }, 1000);
             }
 
@@ -409,56 +426,48 @@ const PlayGame = {
 
     },
 
-    cpterAddCard: function(cardsOnBoard, cardsOnHand) {
+    cpterAddCard: function(cardType) {
 
-        let card = null;
-                
-        // if there is a card on board, get random on monster & booster. Else get random monster
-        if(cardsOnBoard.length > 0) {
-            card = cardsOnHand[Math.floor(Math.random()*cardsOnHand.length)];
-        } else {
-            let cardsMonster = cardsOnHand.filter(card => card.type === 'monster');
-            card = cardsMonster[Math.floor(Math.random()*cardsMonster.length)];
-        }
-
-        console.log("cpter want to add :", card)
+        const infosField = document.querySelector('.infosField');
+        infosField.textContent = "...Computer is playing..."
 
         // Handle booster cards
-        if(card.type === 'booster') {
+        if(cardType === 'booster') {
 
-            // Get random monster card from board to apply boost
-            const monsterCards= cpterDeck.monsters.filter(card => card.onBoard == true);
-            let monsterCard = monsterCards[Math.floor(Math.random()*monsterCards.length)];
+            // Get random booster card
+            const booster = cpterDeck.boosters[Math.floor(Math.random()*cpterDeck.boosters.length)];
 
             // Generating booster card on board
             const cardsContainer = document.querySelector('.cpterCards');
-            cardsContainer.innerHTML += DomRenderCard.booster(card, 'cpter')
+            cardsContainer.innerHTML += DomRenderCard.booster(booster, 'cpter')
 
+            // Get random monster card from board to apply boost
+            const monster = cpterDeck.cardsOnBoard[Math.floor(Math.random()*cpterDeck.cardsOnBoard.length)];
 
-            // Select monster card on board
-            let cardMonsterDom = document.querySelector(`div[data-key="${monsterCard.key}"]`);
-            let cardBoosterDom = document.querySelector(`div[data-key="${card.key}"]`);
+            // Get monster card on board
+            let monsterDom = document.querySelector(`div[data-key="${monster.key}"]`);
+            let boosterDom = document.querySelector(`div[data-key="${booster.key}"]`);
 
-            animation.moveCards(cardBoosterDom, cardMonsterDom);
+            animation.moveCards(boosterDom, monsterDom);
 
             setTimeout(function(){ 
 
-                const typeBooster = card.special_effect_text;
-                console.log('type de booster', typeBooster)
-                const bonus = card.special_effect_value + monsterCard[typeBooster];
-                console.log('bonus', bonus)
+                const typeBooster = booster.special_effect_text;
+
+                const bonus = booster.special_effect_value + monster[typeBooster];
+
                 // update monster card value in dom
-                let textBonus = cardMonsterDom.querySelector(`.${typeBooster}`);
+                let textBonus = monsterDom.querySelector(`.${typeBooster}`);
                 textBonus.textContent = bonus;
 
                 // update monster card value
-                // let monsterInDeck = cpterDeck.monster.find(card => card.key = monsterCard.key)
-                monsterCard[typeBooster] = bonus;
+                monster[typeBooster] = bonus;
 
-                cardBoosterDom.remove();
+                // Delete card in dom
+                boosterDom.remove();
 
                 // Delete card in state
-                let index = cpterDeck.boosters.indexOf(card);
+                let index = cpterDeck.boosters.indexOf(booster);
                 cpterDeck.boosters.splice(index, 1);
 
                 PlayGame.userRound();
@@ -466,33 +475,34 @@ const PlayGame = {
 
         } else {
 
-            // Computer add a card on board
+            // Get random monster card
+            const monster = cpterDeck.monsters[Math.floor(Math.random()*cpterDeck.monsters.length)];
+
+            // Generating monster card on board
             const cardsContainer = document.querySelector('.cpterCards');
-            cardsContainer.innerHTML += DomRenderCard.monster(card, 'cpter')
+            cardsContainer.innerHTML += DomRenderCard.monster(monster, 'cpter')
 
+            // Add card on array "cardsOnBoard"
+            cpterDeck.cardsOnBoard.push(monster);
 
-            // Update status cardOnboard = true
-            cpterDeck.monsters.forEach((monster, index) => {
-                if(monster.key === card.key) {
-                    cpterDeck.monsters[index].onBoard = true;
-                }
-            });
+            // Delete card in main array
+            let index = cpterDeck.monsters.indexOf(monster);
+            cpterDeck.monsters.splice(index, 1);
 
             PlayGame.userRound();
         }
     },
 
-    cpterAttack: function(cardsOnBoard, cardsOnHand) {
-        
+    cpterAttack: function() {
+
         const infosField = document.querySelector('.infosField');
         infosField.textContent = "...Computer is playing..."
 
         // Getting computer cards on board and select one
-        let cardAttack = cardsOnBoard[Math.floor(Math.random()*cardsOnBoard.length)];
+        let cardAttack = cpterDeck.cardsOnBoard[Math.floor(Math.random()*cpterDeck.cardsOnBoard.length)];
 
         // Getting user cards on board and select one
-        const userCards = userDeck.monsters.filter(card => card.onBoard == true);
-        let cardDefense = userCards[Math.floor(Math.random()*userCards.length)];
+        let cardDefense = userDeck.cardsOnBoard[Math.floor(Math.random()*userDeck.cardsOnBoard.length)];
 
         // Select each card in dom
         let cardAttackDom = document.querySelector(`div[data-key="${cardAttack.key}"]`);

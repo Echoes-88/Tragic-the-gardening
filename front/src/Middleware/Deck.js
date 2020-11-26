@@ -1,4 +1,5 @@
 const Store = require('../Store');
+const InitGame = require('../Components/InitGame');
 
 const axios = require('axios');
 
@@ -20,7 +21,6 @@ const MiddlewareDeck = {
         };
 
         const response = await fetch(`${MiddlewareDeck.baseUrl}/crud/deck`, requestConfig);
-
         const jsonResponse = await response.json();
 
         if(response.status === 404) {
@@ -31,11 +31,11 @@ const MiddlewareDeck = {
             // Saving json response in local session
             userDeck = JSON.stringify(jsonResponse);
             sessionStorage.setItem('userDatas', userDeck);
-
+            console.log("le json response est", jsonResponse)
             // Saving datas in store
-            Store.user.decks = jsonResponse;
-
-            return true;
+            Store.user.decks.push(jsonResponse);
+            console.log(Store)
+            return true
         }
 
     },

@@ -1,5 +1,4 @@
-const DomRenderCreateAccount = require('../DomRender/CreateAccount');
-const DomRenderLogin = require('../DomRender/Login');
+const DomRenderForm = require('../DomRender/Form');
 const DomRenderMenu = require('../DomRender/Menu');
 
 const MiddlewareLog = require('../Middleware/Log');
@@ -21,7 +20,7 @@ const Menu = {
             event.preventDefault();
 
             // Create Dom elements
-            mainContainer.innerHTML = DomRenderLogin.render();
+            mainContainer.innerHTML = DomRenderForm.login();
 
             // Listen login form submit
             const loginForm = document.querySelector('form[id="login"]');
@@ -47,7 +46,7 @@ const Menu = {
 
             // Create Dom elements
             const mainContainer = document.querySelector('.container');
-            mainContainer.innerHTML = DomRenderCreateAccount.render();
+            mainContainer.innerHTML = DomRenderForm.createAccount();
 
             // Listen Create Account form submit
             const createAccountForm = document.querySelector('form[id="createAccount"]');

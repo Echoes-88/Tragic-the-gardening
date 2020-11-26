@@ -38,7 +38,7 @@ const MiddlewareLog = {
     handleCreateAccount: async (data) => {
 
         event.preventDefault();
-        console.log(data)
+
         let dataForm = new FormData(data.target);
 
         const requestConfig = {
@@ -76,7 +76,8 @@ const MiddlewareLog = {
 
             // Saving datas in store
             Store.user = jsonResponse;
-            
+            Store.user.decks = [];
+
             return true;
         }
     }

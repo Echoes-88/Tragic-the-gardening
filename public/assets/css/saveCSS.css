@@ -213,8 +213,14 @@ body {
         z-index: 1;
         max-height: -webkit-fill-available;
     }
+   /* .card-background, .monster {
+    background-image: url(../img/Booster.png);
+    }
 
-    
+    .card-background, .booster {
+        background-image: url(../img/Monster.png);
+    } */
+
    
    .card-picture {
     width: 90%;
@@ -401,16 +407,26 @@ body {
             display: inline-block;
         } */
         
-        /* .cpterCards {
+        .cpterCards {
             width: 100%;
             height: 50%;
             padding:1%;
             display: flex;
             flex-wrap: wrap ;
-        } */
+        }
 
         
-
+        .drop-area {
+            width: 100%;
+            height: 50%;
+            padding:1%;
+            display: -webkit-inline-box;
+            align-items: flex-end;
+            overflow-x: scroll;
+            overflow-y: hidden;
+            overflow-x: hidden;
+            white-space: nowrap;
+        }
 
         .show-message {
             background-color: rgba(255, 255, 255, 0.4);
@@ -426,6 +442,11 @@ body {
 
         /* PLAYER AREA */
 
+        .playerArea {
+            background-image: url(../img/board/bckgrd-player-cards.jpg);
+            width: 100%;
+            height: 35%;
+        }
 
         .border-player-area {
             background-image: url(../img/board/border-player-cards.jpg);
@@ -434,7 +455,7 @@ body {
             height: 5%;
         }
 
-        /* .playerCards {
+        .playerCards {
             height: 85%;
             display: -webkit-inline-box;
             align-items: flex-end;
@@ -442,9 +463,17 @@ body {
             overflow-y: hidden;
             overflow-x: hidden;
             white-space: nowrap;
-        } */
+        }
         
-
+        .cardComponent {
+            display: flex;
+            position: relative;
+            background: none;
+            width: fit-content; /* A SUPPRIMER SI BUG */
+            margin: 0 0.2rem;
+            z-index: 2;
+            justify-content: center;
+        }
 
 
    /* SAVE WEBKIT FIX IMG

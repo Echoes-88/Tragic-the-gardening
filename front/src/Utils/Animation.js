@@ -20,7 +20,8 @@ var animation = {
 
         const positionPlayerCard = dragAndDrop.getPosition(playerCard);
         const positionCpterCard = dragAndDrop.getPosition(cpterCard);
-
+        console.log('position carte player', positionPlayerCard)
+        console.log('position carte cpter', positionCpterCard)
         cpterCard.style.position = 'fixed';
 
         cpterCard.animate([{

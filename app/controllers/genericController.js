@@ -155,6 +155,11 @@ const genericController = {
                     });
                 }
 
+                const finalDeck = await models.Deck.findByPk(deck.id, {
+                    include: ['monsters', 'boosters']
+                });
+                console.log('finalDeck', finalDeck)
+                res.json(finalDeck);
 
             } else if(entity === 'other') {
 
