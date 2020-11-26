@@ -2,6 +2,7 @@ body {
     height: 100vh;
    }
    
+   div#preload { display: none; }
    
    @font-face {
        font-family: "AdobeDia";

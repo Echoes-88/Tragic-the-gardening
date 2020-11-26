@@ -1094,17 +1094,16 @@ var animation = {
 
         const positionPlayerCard = dragAndDrop.getPosition(playerCard);
         const positionCpterCard = dragAndDrop.getPosition(cpterCard);
-        console.log('position carte player', positionPlayerCard)
-        console.log('position carte cpter', positionCpterCard)
-        cpterCard.style.position = 'fixed';
 
+        cpterCard.style.position = 'relative';
+        console.log("top", positionPlayerCard.top, "left", positionPlayerCard.left)
         cpterCard.animate([{
-            top: positionCpterCard.top+'px',
-            left: positionCpterCard.left+'px'
+            top: '0px',
+            left: '0px',
         },
         {
-            top: positionPlayerCard.top+'px',
-            left: positionPlayerCard.left+'px'
+            top: (positionPlayerCard.top - positionCpterCard.top)+'px',
+            left: (positionPlayerCard.left - positionCpterCard.left)+'px'
         }
     ], {
         duration: 1000,
