@@ -32,7 +32,7 @@
     display: flex;
     min-width: 21vh; /* IMPORTANT FOR ONWINDOWRESIZE */
     position: relative;
-    width: fit-content;
+    width: 13%;
     background: none;
     margin: 0 0.2rem;
     z-index: 2;
