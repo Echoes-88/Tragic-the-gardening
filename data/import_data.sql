@@ -12,30 +12,33 @@ INSERT INTO "user"("id", "firstname", "lastname", "pseudo", "email", "hit_point"
 -- Ajout de données MONSTER
 -- -----------------------------------------------------
 INSERT INTO "monster"("id", "title", "text", "attack", "defense", "hit_point", "special_effect_value", "special_effect_text", "position") VALUES
-(1, 'canigou', 'Lorem ipsum', 7, 5, 4, 0, null, 0),
-(2, 'Le faucheur', 'Lorem ipsum', 7, 5, 6, 0, null, 0),
-(3, 'Dement Boucher', 'Lorem ipsum', 6, 4, 7, 0, null, 0),
-(4, 'Le contrôleur', 'Lorem ipsum', 6, 7, 6, 0, null, 0),
-(5, 'Le mastificateur', 'Lorem ipsum', 6, 5, 5, 0, null, 0),
-(6, 'Les écorcheurs', 'Lorem ipsum', 5, 5, 5, 0, null, 0),
-(7, 'Robots de combat', 'Lorem ipsum', 6, 10, 8, 0, null, 0),
-(8, 'Brahmines', 'Lorem ipsum', 5, 7, 3, 0, null, 0),
-(9, 'Griffemort', 'Lorem ipsum', 9, 7, 9, 0, null, 0),
-(10, 'Gros rats', 'Lorem ipsum', 3, 3, 3, 0, null, 0),
-(11, 'Mantes', 'Lorem ipsum', 4, 7, 4, 0, null, 0),
-(12, 'Rats', 'Lorem ipsum', 2, 4, 3, 0, null, 0),
-(13, 'Geckos de Feu', 'Lorem ipsum', 5, 5, 4, 0, null, 0);
+(1, 'Super Mutant', 'Lorem ipsum', 7, 4, 6, 0, null, 0),
+(2, 'Yao guai', 'Lorem ipsum', 5, 3, 4, 0, null, 0),
+(3, 'Rataupe', 'Lorem ipsum', 3, 2, 3, 0, null, 0),
+(4, 'Ghoule', 'Lorem ipsum', 4, 3, 5, 0, null, 0),
+(5, 'Alien', 'Lorem ipsum', 6, 5, 5, 0, null, 0),
+(6, 'Assaultron', 'Lorem ipsum', 8, 5, 7, 0, null, 0),
+(7, 'Tourelle', 'Lorem ipsum', 6, 6, 5, 0, null, 0),
+(8, 'Behemoth', 'Lorem ipsum', 8, 5, 8, 0, null, 0),
+(9, 'Brahmine', 'Lorem ipsum', 2, 2, 3, 0, null, 0),
+(10, 'Gardon', 'Lorem ipsum', 2, 4, 3, 0, null, 0),
+(11, 'Centaure', 'Lorem ipsum', 5, 4, 5, 0, null, 0),
+(12, 'Synthétique', 'Lorem ipsum', 6, 7, 6, 0, null, 0),
+(13, 'Ghoule X', 'Lorem ipsum', 4, 3, 6, 0, null, 0),
+(14, 'M. Handy', 'Lorem ipsum', 7, 7, 6, 0, null, 0),
+(15, 'Red Ghoule', 'Lorem ipsum', 5, 5, 5, 0, null, 0);
 
 
 -- -----------------------------------------------------
 -- Ajout de données BOOSTER
 -- -----------------------------------------------------
 INSERT INTO "booster"("id", "title", "text", "special_effect_value", "special_effect_text", "special_effect_value_2", "special_effect_text_2", "position") VALUES
-(1, 'Stimpack', 'Lorem ipsum', 3, 'heal', null, null, 0),
-(2, 'Buffout', 'Lorem ipsum', 2, 'attack', 2, 'hit point', 0),
-(3, 'Mentats', 'Lorem ipsum', 3, 'defense', null, null, 0),
-(4, 'Hintbook', 'Lorem ipsum', 6, 'attack', 7, 'defense', 0),
-(5, 'Premiers secours', 'Lorem ipsum', 4, 'heal', null, null, 0);
+(1, 'Stimpack', 'Lorem ipsum', 3, 'hit_point', null, null, 0),
+(2, 'Buffout', 'Lorem ipsum', 2, 'attack', 2, 'hit_point', 0),
+(3, 'Psycho', 'Lorem ipsum', 3, 'attack', null, null, 0),
+(4, 'Nuka Cola', 'Lorem ipsum', 2, 'defense', 7, 'defense', 0),
+(5, 'Premiers secours', 'Lorem ipsum', 4, 'hit_point', null, null, 0),
+(6, 'Med-x', 'Lorem ipsum', 3, 'defense', null, null, 0);
 
 -- -----------------------------------------------------
 -- Ajout de données DECK

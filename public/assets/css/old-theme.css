@@ -1,0 +1,504 @@
+body {
+    height: 100vh;
+   }
+   
+   
+   @font-face {
+       font-family: "AdobeDia";
+       src: url('../font/AdobeDia.ttf');
+   }
+
+   @font-face {
+    font-family: "SierraMadre-JVYM";
+    src: url('../font/SierraMadre-JVYM.ttf');
+}
+   
+   p {
+       color: greenyellow;
+       font-size: 2em;
+       font-family: "AdobeDia";
+   }
+
+   img {
+    user-drag: none; 
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+   }
+   
+   
+   .container {
+        /* background-image: url(../img/background2.jpg); */
+        background-color: #3e7688;
+       width: 100%;
+       height: 100%;
+       background-position: center;
+       background-repeat: no-repeat;
+       background-size: contain;
+   }
+
+   .logo {
+       margin-top: 3rem;
+   }
+   
+   .menu {
+    margin-top: 1rem;
+   }
+   
+   .menu a {
+        color:#FDFF2F;
+       padding: 1rem 3rem;
+       display: block;
+   }
+   
+   .menu a:hover {
+       color: #223f48;
+   }
+   
+   .menu-list {
+   background-color: #223f48;
+
+   list-style: none;
+   margin: 1rem;
+   font-family: 'AdobeDia';
+   text-align: center;
+   font-size: 1.6em;
+   cursor: pointer;
+   }
+   
+   .menu li:hover {
+       background-color: #FDFF2F;
+       color: #101010;
+   }
+   
+   li:hover a {
+       color: inherit;
+   }
+   
+   
+   .is-hidden {
+       display: none;
+   }
+   
+   /* NAV */
+   .nav-button {
+       background-color: #101010;
+       color:greenyellow;
+       font-family: 'AdobeDia';
+       text-align: center;
+       font-size: 1.6em;
+       cursor: pointer;
+       margin-top:2rem;
+   }
+   
+   /* FORM */
+   form {
+       flex-direction: column;
+   }
+   
+   label {
+       display: block;
+       color: greenyellow;
+       font-size: 2em;
+       font-family: "AdobeDia";
+   
+   }
+   
+   input
+   {   
+       color:green;
+       background-color: black;
+       height: 28px;
+       padding-left: 10px;
+       text-decoration: none;
+       border: 1px solid green;
+   }
+   
+   /* FORM */
+   article {
+       text-align: center;
+   }
+   
+   button {
+       background-color: #101010;
+       color:greenyellow;
+       font-family: 'AdobeDia';
+       text-align: center;
+       font-size: 1.5em;
+       cursor: pointer;
+       margin: 0.7rem auto;
+       display: block;
+   }
+
+   .inactive {
+       color:rgb(219, 255, 166);
+       background-color: #2a2a2a;
+   }
+   
+   /* CARDS */
+   
+   .deckContainer {
+       display: flex;
+       flex-wrap: wrap;
+       flex-direction: row;
+       align-items: center;
+       justify-content: center;
+   }
+   
+   
+   .card-deck {
+       height: 300px;
+       width: 200px;
+       background-size: 100%;
+       margin: auto;
+       margin:2rem;
+       background-image: url(../img/Deck.png);
+   }
+   
+   
+   .card-monster {
+       z-index: 1;
+       max-height: -webkit-fill-available;
+   }
+   
+   .card-booster {
+       z-index: 1;
+       max-height: -webkit-fill-available;
+   }
+
+   /* NB : faire une fonction js qui refresh max-height: -webkit-fill-available si l'utilisateur modifie la taille de la fenettre*/
+   .cardElementsContainer {
+       z-index: 2;
+       position: absolute;
+       max-height: -webkit-fill-available;
+       max-width: -webkit-fill-available;
+       text-align: center;
+       height:100%;
+   }
+
+
+   .imgContainer {
+    position: absolute;
+    /* width: 100%; */
+    height: 100%;
+    z-index: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+   
+   .card-cpter-picture, .card-player-picture {
+        width: 67%;
+        margin-top: 14%;
+   }
+   /* save img detoure */
+   /* .card-picture {
+    width: 66%;
+    background-size: 100%;
+    display: block;
+    margin: auto;
+    } */
+
+   .card-name, .card-description {
+       color: #373737;
+       font-family: 'Staatliches', cursive;
+       font-size: 0.8vw;
+   }
+   .card-attack, .card-defense, .card-hitpoint, .card-value {
+        font-size: 1.35vw;
+        font-weight: bold;
+        color: #3e7688;
+        font-family: 'SierraMadre-JVYM';
+        display: inline;
+        padding: 0.5vw 0.8vw;
+   }
+
+   .card-name {
+       position: absolute;
+       margin-top:6%;
+       padding: 2%;
+       width: 76%;
+       font-size: min(max(1rem, 1vw), 14px);
+       left: 26%;
+       z-index: inherit;
+       color: white;
+    }
+
+     .card-attack {
+        position: absolute;
+        left:4%;
+        top:86%;
+        color: #9f5252;
+        z-index: inherit;
+     }
+
+     .card-defense {
+        position: absolute;
+        left:80%;
+        top:86%;
+        color:#52869f;
+        z-index: inherit;
+     }
+
+     .card-hitpoint {
+        margin-top:3%;
+        margin-left:8%;
+        position: absolute;
+        left: -2%;
+        color:#535f37;
+        z-index: inherit;
+     }
+
+     .card-value {
+        margin-top:3%;
+        margin-left:2%;
+     }
+
+   
+   /* BOARD */
+   
+   .board-game {
+
+   }
+
+        /* SIDE AND DROP */
+        .side-and-drop {
+        width: 100%;
+        height: 65%;
+        display: flex;
+        }
+        /* SIDE AREA */
+        .sideArea {
+            background-image: url(../img/board/bckgrd-Infos.jpg);
+            background-repeat: repeat;
+            width: 20%;
+            max-width: 260px;
+            height: 100%;
+            display: inline-block;
+        }
+
+        .border-left-side {
+            background-image: url(../img/board/border-left-infos.jpg);
+            background-repeat: repeat-y;
+            width: 6px;
+        }
+
+        .infosField {
+            background-color: black;
+            color: greenyellow;
+            height: 20%;
+            width: 80%;
+            margin: auto;
+            margin-top: 5%;
+        }
+
+        /* BOARD AREA */
+
+        .boardArea {
+            background-image: url(../img/board/bckgrd-board.jpg);   
+            width: inherit;
+            height: 100%;
+            display: flex;
+            flex-wrap: wrap ;
+            display: inline-block;
+        }
+   
+        /* .playArea {
+            width: 80%;
+            height: 65%;
+            display: flex;
+            flex-wrap: wrap ;
+            display: inline-block;
+        } */
+        
+        .cpterCards {
+            width: 100%;
+            height: 50%;
+            padding:1%;
+            display: flex;
+            flex-wrap: wrap ;
+        }
+
+        
+        .drop-area {
+            width: 100%;
+            height: 50%;
+            padding:1%;
+            display: -webkit-inline-box;
+            align-items: flex-end;
+            overflow-x: scroll;
+            overflow-y: hidden;
+            overflow-x: hidden;
+            white-space: nowrap;
+           
+        }
+
+
+        /* PLAYER AREA */
+
+        .playerArea {
+            background-image: url(../img/board/bckgrd-player-cards.jpg);
+            width: 100%;
+            height: 35%;
+        }
+
+        .border-player-area {
+            background-image: url(../img/board/border-player-cards.jpg);
+            background-repeat: repeat-x;
+            width: 100%;
+            height: 5%;
+        }
+
+        .playerCards {
+            height: 85%;
+            display: -webkit-inline-box;
+            align-items: flex-end;
+            overflow-x: scroll;
+            overflow-y: hidden;
+            overflow-x: hidden;
+            white-space: nowrap;
+        }
+        
+        .cardComponent {
+            display: flex;
+            position: relative;
+            background: none;
+            width: fit-content; /* A SUPPRIMER SI BUG */
+            margin: 0 0.2rem;
+            z-index: 2;
+            justify-content: center;
+        }
+
+
+   /* SAVE WEBKIT FIX IMG
+   
+   .card-monster {
+    width: 13rem; 
+    min-height: -webkit-fill-available;
+    background-size: 100%;
+    background: url(../img/Monster.png) no-repeat;
+    background-size: contain;
+    display: inline-block;
+} */
+
+    /* FIGHT AREA */
+    .fightArea {
+        position: absolute;
+        width: 60%;
+        height: 60%;
+        margin: auto;
+        z-index: 4;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+    }
+
+    .cogwheel {
+        color: white;
+        font-size: 10em;
+        text-shadow: 6em 6em 6em #000000;
+        animation: rotation 4s infinite linear;
+        position: absolute;
+        left: 50%;
+        top: 25%;
+    }
+
+    /* .shadow {
+        -webkit-box-shadow: 10px 10px 23px -4px rgba(0,0,0,0.43);
+        -moz-box-shadow: 10px 10px 23px -4px rgba(0,0,0,0.43);
+        box-shadow: 10px 10px 23px -4px rgba(0,0,0,0.43);
+    } */
+
+ /* ANIMATIONS */
+
+.facticePosition, .moveCpterCard {
+    animation: moveCpterCard 1s linear;
+}
+  @keyframes moveCpterCard {
+    from {
+        top: var(--topStart);
+        left: var(--leftStart);
+      }
+      to {
+        top: var(--topEnd);
+        left: var(--leftEnd);
+      }
+  }
+
+.blink_me {
+    animation: blinker 1s linear infinite;
+  }
+  
+  @keyframes blinker {
+    50% {
+      opacity: 0;
+    }
+  }
+
+.shake {
+    animation: shake 1.2s cubic-bezier(.36,.07,.19,.97) both;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+  
+  @keyframes shake {
+    10%, 90% {
+      transform: translate3d(-4px, 0, -10px);
+    }
+    
+    20%, 80% {
+      transform: translate3d(5px, 0, 15px);
+    }
+  
+    30%, 50%, 70% {
+      transform: translate3d(-8px, 0, -15px);
+    }
+  
+    40%, 60% {
+      transform: translate3d(8px, 0, 15px);
+    }
+  }
+
+ 
+  @keyframes rotation {
+    from {
+        -webkit-transform: rotate(0deg);
+    }
+    to {
+        -webkit-transform: rotate(360deg);
+    }
+  }
+
+/* 
+  .moveCenterFromLeft{
+    animation: moveCenterFromLeft linear 0.5s;
+    animation-iteration-count: 1;
+    transform-origin: 50% 50%;
+  }
+  
+  @keyframes moveCenterFromLeft{
+    0% {
+        transform:  translate(0%,0%)  ;
+      }
+      100% {
+        transform:  translate(30%,0%)  ;
+      }
+    }
+
+.moveCenterFromRight{
+    animation: moveCenterFromRight linear 0.5s;
+    animation-iteration-count: 1;
+    transform-origin: 50% 50%;
+    }
+    
+    @keyframes moveCenterFromRight{
+    0% {
+        transform:  translate(0%,0%)  ;
+        }
+        100% {
+        transform:  translate(-30%,0%)  ;
+        }
+    } */

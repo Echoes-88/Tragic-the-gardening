@@ -3,97 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Lakki+Reddy&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Staatliches&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./assets/css/reset.css" />
     <link rel="stylesheet" href="./assets/css/resetForm.css" />
-		<link rel="stylesheet" href="./assets/css/style.css" />
+    <link rel="stylesheet" href="./assets/css/theme-2.css" />
+    <link rel="stylesheet" href="./assets/css/cards.css" id="cards"/>
+    
+    <!-- TO DO : Loop function -->
+    <link rel="preload" href="  ./assets/img/monster.png" as="image">
+    <link rel="preload" href="  ./assets/img/booster.png" as="image">
+    <link rel="preload" href="  ./assets/img/monster/1.png" as="image">
+    <link rel="preload" href="  ./assets/img/monster/2.png" as="image">
+    <link rel="preload" href="  ./assets/img/monster/3.png" as="image">
+    <link rel="preload" href="  ./assets/img/monster/4.png" as="image">
+    <link rel="preload" href="  ./assets/img/monster/5.png" as="image">
+    <link rel="preload" href="  ./assets/img/monster/6.png" as="image">
+    <link rel="preload" href="  ./assets/img/monster/7.png" as="image">
+    <link rel="preload" href="  ./assets/img/monster/8.png" as="image">
+    <link rel="preload" href="  ./assets/img/monster/9.png" as="image">
+    <link rel="preload" href="  ./assets/img/monster/10.png" as="image">
+    <link rel="preload" href="  ./assets/img/monster/11.png" as="image">
+    <link rel="preload" href="  ./assets/img/monster/12.png" as="image">
+    <link rel="preload" href="  ./assets/img/monster/13.png" as="image">
+    <link rel="preload" href="  ./assets/img/monster/14.png" as="image">
+    <link rel="preload" href="  ./assets/img/monster/15.png" as="image">
+    <link rel="preload" href="  ./assets/img/monster/16.png" as="image">
+    <link rel="preload" href="  ./assets/img/booster/1.png" as="image">
+    <link rel="preload" href="  ./assets/img/booster/2.png" as="image">
+    <link rel="preload" href="  ./assets/img/booster/3.png" as="image">
+    <link rel="preload" href="  ./assets/img/booster/4.png" as="image">
+    <link rel="preload" href="  ./assets/img/booster/5.png" as="image">
+    <link rel="preload" href="  ./assets/img/booster/6.png" as="image">
+    
     <title>Tragic the gardening</title>
 </head>
 <body>
 
   <main class="container">
 
-    <nav class="menu">
-      <ul>
-        <li class="menu-list" set-menu="play"><a href="">PLAY</a></li>
-        <li class="menu-list" set-menu="login"><a href="">LOGIN</a></li>
-        <li class="menu-list" set-menu="account"><a href="">MON COMPTE</a></li>
-        <li class="menu-list" set-menu="createAccount"><a href="/signup">CREER UN COMPTE</a></li>
-        <li class="menu-list" set-menu="rules"><a href="">RULES</a></li>
-      </ul>
 
-    </nav>
-
-    <!-- LOGIN FORM -->
-    <form action="" class="form" id="login">
-
-      <div class="form-label-group">
-        <label for="email">Email</label>
-          <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Votre courriel">
+  <!-- TEMPLATE CARDS -->
+  <template id="template-card">
+    <div class="cardComponent">
+      <p class="card-name"></p>
+      <div class="card-picture-container">
+        <img class="card-picture">
       </div>
-  
-      <div class="form-label-group">
-        <label for="password">Password</label>
-          <input type="password" class="form-control" id="password" name="password"
-              placeholder="Votre mot de passe" autocomplete="on">
-
-      </div>
-  
-      <div class="checkbox mb-3">
-          <label>
-              <input type="checkbox" name="remember" value="remember-me"> Se souvenir de moi
-          </label>
-      </div>
-      <div>
-      <button class="" type="submit">Se connecter</button>
-      </div>
-  </form>
-
-  <!-- CREATE ACCOUNT FORM -->
-  <form action="" class="form" id="createAccount">
-
-    <div class="form-label-group">
-      <label for="lastname">Lastname</label>
-        <input type="lastname" class="form-control" id="lastname" name="lastname"
-            aria-describedby="lastnameHelp" placeholder="Votre nom"
-            value=''>
+      <img class="card-background">
+      <p class="card-value attack" id="attack"></p>
+      <p class="card-value defense" id="defense"></p>
+      <p class="card-value hitpoint" id="hitpoint"></p>
+      <p class="card-value boost" id="boost"></p>
     </div>
+  </template>
 
-    <div class="form-label-group">
-      <label for="firstname">Firstname</label>
-        <input type="firstname" class="form-control" id="firstname" name="firstname"
-            aria-describedby="firstnameHelp" placeholder="Votre prénom"
-            value=''>
+  <!-- <div class="cardComponent monster playerCard" data-key="4" data-player="playerDeck" draggable="true" data-status="onHand" style="user-select: none;">
+    <p class="card-name">Brahmines</p>
+    <div class="imgContainer">
+      <img src="./assets/img/monsters/8.png" class="card-player-picture">
     </div>
-
-    <div class="form-label-group">
-      <label for="pseudo">Nickname</label>
-        <input type="pseudo" class="form-control" id="pseudo" name="pseudo"
-            aria-describedby="pseudoHelp" placeholder="Votre pseudo"
-            value=''>
-    </div>
-
-    <div class="form-label-group">
-      <label for="email">Email</label>
-        <input type="email" class="form-control" id="emailCreate" name="email" aria-describedby="emailHelp"
-            placeholder="Votre courriel" autocomplete="username" value=''>
-    </div>
-
-    <div class="form-label-group">
-      <label for="password">Password</label>
-        <input type="password" class="form-control" id="passwordCreate" name="password"
-            placeholder="Votre mot de mot de passe" autocomplete="on">
-    </div>
-
-    <div class="form-label-group">
-      <label for="passwordConfirm">Confirm password</label>
-        <input type="password" class="form-control" id="passwordConfirm" name="passwordConfirm"
-            placeholder="Confirmez votre mot de passe" autocomplete="new-password">
-    </div>
-
-        <button type="submit" class="">Submit</button>
-
-
-</form>
+    <img class="card-monster" src="./assets/img/Monster.png">
+    <p class="card-attack">5</p>
+    <p class="card-defense">7</p>
+    <p class="card-hitpoint">3</p>
+  </div> -->
 
 
   </main>

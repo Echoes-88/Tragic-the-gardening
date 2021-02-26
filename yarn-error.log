@@ -1,0 +1,57 @@
+Arguments: 
+  /usr/local/bin/node /usr/local/bin/yarn add webpack --dev
+
+PATH: 
+  /home/etudiant/.npm-packages/bin:/home/etudiant/.npm-packages/bin:/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games
+
+Yarn version: 
+  1.22.0
+
+Node version: 
+  13.9.0
+
+Platform: 
+  linux x64
+
+Trace: 
+  Error: ENOSPC: no space left on device, mkdir '/home/etudiant/.cache/yarn/v6/npm-download-stats-0.3.4-67ea0c32f14acd9f639da704eef509684ba2dae7-integrity/node_modules'
+
+npm manifest: 
+  {
+    "name": "tragic",
+    "version": "1.0.0",
+    "description": "Dossiers &amp; fichiers de base pour nouveau projet",
+    "main": "app/server.js",
+    "dependencies": {
+      "bcrypt": "^5.0.0",
+      "cors": "^2.8.5",
+      "dotenv": "^8.2.0",
+      "ejs": "^3.1.5",
+      "express": "^4.17.1",
+      "express-session": "^1.17.1",
+      "multer": "^1.4.2",
+      "pg": "^8.3.0",
+      "sequelize": "^6.3.4",
+      "underscore": "^1.11.0",
+      "watchify": "^3.11.1"
+    },
+    "devDependencies": {
+      "babel-preset-es2015": "^6.24.1",
+      "webpack": "^5.1.0",
+      "webpack-cli": "^4.0.0"
+    },
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "start": "node app/server.js",
+      "build": "webpack front/src/App/app.js -o public/assets/js/bundle.js",
+      "dev": "nodemon app/server.js"
+    },
+    "author": "",
+    "license": "ISC"
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

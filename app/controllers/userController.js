@@ -8,6 +8,7 @@ const userController = {
 
             // Checking if user already exist
             const user = await models.User.findOne({
+                include: {all:true, nested:true},
                 where: {
                     email: req.body.email
                 }
@@ -25,13 +26,16 @@ const userController = {
                     res.status(404).json({error: `Password not found`});
                 } else {
                     // if login ok, add user informations to session
+                    console.log('c ok');
+
                     req.session.user = {
                         firstname: user.firstname,
                         lastname: user.lastname,
                         pseudo: user.pseudo,
                         email: user.email,
                         role: user.role,
-                        id: user.id
+                        id: user.id,
+                        decks: user.decks
                     };
 
                     if(req.body.remember) {
@@ -60,7 +64,7 @@ const userController = {
         const user = await models.User.findOne({
             where: {
                 email: req.body.email
-            }
+            },
         });
 
         if(user) {
@@ -77,7 +81,7 @@ const userController = {
               // Creating bcrypt password
               const hashPwd = bcrypt.hashSync(req.body.password, 10);
 
-              // Add user in database
+              // Add user in database   
               const user = await models.User.create({
                   email: req.body.email,
                   psw: hashPwd,
@@ -120,8 +124,6 @@ const userController = {
         })
 
         res.json(decks);
-
-
     }
 };
 
